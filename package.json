@@ -1,0 +1,23 @@
+{
+  "name": "sentinel-js-sdk",
+  "version": "1.0.0",
+  "description": "sentinel javascript sdk",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sentinel-official/sentinel-js-sdk.git"
+  },
+  "author": "Tkd-Alex <alex.tkd.alex@gmail.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sentinel-official/sentinel-js-sdk/issues"
+  },
+  "build": "tsc",
+  "homepage": "https://github.com/sentinel-official/sentinel-js-sdk#readme",
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  }
+}
