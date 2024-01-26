@@ -18,6 +18,7 @@
   "build": "tsc",
   "homepage": "https://github.com/sentinel-official/sentinel-js-sdk#readme",
   "devDependencies": {
+    "ts-proto": "^1.167.0",
     "typescript": "^5.3.3"
   }
 }

@@ -129,3 +129,5 @@ Temporary Items
 # Custom
 dist/*
 !dist/.gitkeep
+
+scripts/*.proto
