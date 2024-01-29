@@ -17,6 +17,11 @@
   },
   "build": "tsc",
   "homepage": "https://github.com/sentinel-official/sentinel-js-sdk#readme",
+  "dependencies": {
+    "@cosmjs/proto-signing": "^0.32.2",
+    "@cosmjs/stargate": "^0.32.2",
+    "long": "^5.2.3"
+  },
   "devDependencies": {
     "ts-proto": "^1.167.0",
     "typescript": "^5.3.3"
