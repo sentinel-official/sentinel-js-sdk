@@ -36,7 +36,7 @@ export function setupProviderExtension(base: QueryClient): ProviderExtension {
             providers: async (status: Status, pagination?: PageRequest) =>
                 queryService.QueryProviders(QueryProvidersRequest.fromJSON({status, pagination})),
             provider: async (address: string) => {
-                const { provider } = await queryService.QueryProvider(QueryProviderRequest.fromJSON({address: address}))
+                const { provider } = await queryService.QueryProvider(QueryProviderRequest.fromJSON({address}))
                 return provider
             },
             params: async () => {

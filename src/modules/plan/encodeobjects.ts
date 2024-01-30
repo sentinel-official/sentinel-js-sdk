@@ -41,22 +41,22 @@ export interface MsgSubscribeEncodeObject extends EncodeObject {
     readonly value: Partial<MsgSubscribeRequest>
 }
 
-export function isMsgCreateEncodeObject(object: EncodeObject): object is MsgCreateEncodeObject{
+export function isMsgCreateEncodeObject(object: EncodeObject): object is MsgCreateEncodeObject {
     return (object as MsgCreateEncodeObject).typeUrl === MsgCreateTypeUrl
 }
 
-export function isMsgUpdateStatusEncodeObject(object: EncodeObject): object is MsgUpdateStatusEncodeObject{
+export function isMsgUpdateStatusEncodeObject(object: EncodeObject): object is MsgUpdateStatusEncodeObject {
     return (object as MsgUpdateStatusEncodeObject).typeUrl === MsgUpdateStatusTypeUrl
 }
 
-export function isMsgLinkNodeEncodeObject(object: EncodeObject): object is MsgLinkNodeEncodeObject{
+export function isMsgLinkNodeEncodeObject(object: EncodeObject): object is MsgLinkNodeEncodeObject {
     return (object as MsgLinkNodeEncodeObject).typeUrl === MsgLinkNodeTypeUrl
 }
 
-export function isMsgUnlinkNodeEncodeObject(object: EncodeObject): object is MsgUnlinkNodeEncodeObject{
+export function isMsgUnlinkNodeEncodeObject(object: EncodeObject): object is MsgUnlinkNodeEncodeObject {
     return (object as MsgUnlinkNodeEncodeObject).typeUrl === MsgUnlinkNodeTypeUrl
 }
 
-export function isMsgSubscribeEncodeObject(object: EncodeObject): object is MsgSubscribeEncodeObject{
+export function isMsgSubscribeEncodeObject(object: EncodeObject): object is MsgSubscribeEncodeObject {
     return (object as MsgSubscribeEncodeObject).typeUrl === MsgSubscribeTypeUrl
 }

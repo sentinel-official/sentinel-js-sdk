@@ -20,10 +20,10 @@ export interface MsgUpdateEncodeObject extends EncodeObject {
     readonly value: Partial<MsgUpdateRequest>
 }
 
-export function isMsgRegisterEncodeObject(object: EncodeObject): object is MsgRegisterEncodeObject{
+export function isMsgRegisterEncodeObject(object: EncodeObject): object is MsgRegisterEncodeObject {
     return (object as MsgRegisterEncodeObject).typeUrl === MsgRegisterTypeUrl
 }
 
-export function isMsgUpdateEncodeObject(object: EncodeObject): object is MsgUpdateEncodeObject{
+export function isMsgUpdateEncodeObject(object: EncodeObject): object is MsgUpdateEncodeObject {
     return (object as MsgUpdateEncodeObject).typeUrl === MsgUpdateTypeUrl
 }
