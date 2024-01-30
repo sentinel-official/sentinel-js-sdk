@@ -48,5 +48,4 @@ export function isMsgUpdateStatusEncodeObject(object: EncodeObject): object is M
 
 export function isMsgSubscribeEncodeObject(object: EncodeObject): object is MsgSubscribeEncodeObject {
     return (object as MsgSubscribeEncodeObject).typeUrl === MsgSubscribeTypeUrl
-
 }
