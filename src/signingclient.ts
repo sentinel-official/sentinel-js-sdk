@@ -6,12 +6,12 @@ import { Coin, OfflineSigner, Registry } from "@cosmjs/proto-signing";
 import Long from "long";
 
 import {
-    MsgRegisterEncodeObject,
+    MsgRegisterEncodeObject as NodeMsgRegisterEncodeObject,
     MsgUpdateDetailsEncodeObject,
     MsgUpdateStatusEncodeObject as NodeMsgUpdateStatusEncodeObject,
     MsgSubscribeEncodeObject as NodeMsgSubscribeEncodeObject,
 
-    MsgRegisterTypeUrl,
+    MsgRegisterTypeUrl as NodeMsgRegisterTypeUrl,
     MsgUpdateDetailsTypeUrl,
     MsgUpdateStatusTypeUrl as NodeMsgUpdateStatusTypeUrl,
     MsgSubscribeTypeUrl as NodeMsgSubscribeTypeUrl
@@ -31,7 +31,13 @@ import {
     MsgSubscribeTypeUrl as PlanMsgSubscribeTypeUrl
 } from "./modules/plan";
 
+import {
+    MsgRegisterEncodeObject as ProviderMsgRegisterEncodeObject,
+    MsgUpdateEncodeObject,
 
+    MsgRegisterTypeUrl as ProviderMsgRegisterTypeUrl,
+    MsgUpdateTypeUrl
+} from "./modules/provider";
 
 import { Status } from "./protobuf/sentinel/types/v1/status";
 import { Duration } from "./protobuf/google/protobuf/duration";
@@ -56,6 +62,10 @@ export class SigningSentinelClient extends SigningStargateClient {
             linkNode: this.planLinkNode.bind(this),
             unlinkNode: this.planUnlinkNode.bind(this),
             subscribe: this.planSubscribe.bind(this),
+        },
+        provider: {
+            register: this.providerRegister.bind(this),
+            update: this.providerUpdate.bind(this),
         }
     }
 
@@ -85,8 +95,8 @@ export class SigningSentinelClient extends SigningStargateClient {
         fee: StdFee | "auto" | number = "auto",
         memo: string = "",
     ): Promise<DeliverTxResponse> {
-        const msg: MsgRegisterEncodeObject = {
-            typeUrl: MsgRegisterTypeUrl,
+        const msg: NodeMsgRegisterEncodeObject = {
+            typeUrl: NodeMsgRegisterTypeUrl,
             value: {
                 from,
                 gigabytePrices,
@@ -250,6 +260,54 @@ export class SigningSentinelClient extends SigningStargateClient {
                 from,
                 id,
                 denom
+            }
+        }
+        return this.signAndBroadcast(from, [msg], fee, memo)
+    }
+
+    public async providerRegister(
+        from: string,
+        name: string,
+        identity: string,
+        website: string,
+        description: string,
+
+        fee: StdFee | "auto" | number = "auto",
+        memo: string = "",
+    ): Promise<DeliverTxResponse> {
+        const msg: ProviderMsgRegisterEncodeObject = {
+            typeUrl: ProviderMsgRegisterTypeUrl,
+            value: {
+                from,
+                name,
+                identity,
+                website,
+                description
+            }
+        }
+        return this.signAndBroadcast(from, [msg], fee, memo)
+    }
+
+    public async providerUpdate(
+        from: string,
+        name: string,
+        identity: string,
+        website: string,
+        description: string,
+        status: Status,
+
+        fee: StdFee | "auto" | number = "auto",
+        memo: string = "",
+    ): Promise<DeliverTxResponse> {
+        const msg: MsgUpdateEncodeObject = {
+            typeUrl: MsgUpdateTypeUrl,
+            value: {
+                from,
+                name,
+                identity,
+                website,
+                description,
+                status
             }
         }
         return this.signAndBroadcast(from, [msg], fee, memo)
