@@ -4,20 +4,37 @@ import { buildSentinelQueryClient, SentinelQueryClient } from "./modules/queries
 import { SentinelRegistry } from "./modules";
 import { Coin, OfflineSigner, Registry } from "@cosmjs/proto-signing";
 import Long from "long";
+
 import {
     MsgRegisterEncodeObject,
     MsgUpdateDetailsEncodeObject,
-    MsgUpdateStatusEncodeObject,
-    MsgSubscribeEncodeObject
+    MsgUpdateStatusEncodeObject as NodeMsgUpdateStatusEncodeObject,
+    MsgSubscribeEncodeObject as NodeMsgSubscribeEncodeObject,
+
+    MsgRegisterTypeUrl,
+    MsgUpdateDetailsTypeUrl,
+    MsgUpdateStatusTypeUrl as NodeMsgUpdateStatusTypeUrl,
+    MsgSubscribeTypeUrl as NodeMsgSubscribeTypeUrl
 } from './modules/node'
 
 import {
-    MsgRegisterTypeUrl,
-    MsgUpdateDetailsTypeUrl,
-    MsgUpdateStatusTypeUrl,
-    MsgSubscribeTypeUrl
-} from './modules/node'
+    MsgCreateEncodeObject,
+    MsgUpdateStatusEncodeObject as PlanMsgUpdateStatusEncodeObject,
+    MsgLinkNodeEncodeObject,
+    MsgUnlinkNodeEncodeObject,
+    MsgSubscribeEncodeObject as PlanMsgSubscribeEncodeObject,
+
+    MsgCreateTypeUrl,
+    MsgUpdateStatusTypeUrl as PlanMsgUpdateStatusTypeUrl,
+    MsgLinkNodeTypeUrl,
+    MsgUnlinkNodeTypeUrl,
+    MsgSubscribeTypeUrl as PlanMsgSubscribeTypeUrl
+} from "./modules/plan";
+
+
+
 import { Status } from "./protobuf/sentinel/types/v1/status";
+import { Duration } from "./protobuf/google/protobuf/duration";
 
 function createDefaultRegistry(): Registry {
     return new Registry(SentinelRegistry);
@@ -32,6 +49,13 @@ export class SigningSentinelClient extends SigningStargateClient {
             updateDetails: this.nodeUpdateDetails.bind(this),
             updateStatus: this.nodeUpdateStatus.bind(this),
             subscribe: this.nodeSubscribe.bind(this)
+        },
+        plan: {
+            create: this.planCreate.bind(this),
+            updateStatus: this.planUpdateStatus.bind(this),
+            linkNode: this.planLinkNode.bind(this),
+            unlinkNode: this.planUnlinkNode.bind(this),
+            subscribe: this.planSubscribe.bind(this),
         }
     }
 
@@ -101,8 +125,8 @@ export class SigningSentinelClient extends SigningStargateClient {
         fee: StdFee | "auto" | number = "auto",
         memo: string = "",
     ): Promise<DeliverTxResponse> {
-        const msg: MsgUpdateStatusEncodeObject = {
-            typeUrl: MsgUpdateStatusTypeUrl,
+        const msg: NodeMsgUpdateStatusEncodeObject = {
+            typeUrl: NodeMsgUpdateStatusTypeUrl,
             value: {
                 from,
                 status
@@ -121,8 +145,8 @@ export class SigningSentinelClient extends SigningStargateClient {
         fee: StdFee | "auto" | number = "auto",
         memo: string = "",
     ): Promise<DeliverTxResponse> {
-        const msg: MsgSubscribeEncodeObject = {
-            typeUrl: MsgSubscribeTypeUrl,
+        const msg: NodeMsgSubscribeEncodeObject = {
+            typeUrl: NodeMsgSubscribeTypeUrl,
             value: {
                 from,
                 nodeAddress,
@@ -133,5 +157,103 @@ export class SigningSentinelClient extends SigningStargateClient {
         }
         return this.signAndBroadcast(from, [msg], fee, memo)
     }
+
+    public async planCreate(
+        from: string,
+        duration: Duration | undefined,
+        gigabytes: Long,
+        prices: Coin[],
+
+        fee: StdFee | "auto" | number = "auto",
+        memo: string = "",
+    ): Promise<DeliverTxResponse> {
+        const msg: MsgCreateEncodeObject = {
+            typeUrl: MsgCreateTypeUrl,
+            value: {
+                from,
+                duration,
+                gigabytes,
+                prices
+            }
+        }
+        return this.signAndBroadcast(from, [msg], fee, memo)
+    }
+
+    public async planUpdateStatus(
+        from: string,
+        id: Long,
+        status: Status,
+
+        fee: StdFee | "auto" | number = "auto",
+        memo: string = "",
+    ): Promise<DeliverTxResponse> {
+        const msg: PlanMsgUpdateStatusEncodeObject = {
+            typeUrl: PlanMsgUpdateStatusTypeUrl,
+            value: {
+                from,
+                id,
+                status
+            }
+        }
+        return this.signAndBroadcast(from, [msg], fee, memo)
+    }
+
+    public async planLinkNode(
+        from: string,
+        id: Long,
+        nodeAddress: string,
+
+        fee: StdFee | "auto" | number = "auto",
+        memo: string = "",
+    ): Promise<DeliverTxResponse> {
+        const msg: MsgLinkNodeEncodeObject = {
+            typeUrl: MsgLinkNodeTypeUrl,
+            value: {
+                from,
+                id,
+                nodeAddress
+            }
+        }
+        return this.signAndBroadcast(from, [msg], fee, memo)
+    }
+
+    public async planUnlinkNode(
+        from: string,
+        id: Long,
+        nodeAddress: string,
+
+        fee: StdFee | "auto" | number = "auto",
+        memo: string = "",
+    ): Promise<DeliverTxResponse> {
+        const msg: MsgUnlinkNodeEncodeObject = {
+            typeUrl: MsgUnlinkNodeTypeUrl,
+            value: {
+                from,
+                id,
+                nodeAddress
+            }
+        }
+        return this.signAndBroadcast(from, [msg], fee, memo)
+    }
+
+    public async planSubscribe(
+        from: string,
+        id: Long,
+        denom: string = "udvpn",
+
+        fee: StdFee | "auto" | number = "auto",
+        memo: string = "",
+    ): Promise<DeliverTxResponse> {
+        const msg: PlanMsgSubscribeEncodeObject = {
+            typeUrl: PlanMsgSubscribeTypeUrl,
+            value: {
+                from,
+                id,
+                denom
+            }
+        }
+        return this.signAndBroadcast(from, [msg], fee, memo)
+    }
+
 }
 
