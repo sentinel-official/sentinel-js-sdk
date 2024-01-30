@@ -3,7 +3,7 @@ import { StargateClient, StargateClientOptions } from "@cosmjs/stargate"
 import { buildSentinelQueryClient, SentinelQueryClient } from "./modules/queries"
 
 export class SentinelClient extends StargateClient {
-    public readonly sentinelQueryClient: SentinelQueryClient | undefined
+    public readonly sentinelQuery: SentinelQueryClient | undefined
 
     public static override async connect(
         endpoint: string,
@@ -15,7 +15,7 @@ export class SentinelClient extends StargateClient {
 
     protected constructor(tmClient: Tendermint34Client | undefined, options: StargateClientOptions = {}) {
         super(tmClient, options)
-        if (tmClient) this.sentinelQueryClient = buildSentinelQueryClient(tmClient)
+        if (tmClient) this.sentinelQuery = buildSentinelQueryClient(tmClient)
     }
 }
 
