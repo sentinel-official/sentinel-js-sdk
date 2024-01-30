@@ -4,12 +4,14 @@ import { defaultRegistryTypes } from "@cosmjs/stargate";
 import { registry as NodeRegistry } from "./node/registry";
 import { registry as PlanRegistry } from "./plan/registry";
 import { registry as ProviderRegistry } from "./plan/registry";
+import { registry as SessionRegistry } from "./plan/registry";
 
 export const SentinelRegistry: ReadonlyArray<[string, GeneratedType]> = [
     ...defaultRegistryTypes,
     ...NodeRegistry,
     ...PlanRegistry,
-    ...ProviderRegistry
+    ...ProviderRegistry,
+    ...SessionRegistry,
 ]
 
 export default SentinelRegistry
