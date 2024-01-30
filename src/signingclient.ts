@@ -7,12 +7,12 @@ import Long from "long";
 
 import {
     MsgRegisterEncodeObject as NodeMsgRegisterEncodeObject,
-    MsgUpdateDetailsEncodeObject,
+    MsgUpdateDetailsEncodeObject as NodeMsgUpdateDetailsEncodeObject,
     MsgUpdateStatusEncodeObject as NodeMsgUpdateStatusEncodeObject,
     MsgSubscribeEncodeObject as NodeMsgSubscribeEncodeObject,
 
     MsgRegisterTypeUrl as NodeMsgRegisterTypeUrl,
-    MsgUpdateDetailsTypeUrl,
+    MsgUpdateDetailsTypeUrl as NodeMsgUpdateDetailsTypeUrl,
     MsgUpdateStatusTypeUrl as NodeMsgUpdateStatusTypeUrl,
     MsgSubscribeTypeUrl as NodeMsgSubscribeTypeUrl
 } from './modules/node'
@@ -39,8 +39,19 @@ import {
     MsgUpdateTypeUrl
 } from "./modules/provider";
 
+import {
+    MsgStartEncodeObject,
+    MsgUpdateDetailsEncodeObject as SessionMsgUpdateDetailsEncodeObject,
+    MsgEndEncodeObject,
+
+    MsgStartTypeUrl,
+    MsgUpdateDetailsTypeUrl as SessionMsgUpdateDetailsTypeUrl,
+    MsgEndTypeUrl,
+} from "./modules/session";
+
 import { Status } from "./protobuf/sentinel/types/v1/status";
 import { Duration } from "./protobuf/google/protobuf/duration";
+import { Proof } from "./protobuf/sentinel/session/v2/proof";
 
 function createDefaultRegistry(): Registry {
     return new Registry(SentinelRegistry);
@@ -66,6 +77,11 @@ export class SigningSentinelClient extends SigningStargateClient {
         provider: {
             register: this.providerRegister.bind(this),
             update: this.providerUpdate.bind(this),
+        },
+        session: {
+            start: this.sessionStart.bind(this),
+            updateDetails: this.sessionUpdateDetails.bind(this),
+            end: this.sessionEnd.bind(this),
         }
     }
 
@@ -116,8 +132,8 @@ export class SigningSentinelClient extends SigningStargateClient {
         fee: StdFee | "auto" | number = "auto",
         memo: string = "",
     ): Promise<DeliverTxResponse> {
-        const msg: MsgUpdateDetailsEncodeObject = {
-            typeUrl: MsgUpdateDetailsTypeUrl,
+        const msg: NodeMsgUpdateDetailsEncodeObject = {
+            typeUrl: NodeMsgUpdateDetailsTypeUrl,
             value: {
                 from,
                 gigabytePrices,
@@ -308,6 +324,63 @@ export class SigningSentinelClient extends SigningStargateClient {
                 website,
                 description,
                 status
+            }
+        }
+        return this.signAndBroadcast(from, [msg], fee, memo)
+    }
+
+    public async sessionStart(
+        from: string,
+        id: Long,
+        address: string,
+
+        fee: StdFee | "auto" | number = "auto",
+        memo: string = "",
+    ): Promise<DeliverTxResponse> {
+        const msg: MsgStartEncodeObject = {
+            typeUrl: MsgStartTypeUrl,
+            value: {
+                from,
+                id,
+                address
+            }
+        }
+        return this.signAndBroadcast(from, [msg], fee, memo)
+    }
+
+    public async sessionUpdateDetails(
+        from: string,
+        proof: Proof | undefined,
+        signature: Uint8Array,
+
+        fee: StdFee | "auto" | number = "auto",
+        memo: string = "",
+    ): Promise<DeliverTxResponse> {
+        const msg: SessionMsgUpdateDetailsEncodeObject = {
+            typeUrl: SessionMsgUpdateDetailsTypeUrl,
+            value: {
+                from,
+                proof,
+                signature
+            }
+        }
+        return this.signAndBroadcast(from, [msg], fee, memo)
+    }
+
+    public async sessionEnd(
+        from: string,
+        id: Long,
+        rating: Long,
+
+        fee: StdFee | "auto" | number = "auto",
+        memo: string = "",
+    ): Promise<DeliverTxResponse> {
+        const msg: MsgEndEncodeObject = {
+            typeUrl: MsgEndTypeUrl,
+            value: {
+                from,
+                id,
+                rating
             }
         }
         return this.signAndBroadcast(from, [msg], fee, memo)
