@@ -5,6 +5,7 @@ import { registry as NodeRegistry } from "./node/registry";
 import { registry as PlanRegistry } from "./plan/registry";
 import { registry as ProviderRegistry } from "./plan/registry";
 import { registry as SessionRegistry } from "./plan/registry";
+import { registry as SubscriptionRegistry } from "./plan/registry";
 
 export const SentinelRegistry: ReadonlyArray<[string, GeneratedType]> = [
     ...defaultRegistryTypes,
@@ -12,6 +13,7 @@ export const SentinelRegistry: ReadonlyArray<[string, GeneratedType]> = [
     ...PlanRegistry,
     ...ProviderRegistry,
     ...SessionRegistry,
+    ...SubscriptionRegistry
 ]
 
 export default SentinelRegistry
