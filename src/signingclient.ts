@@ -49,6 +49,14 @@ import {
     MsgEndTypeUrl,
 } from "./modules/session";
 
+import {
+    MsgCancelEncodeObject,
+    MsgAllocateEncodeObject,
+
+    MsgCancelTypeUrl,
+    MsgAllocateTypeUrl
+} from "./modules/subscription";
+
 import { Status } from "./protobuf/sentinel/types/v1/status";
 import { Duration } from "./protobuf/google/protobuf/duration";
 import { Proof } from "./protobuf/sentinel/session/v2/proof";
@@ -82,6 +90,10 @@ export class SigningSentinelClient extends SigningStargateClient {
             start: this.sessionStart.bind(this),
             updateDetails: this.sessionUpdateDetails.bind(this),
             end: this.sessionEnd.bind(this),
+        },
+        subscription: {
+            cancel: this.subscriptionCancel.bind(this),
+            allocate: this.subscriptionAllocate.bind(this)
         }
     }
 
@@ -381,6 +393,44 @@ export class SigningSentinelClient extends SigningStargateClient {
                 from,
                 id,
                 rating
+            }
+        }
+        return this.signAndBroadcast(from, [msg], fee, memo)
+    }
+
+    public async subscriptionCancel(
+        from: string,
+        id: Long,
+
+        fee: StdFee | "auto" | number = "auto",
+        memo: string = "",
+    ): Promise<DeliverTxResponse> {
+        const msg: MsgCancelEncodeObject = {
+            typeUrl: MsgCancelTypeUrl,
+            value: {
+                from,
+                id,
+            }
+        }
+        return this.signAndBroadcast(from, [msg], fee, memo)
+    }
+
+    public async subscriptionAllocate(
+        from: string,
+        id: Long,
+        address: string,
+        bytes: string,
+
+        fee: StdFee | "auto" | number = "auto",
+        memo: string = "",
+    ): Promise<DeliverTxResponse> {
+        const msg: MsgAllocateEncodeObject = {
+            typeUrl: MsgAllocateTypeUrl,
+            value: {
+                from,
+                id,
+                address,
+                bytes
             }
         }
         return this.signAndBroadcast(from, [msg], fee, memo)

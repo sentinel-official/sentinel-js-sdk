@@ -15,7 +15,7 @@ export interface MsgCancelEncodeObject extends EncodeObject {
     readonly value: Partial<MsgCancelRequest>
 }
 
-export interface MsgUpAllocateEcodeObject extends EncodeObject {
+export interface MsgAllocateEncodeObject extends EncodeObject {
     readonly typeUrl: typeof MsgAllocateTypeUrl,
     readonly value: Partial<MsgAllocateRequest>
 }
@@ -24,6 +24,6 @@ export function isMsgCancelEncodeObject(object: EncodeObject): object is MsgCanc
     return (object as MsgCancelEncodeObject).typeUrl === MsgCancelTypeUrl
 }
 
-export function isMsgAllocateEncodeObject(object: EncodeObject): object is MsgUpAllocateEcodeObject {
-    return (object as MsgUpAllocateEcodeObject).typeUrl === MsgAllocateTypeUrl
+export function isMsgAllocateEncodeObject(object: EncodeObject): object is MsgAllocateEncodeObject {
+    return (object as MsgAllocateEncodeObject).typeUrl === MsgAllocateTypeUrl
 }
