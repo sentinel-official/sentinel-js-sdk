@@ -14,7 +14,7 @@ import {
 
 import Long  from "long";
 
-import { PageRequest } from "cosmjs-types/cosmos/base/query/v1beta1/pagination";
+import { PageRequest } from "../../protobuf/cosmos/base/query/v1beta1/pagination";
 import { Status } from "../../protobuf/sentinel/types/v1/status";
 
 import { Plan } from "../../protobuf/sentinel/plan/v2/plan";

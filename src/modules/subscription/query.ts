@@ -30,7 +30,7 @@ import {
 
 import Long from 'long';
 
-import { PageRequest } from "cosmjs-types/cosmos/base/query/v1beta1/pagination";
+import { PageRequest } from "../../protobuf/cosmos/base/query/v1beta1/pagination";
 
 import { Params } from "../../protobuf/sentinel/subscription/v2/params";
 import { Payout } from "../../protobuf/sentinel/subscription/v2/payout";

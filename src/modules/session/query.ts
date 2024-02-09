@@ -21,7 +21,7 @@ import {
 
 import Long from "long";
 
-import { PageRequest } from "cosmjs-types/cosmos/base/query/v1beta1/pagination";
+import { PageRequest } from "../../protobuf/cosmos/base/query/v1beta1/pagination";
 
 import { Session } from "../../protobuf/sentinel/session/v2/session";
 import { Params } from "../../protobuf/sentinel/session/v2/params";

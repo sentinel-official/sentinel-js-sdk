@@ -13,7 +13,7 @@ import {
     QueryClient,
 } from "@cosmjs/stargate";
 
-import { PageRequest } from "cosmjs-types/cosmos/base/query/v1beta1/pagination";
+import { PageRequest } from "../../protobuf/cosmos/base/query/v1beta1/pagination";
 import { Status } from "../../protobuf/sentinel/types/v1/status";
 
 import { Provider } from "../../protobuf/sentinel/provider/v1/provider";
