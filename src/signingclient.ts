@@ -101,7 +101,7 @@ export class SigningSentinelClient extends SigningStargateClient {
         endpoint: string,
         signer: OfflineSigner,
         options: SigningStargateClientOptions = {}
-    ): Promise<SigningStargateClient> {
+    ): Promise<SigningSentinelClient> {
         const tmClient = await Tendermint34Client.connect(endpoint)
         return new SigningSentinelClient(tmClient, signer, {
             registry: createDefaultRegistry(),
