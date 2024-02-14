@@ -1,9 +1,10 @@
 {
   "compilerOptions": {
+    "baseUrl": ".",
     "declaration": false,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
-    "lib": ["es2017"],
+    "lib": ["es2017", "dom"],
     "module": "commonjs",
     "moduleResolution": "node",
     "newLine": "LF",
@@ -22,5 +23,8 @@
     "target": "es2017",
     "outDir": "dist",
     "rootDir": "src"
-  }
+  },
+  "include": [
+    "src/**/*"
+  ]
 }
