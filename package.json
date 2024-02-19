@@ -1,11 +1,16 @@
 {
-  "name": "sentinel-js-sdk",
+  "name": "@sentinel-official/sentinel-js-sdk",
   "version": "1.0.0",
   "description": "sentinel javascript sdk",
   "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "rm -rf dist/* && touch dist/.gitkeep && tsc"
   },
+  "files": [
+    "dist",
+    "src"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/sentinel-official/sentinel-js-sdk.git"
