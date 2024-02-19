@@ -1,7 +1,11 @@
-import { Bandwidth } from "./protobuf/sentinel/types/v1/bandwidth";
-import { Status } from "./protobuf/sentinel/types/v1/status";
-import { PageRequest } from "./protobuf/cosmos/base/query/v1beta1/pagination";
+export { Bandwidth } from "./protobuf/sentinel/types/v1/bandwidth";
+export { Status } from "./protobuf/sentinel/types/v1/status";
 
-export { Bandwidth };
-export { Status };
-export { PageRequest };
+export { Coin } from "./protobuf/cosmos/base/v1beta1/coin";
+export { PageRequest } from "./protobuf/cosmos/base/query/v1beta1/pagination";
+
+export { Node } from "./modules/node";
+export { Plan } from "./modules/plan";
+export { Provider } from "./modules/provider";
+export { Session } from "./modules/session";
+export { Subscription } from "./modules/subscription";
