@@ -87,10 +87,10 @@ export const Quota = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<Quota>, I>>(base?: I): Quota {
-    return Quota.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<Quota>): Quota {
+    return Quota.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<Quota>, I>>(object: I): Quota {
+  fromPartial(object: DeepPartial<Quota>): Quota {
     const message = createBaseQuota();
     message.address = object.address ?? "";
     message.allocated = object.allocated ?? "";
@@ -106,10 +106,6 @@ export type DeepPartial<T> = T extends Builtin ? T
   : T extends ReadonlyArray<infer U> ? ReadonlyArray<DeepPartial<U>>
   : T extends {} ? { [K in keyof T]?: DeepPartial<T[K]> }
   : Partial<T>;
-
-type KeysOfUnion<T> = T extends T ? keyof T : never;
-export type Exact<P, I extends P> = P extends Builtin ? P
-  : P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
 
 if (_m0.util.Long !== Long) {
   _m0.util.Long = Long as any;

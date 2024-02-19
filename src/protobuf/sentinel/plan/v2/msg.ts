@@ -169,10 +169,10 @@ export const MsgCreateRequest = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<MsgCreateRequest>, I>>(base?: I): MsgCreateRequest {
-    return MsgCreateRequest.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<MsgCreateRequest>): MsgCreateRequest {
+    return MsgCreateRequest.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<MsgCreateRequest>, I>>(object: I): MsgCreateRequest {
+  fromPartial(object: DeepPartial<MsgCreateRequest>): MsgCreateRequest {
     const message = createBaseMsgCreateRequest();
     message.from = object.from ?? "";
     message.duration = (object.duration !== undefined && object.duration !== null)
@@ -263,10 +263,10 @@ export const MsgUpdateStatusRequest = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<MsgUpdateStatusRequest>, I>>(base?: I): MsgUpdateStatusRequest {
-    return MsgUpdateStatusRequest.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<MsgUpdateStatusRequest>): MsgUpdateStatusRequest {
+    return MsgUpdateStatusRequest.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<MsgUpdateStatusRequest>, I>>(object: I): MsgUpdateStatusRequest {
+  fromPartial(object: DeepPartial<MsgUpdateStatusRequest>): MsgUpdateStatusRequest {
     const message = createBaseMsgUpdateStatusRequest();
     message.from = object.from ?? "";
     message.id = (object.id !== undefined && object.id !== null) ? Long.fromValue(object.id) : Long.UZERO;
@@ -352,10 +352,10 @@ export const MsgLinkNodeRequest = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<MsgLinkNodeRequest>, I>>(base?: I): MsgLinkNodeRequest {
-    return MsgLinkNodeRequest.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<MsgLinkNodeRequest>): MsgLinkNodeRequest {
+    return MsgLinkNodeRequest.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<MsgLinkNodeRequest>, I>>(object: I): MsgLinkNodeRequest {
+  fromPartial(object: DeepPartial<MsgLinkNodeRequest>): MsgLinkNodeRequest {
     const message = createBaseMsgLinkNodeRequest();
     message.from = object.from ?? "";
     message.id = (object.id !== undefined && object.id !== null) ? Long.fromValue(object.id) : Long.UZERO;
@@ -441,10 +441,10 @@ export const MsgUnlinkNodeRequest = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<MsgUnlinkNodeRequest>, I>>(base?: I): MsgUnlinkNodeRequest {
-    return MsgUnlinkNodeRequest.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<MsgUnlinkNodeRequest>): MsgUnlinkNodeRequest {
+    return MsgUnlinkNodeRequest.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<MsgUnlinkNodeRequest>, I>>(object: I): MsgUnlinkNodeRequest {
+  fromPartial(object: DeepPartial<MsgUnlinkNodeRequest>): MsgUnlinkNodeRequest {
     const message = createBaseMsgUnlinkNodeRequest();
     message.from = object.from ?? "";
     message.id = (object.id !== undefined && object.id !== null) ? Long.fromValue(object.id) : Long.UZERO;
@@ -530,10 +530,10 @@ export const MsgSubscribeRequest = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<MsgSubscribeRequest>, I>>(base?: I): MsgSubscribeRequest {
-    return MsgSubscribeRequest.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<MsgSubscribeRequest>): MsgSubscribeRequest {
+    return MsgSubscribeRequest.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<MsgSubscribeRequest>, I>>(object: I): MsgSubscribeRequest {
+  fromPartial(object: DeepPartial<MsgSubscribeRequest>): MsgSubscribeRequest {
     const message = createBaseMsgSubscribeRequest();
     message.from = object.from ?? "";
     message.id = (object.id !== undefined && object.id !== null) ? Long.fromValue(object.id) : Long.UZERO;
@@ -576,10 +576,10 @@ export const MsgCreateResponse = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<MsgCreateResponse>, I>>(base?: I): MsgCreateResponse {
-    return MsgCreateResponse.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<MsgCreateResponse>): MsgCreateResponse {
+    return MsgCreateResponse.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<MsgCreateResponse>, I>>(_: I): MsgCreateResponse {
+  fromPartial(_: DeepPartial<MsgCreateResponse>): MsgCreateResponse {
     const message = createBaseMsgCreateResponse();
     return message;
   },
@@ -619,10 +619,10 @@ export const MsgUpdateStatusResponse = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<MsgUpdateStatusResponse>, I>>(base?: I): MsgUpdateStatusResponse {
-    return MsgUpdateStatusResponse.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<MsgUpdateStatusResponse>): MsgUpdateStatusResponse {
+    return MsgUpdateStatusResponse.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<MsgUpdateStatusResponse>, I>>(_: I): MsgUpdateStatusResponse {
+  fromPartial(_: DeepPartial<MsgUpdateStatusResponse>): MsgUpdateStatusResponse {
     const message = createBaseMsgUpdateStatusResponse();
     return message;
   },
@@ -662,10 +662,10 @@ export const MsgLinkNodeResponse = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<MsgLinkNodeResponse>, I>>(base?: I): MsgLinkNodeResponse {
-    return MsgLinkNodeResponse.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<MsgLinkNodeResponse>): MsgLinkNodeResponse {
+    return MsgLinkNodeResponse.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<MsgLinkNodeResponse>, I>>(_: I): MsgLinkNodeResponse {
+  fromPartial(_: DeepPartial<MsgLinkNodeResponse>): MsgLinkNodeResponse {
     const message = createBaseMsgLinkNodeResponse();
     return message;
   },
@@ -705,10 +705,10 @@ export const MsgUnlinkNodeResponse = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<MsgUnlinkNodeResponse>, I>>(base?: I): MsgUnlinkNodeResponse {
-    return MsgUnlinkNodeResponse.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<MsgUnlinkNodeResponse>): MsgUnlinkNodeResponse {
+    return MsgUnlinkNodeResponse.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<MsgUnlinkNodeResponse>, I>>(_: I): MsgUnlinkNodeResponse {
+  fromPartial(_: DeepPartial<MsgUnlinkNodeResponse>): MsgUnlinkNodeResponse {
     const message = createBaseMsgUnlinkNodeResponse();
     return message;
   },
@@ -748,10 +748,10 @@ export const MsgSubscribeResponse = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<MsgSubscribeResponse>, I>>(base?: I): MsgSubscribeResponse {
-    return MsgSubscribeResponse.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<MsgSubscribeResponse>): MsgSubscribeResponse {
+    return MsgSubscribeResponse.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<MsgSubscribeResponse>, I>>(_: I): MsgSubscribeResponse {
+  fromPartial(_: DeepPartial<MsgSubscribeResponse>): MsgSubscribeResponse {
     const message = createBaseMsgSubscribeResponse();
     return message;
   },
@@ -820,10 +820,6 @@ export type DeepPartial<T> = T extends Builtin ? T
   : T extends ReadonlyArray<infer U> ? ReadonlyArray<DeepPartial<U>>
   : T extends {} ? { [K in keyof T]?: DeepPartial<T[K]> }
   : Partial<T>;
-
-type KeysOfUnion<T> = T extends T ? keyof T : never;
-export type Exact<P, I extends P> = P extends Builtin ? P
-  : P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
 
 if (_m0.util.Long !== Long) {
   _m0.util.Long = Long as any;

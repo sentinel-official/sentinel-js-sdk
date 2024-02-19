@@ -147,10 +147,10 @@ export const EventUpdateStatus = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<EventUpdateStatus>, I>>(base?: I): EventUpdateStatus {
-    return EventUpdateStatus.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<EventUpdateStatus>): EventUpdateStatus {
+    return EventUpdateStatus.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<EventUpdateStatus>, I>>(object: I): EventUpdateStatus {
+  fromPartial(object: DeepPartial<EventUpdateStatus>): EventUpdateStatus {
     const message = createBaseEventUpdateStatus();
     message.status = object.status ?? 0;
     message.address = object.address ?? "";
@@ -253,10 +253,10 @@ export const EventAllocate = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<EventAllocate>, I>>(base?: I): EventAllocate {
-    return EventAllocate.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<EventAllocate>): EventAllocate {
+    return EventAllocate.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<EventAllocate>, I>>(object: I): EventAllocate {
+  fromPartial(object: DeepPartial<EventAllocate>): EventAllocate {
     const message = createBaseEventAllocate();
     message.address = object.address ?? "";
     message.grantedBytes = object.grantedBytes ?? "";
@@ -343,10 +343,10 @@ export const EventCreatePayout = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<EventCreatePayout>, I>>(base?: I): EventCreatePayout {
-    return EventCreatePayout.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<EventCreatePayout>): EventCreatePayout {
+    return EventCreatePayout.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<EventCreatePayout>, I>>(object: I): EventCreatePayout {
+  fromPartial(object: DeepPartial<EventCreatePayout>): EventCreatePayout {
     const message = createBaseEventCreatePayout();
     message.address = object.address ?? "";
     message.nodeAddress = object.nodeAddress ?? "";
@@ -460,10 +460,10 @@ export const EventPayForPayout = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<EventPayForPayout>, I>>(base?: I): EventPayForPayout {
-    return EventPayForPayout.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<EventPayForPayout>): EventPayForPayout {
+    return EventPayForPayout.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<EventPayForPayout>, I>>(object: I): EventPayForPayout {
+  fromPartial(object: DeepPartial<EventPayForPayout>): EventPayForPayout {
     const message = createBaseEventPayForPayout();
     message.address = object.address ?? "";
     message.nodeAddress = object.nodeAddress ?? "";
@@ -579,10 +579,10 @@ export const EventPayForPlan = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<EventPayForPlan>, I>>(base?: I): EventPayForPlan {
-    return EventPayForPlan.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<EventPayForPlan>): EventPayForPlan {
+    return EventPayForPlan.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<EventPayForPlan>, I>>(object: I): EventPayForPlan {
+  fromPartial(object: DeepPartial<EventPayForPlan>): EventPayForPlan {
     const message = createBaseEventPayForPlan();
     message.address = object.address ?? "";
     message.payment = object.payment ?? "";
@@ -719,10 +719,10 @@ export const EventPayForSession = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<EventPayForSession>, I>>(base?: I): EventPayForSession {
-    return EventPayForSession.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<EventPayForSession>): EventPayForSession {
+    return EventPayForSession.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<EventPayForSession>, I>>(object: I): EventPayForSession {
+  fromPartial(object: DeepPartial<EventPayForSession>): EventPayForSession {
     const message = createBaseEventPayForSession();
     message.address = object.address ?? "";
     message.nodeAddress = object.nodeAddress ?? "";
@@ -815,10 +815,10 @@ export const EventRefund = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<EventRefund>, I>>(base?: I): EventRefund {
-    return EventRefund.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<EventRefund>): EventRefund {
+    return EventRefund.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<EventRefund>, I>>(object: I): EventRefund {
+  fromPartial(object: DeepPartial<EventRefund>): EventRefund {
     const message = createBaseEventRefund();
     message.address = object.address ?? "";
     message.amount = object.amount ?? "";
@@ -834,10 +834,6 @@ export type DeepPartial<T> = T extends Builtin ? T
   : T extends ReadonlyArray<infer U> ? ReadonlyArray<DeepPartial<U>>
   : T extends {} ? { [K in keyof T]?: DeepPartial<T[K]> }
   : Partial<T>;
-
-type KeysOfUnion<T> = T extends T ? keyof T : never;
-export type Exact<P, I extends P> = P extends Builtin ? P
-  : P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
 
 if (_m0.util.Long !== Long) {
   _m0.util.Long = Long as any;

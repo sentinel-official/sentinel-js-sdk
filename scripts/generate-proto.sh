@@ -79,7 +79,7 @@ protoc \
   --plugin=$TS_PROTOPATH \
   --ts_proto_out=$TS_OUTPUT \
   --proto_path=$TMP_FOLDER \
-  --ts_proto_opt="esModuleInterop=true,forceLong=long,useOptionals=messages" \
+  --ts_proto_opt="esModuleInterop=true,forceLong=long,useOptionals=messages,useExactTypes=false" \
   $(find $TMP_FOLDER/sentinel -iname "*.proto")
 
 # Remove temp directory

@@ -154,10 +154,10 @@ export const MsgRegisterRequest = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<MsgRegisterRequest>, I>>(base?: I): MsgRegisterRequest {
-    return MsgRegisterRequest.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<MsgRegisterRequest>): MsgRegisterRequest {
+    return MsgRegisterRequest.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<MsgRegisterRequest>, I>>(object: I): MsgRegisterRequest {
+  fromPartial(object: DeepPartial<MsgRegisterRequest>): MsgRegisterRequest {
     const message = createBaseMsgRegisterRequest();
     message.from = object.from ?? "";
     message.gigabytePrices = object.gigabytePrices?.map((e) => Coin.fromPartial(e)) || [];
@@ -262,10 +262,10 @@ export const MsgUpdateDetailsRequest = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<MsgUpdateDetailsRequest>, I>>(base?: I): MsgUpdateDetailsRequest {
-    return MsgUpdateDetailsRequest.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<MsgUpdateDetailsRequest>): MsgUpdateDetailsRequest {
+    return MsgUpdateDetailsRequest.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<MsgUpdateDetailsRequest>, I>>(object: I): MsgUpdateDetailsRequest {
+  fromPartial(object: DeepPartial<MsgUpdateDetailsRequest>): MsgUpdateDetailsRequest {
     const message = createBaseMsgUpdateDetailsRequest();
     message.from = object.from ?? "";
     message.gigabytePrices = object.gigabytePrices?.map((e) => Coin.fromPartial(e)) || [];
@@ -338,10 +338,10 @@ export const MsgUpdateStatusRequest = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<MsgUpdateStatusRequest>, I>>(base?: I): MsgUpdateStatusRequest {
-    return MsgUpdateStatusRequest.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<MsgUpdateStatusRequest>): MsgUpdateStatusRequest {
+    return MsgUpdateStatusRequest.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<MsgUpdateStatusRequest>, I>>(object: I): MsgUpdateStatusRequest {
+  fromPartial(object: DeepPartial<MsgUpdateStatusRequest>): MsgUpdateStatusRequest {
     const message = createBaseMsgUpdateStatusRequest();
     message.from = object.from ?? "";
     message.status = object.status ?? 0;
@@ -454,10 +454,10 @@ export const MsgSubscribeRequest = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<MsgSubscribeRequest>, I>>(base?: I): MsgSubscribeRequest {
-    return MsgSubscribeRequest.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<MsgSubscribeRequest>): MsgSubscribeRequest {
+    return MsgSubscribeRequest.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<MsgSubscribeRequest>, I>>(object: I): MsgSubscribeRequest {
+  fromPartial(object: DeepPartial<MsgSubscribeRequest>): MsgSubscribeRequest {
     const message = createBaseMsgSubscribeRequest();
     message.from = object.from ?? "";
     message.nodeAddress = object.nodeAddress ?? "";
@@ -504,10 +504,10 @@ export const MsgRegisterResponse = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<MsgRegisterResponse>, I>>(base?: I): MsgRegisterResponse {
-    return MsgRegisterResponse.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<MsgRegisterResponse>): MsgRegisterResponse {
+    return MsgRegisterResponse.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<MsgRegisterResponse>, I>>(_: I): MsgRegisterResponse {
+  fromPartial(_: DeepPartial<MsgRegisterResponse>): MsgRegisterResponse {
     const message = createBaseMsgRegisterResponse();
     return message;
   },
@@ -547,10 +547,10 @@ export const MsgUpdateDetailsResponse = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<MsgUpdateDetailsResponse>, I>>(base?: I): MsgUpdateDetailsResponse {
-    return MsgUpdateDetailsResponse.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<MsgUpdateDetailsResponse>): MsgUpdateDetailsResponse {
+    return MsgUpdateDetailsResponse.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<MsgUpdateDetailsResponse>, I>>(_: I): MsgUpdateDetailsResponse {
+  fromPartial(_: DeepPartial<MsgUpdateDetailsResponse>): MsgUpdateDetailsResponse {
     const message = createBaseMsgUpdateDetailsResponse();
     return message;
   },
@@ -590,10 +590,10 @@ export const MsgUpdateStatusResponse = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<MsgUpdateStatusResponse>, I>>(base?: I): MsgUpdateStatusResponse {
-    return MsgUpdateStatusResponse.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<MsgUpdateStatusResponse>): MsgUpdateStatusResponse {
+    return MsgUpdateStatusResponse.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<MsgUpdateStatusResponse>, I>>(_: I): MsgUpdateStatusResponse {
+  fromPartial(_: DeepPartial<MsgUpdateStatusResponse>): MsgUpdateStatusResponse {
     const message = createBaseMsgUpdateStatusResponse();
     return message;
   },
@@ -633,10 +633,10 @@ export const MsgSubscribeResponse = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<MsgSubscribeResponse>, I>>(base?: I): MsgSubscribeResponse {
-    return MsgSubscribeResponse.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<MsgSubscribeResponse>): MsgSubscribeResponse {
+    return MsgSubscribeResponse.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<MsgSubscribeResponse>, I>>(_: I): MsgSubscribeResponse {
+  fromPartial(_: DeepPartial<MsgSubscribeResponse>): MsgSubscribeResponse {
     const message = createBaseMsgSubscribeResponse();
     return message;
   },
@@ -697,10 +697,6 @@ export type DeepPartial<T> = T extends Builtin ? T
   : T extends ReadonlyArray<infer U> ? ReadonlyArray<DeepPartial<U>>
   : T extends {} ? { [K in keyof T]?: DeepPartial<T[K]> }
   : Partial<T>;
-
-type KeysOfUnion<T> = T extends T ? keyof T : never;
-export type Exact<P, I extends P> = P extends Builtin ? P
-  : P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
 
 if (_m0.util.Long !== Long) {
   _m0.util.Long = Long as any;

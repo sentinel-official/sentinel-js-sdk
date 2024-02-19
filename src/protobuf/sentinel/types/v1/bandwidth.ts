@@ -72,10 +72,10 @@ export const Bandwidth = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<Bandwidth>, I>>(base?: I): Bandwidth {
-    return Bandwidth.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<Bandwidth>): Bandwidth {
+    return Bandwidth.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<Bandwidth>, I>>(object: I): Bandwidth {
+  fromPartial(object: DeepPartial<Bandwidth>): Bandwidth {
     const message = createBaseBandwidth();
     message.upload = object.upload ?? "";
     message.download = object.download ?? "";
@@ -90,10 +90,6 @@ export type DeepPartial<T> = T extends Builtin ? T
   : T extends ReadonlyArray<infer U> ? ReadonlyArray<DeepPartial<U>>
   : T extends {} ? { [K in keyof T]?: DeepPartial<T[K]> }
   : Partial<T>;
-
-type KeysOfUnion<T> = T extends T ? keyof T : never;
-export type Exact<P, I extends P> = P extends Builtin ? P
-  : P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
 
 if (_m0.util.Long !== Long) {
   _m0.util.Long = Long as any;

@@ -92,10 +92,10 @@ export const MsgCancelRequest = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<MsgCancelRequest>, I>>(base?: I): MsgCancelRequest {
-    return MsgCancelRequest.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<MsgCancelRequest>): MsgCancelRequest {
+    return MsgCancelRequest.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<MsgCancelRequest>, I>>(object: I): MsgCancelRequest {
+  fromPartial(object: DeepPartial<MsgCancelRequest>): MsgCancelRequest {
     const message = createBaseMsgCancelRequest();
     message.from = object.from ?? "";
     message.id = (object.id !== undefined && object.id !== null) ? Long.fromValue(object.id) : Long.UZERO;
@@ -194,10 +194,10 @@ export const MsgAllocateRequest = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<MsgAllocateRequest>, I>>(base?: I): MsgAllocateRequest {
-    return MsgAllocateRequest.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<MsgAllocateRequest>): MsgAllocateRequest {
+    return MsgAllocateRequest.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<MsgAllocateRequest>, I>>(object: I): MsgAllocateRequest {
+  fromPartial(object: DeepPartial<MsgAllocateRequest>): MsgAllocateRequest {
     const message = createBaseMsgAllocateRequest();
     message.from = object.from ?? "";
     message.id = (object.id !== undefined && object.id !== null) ? Long.fromValue(object.id) : Long.UZERO;
@@ -241,10 +241,10 @@ export const MsgCancelResponse = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<MsgCancelResponse>, I>>(base?: I): MsgCancelResponse {
-    return MsgCancelResponse.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<MsgCancelResponse>): MsgCancelResponse {
+    return MsgCancelResponse.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<MsgCancelResponse>, I>>(_: I): MsgCancelResponse {
+  fromPartial(_: DeepPartial<MsgCancelResponse>): MsgCancelResponse {
     const message = createBaseMsgCancelResponse();
     return message;
   },
@@ -284,10 +284,10 @@ export const MsgAllocateResponse = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<MsgAllocateResponse>, I>>(base?: I): MsgAllocateResponse {
-    return MsgAllocateResponse.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<MsgAllocateResponse>): MsgAllocateResponse {
+    return MsgAllocateResponse.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<MsgAllocateResponse>, I>>(_: I): MsgAllocateResponse {
+  fromPartial(_: DeepPartial<MsgAllocateResponse>): MsgAllocateResponse {
     const message = createBaseMsgAllocateResponse();
     return message;
   },
@@ -332,10 +332,6 @@ export type DeepPartial<T> = T extends Builtin ? T
   : T extends ReadonlyArray<infer U> ? ReadonlyArray<DeepPartial<U>>
   : T extends {} ? { [K in keyof T]?: DeepPartial<T[K]> }
   : Partial<T>;
-
-type KeysOfUnion<T> = T extends T ? keyof T : never;
-export type Exact<P, I extends P> = P extends Builtin ? P
-  : P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
 
 if (_m0.util.Long !== Long) {
   _m0.util.Long = Long as any;

@@ -107,10 +107,10 @@ export const QueryNodesRequest = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<QueryNodesRequest>, I>>(base?: I): QueryNodesRequest {
-    return QueryNodesRequest.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<QueryNodesRequest>): QueryNodesRequest {
+    return QueryNodesRequest.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<QueryNodesRequest>, I>>(object: I): QueryNodesRequest {
+  fromPartial(object: DeepPartial<QueryNodesRequest>): QueryNodesRequest {
     const message = createBaseQueryNodesRequest();
     message.status = object.status ?? 0;
     message.pagination = (object.pagination !== undefined && object.pagination !== null)
@@ -197,10 +197,10 @@ export const QueryNodesForPlanRequest = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<QueryNodesForPlanRequest>, I>>(base?: I): QueryNodesForPlanRequest {
-    return QueryNodesForPlanRequest.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<QueryNodesForPlanRequest>): QueryNodesForPlanRequest {
+    return QueryNodesForPlanRequest.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<QueryNodesForPlanRequest>, I>>(object: I): QueryNodesForPlanRequest {
+  fromPartial(object: DeepPartial<QueryNodesForPlanRequest>): QueryNodesForPlanRequest {
     const message = createBaseQueryNodesForPlanRequest();
     message.id = (object.id !== undefined && object.id !== null) ? Long.fromValue(object.id) : Long.UZERO;
     message.status = object.status ?? 0;
@@ -258,10 +258,10 @@ export const QueryNodeRequest = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<QueryNodeRequest>, I>>(base?: I): QueryNodeRequest {
-    return QueryNodeRequest.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<QueryNodeRequest>): QueryNodeRequest {
+    return QueryNodeRequest.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<QueryNodeRequest>, I>>(object: I): QueryNodeRequest {
+  fromPartial(object: DeepPartial<QueryNodeRequest>): QueryNodeRequest {
     const message = createBaseQueryNodeRequest();
     message.address = object.address ?? "";
     return message;
@@ -302,10 +302,10 @@ export const QueryParamsRequest = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<QueryParamsRequest>, I>>(base?: I): QueryParamsRequest {
-    return QueryParamsRequest.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<QueryParamsRequest>): QueryParamsRequest {
+    return QueryParamsRequest.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<QueryParamsRequest>, I>>(_: I): QueryParamsRequest {
+  fromPartial(_: DeepPartial<QueryParamsRequest>): QueryParamsRequest {
     const message = createBaseQueryParamsRequest();
     return message;
   },
@@ -374,10 +374,10 @@ export const QueryNodesResponse = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<QueryNodesResponse>, I>>(base?: I): QueryNodesResponse {
-    return QueryNodesResponse.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<QueryNodesResponse>): QueryNodesResponse {
+    return QueryNodesResponse.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<QueryNodesResponse>, I>>(object: I): QueryNodesResponse {
+  fromPartial(object: DeepPartial<QueryNodesResponse>): QueryNodesResponse {
     const message = createBaseQueryNodesResponse();
     message.nodes = object.nodes?.map((e) => Node.fromPartial(e)) || [];
     message.pagination = (object.pagination !== undefined && object.pagination !== null)
@@ -450,10 +450,10 @@ export const QueryNodesForPlanResponse = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<QueryNodesForPlanResponse>, I>>(base?: I): QueryNodesForPlanResponse {
-    return QueryNodesForPlanResponse.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<QueryNodesForPlanResponse>): QueryNodesForPlanResponse {
+    return QueryNodesForPlanResponse.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<QueryNodesForPlanResponse>, I>>(object: I): QueryNodesForPlanResponse {
+  fromPartial(object: DeepPartial<QueryNodesForPlanResponse>): QueryNodesForPlanResponse {
     const message = createBaseQueryNodesForPlanResponse();
     message.nodes = object.nodes?.map((e) => Node.fromPartial(e)) || [];
     message.pagination = (object.pagination !== undefined && object.pagination !== null)
@@ -510,10 +510,10 @@ export const QueryNodeResponse = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<QueryNodeResponse>, I>>(base?: I): QueryNodeResponse {
-    return QueryNodeResponse.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<QueryNodeResponse>): QueryNodeResponse {
+    return QueryNodeResponse.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<QueryNodeResponse>, I>>(object: I): QueryNodeResponse {
+  fromPartial(object: DeepPartial<QueryNodeResponse>): QueryNodeResponse {
     const message = createBaseQueryNodeResponse();
     message.node = (object.node !== undefined && object.node !== null) ? Node.fromPartial(object.node) : undefined;
     return message;
@@ -567,10 +567,10 @@ export const QueryParamsResponse = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<QueryParamsResponse>, I>>(base?: I): QueryParamsResponse {
-    return QueryParamsResponse.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<QueryParamsResponse>): QueryParamsResponse {
+    return QueryParamsResponse.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<QueryParamsResponse>, I>>(object: I): QueryParamsResponse {
+  fromPartial(object: DeepPartial<QueryParamsResponse>): QueryParamsResponse {
     const message = createBaseQueryParamsResponse();
     message.params = (object.params !== undefined && object.params !== null)
       ? Params.fromPartial(object.params)
@@ -634,10 +634,6 @@ export type DeepPartial<T> = T extends Builtin ? T
   : T extends ReadonlyArray<infer U> ? ReadonlyArray<DeepPartial<U>>
   : T extends {} ? { [K in keyof T]?: DeepPartial<T[K]> }
   : Partial<T>;
-
-type KeysOfUnion<T> = T extends T ? keyof T : never;
-export type Exact<P, I extends P> = P extends Builtin ? P
-  : P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
 
 if (_m0.util.Long !== Long) {
   _m0.util.Long = Long as any;

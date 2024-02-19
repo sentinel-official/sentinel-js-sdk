@@ -82,10 +82,10 @@ export const GenesisSubscription = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<GenesisSubscription>, I>>(base?: I): GenesisSubscription {
-    return GenesisSubscription.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<GenesisSubscription>): GenesisSubscription {
+    return GenesisSubscription.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<GenesisSubscription>, I>>(object: I): GenesisSubscription {
+  fromPartial(object: DeepPartial<GenesisSubscription>): GenesisSubscription {
     const message = createBaseGenesisSubscription();
     message.subscription = (object.subscription !== undefined && object.subscription !== null)
       ? Any.fromPartial(object.subscription)
@@ -160,10 +160,10 @@ export const GenesisState = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<GenesisState>, I>>(base?: I): GenesisState {
-    return GenesisState.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<GenesisState>): GenesisState {
+    return GenesisState.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<GenesisState>, I>>(object: I): GenesisState {
+  fromPartial(object: DeepPartial<GenesisState>): GenesisState {
     const message = createBaseGenesisState();
     message.subscriptions = object.subscriptions?.map((e) => GenesisSubscription.fromPartial(e)) || [];
     message.params = (object.params !== undefined && object.params !== null)
@@ -180,10 +180,6 @@ export type DeepPartial<T> = T extends Builtin ? T
   : T extends ReadonlyArray<infer U> ? ReadonlyArray<DeepPartial<U>>
   : T extends {} ? { [K in keyof T]?: DeepPartial<T[K]> }
   : Partial<T>;
-
-type KeysOfUnion<T> = T extends T ? keyof T : never;
-export type Exact<P, I extends P> = P extends Builtin ? P
-  : P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
 
 if (_m0.util.Long !== Long) {
   _m0.util.Long = Long as any;

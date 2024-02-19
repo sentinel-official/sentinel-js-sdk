@@ -134,10 +134,10 @@ export const Payout = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<Payout>, I>>(base?: I): Payout {
-    return Payout.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<Payout>): Payout {
+    return Payout.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<Payout>, I>>(object: I): Payout {
+  fromPartial(object: DeepPartial<Payout>): Payout {
     const message = createBasePayout();
     message.id = (object.id !== undefined && object.id !== null) ? Long.fromValue(object.id) : Long.UZERO;
     message.address = object.address ?? "";
@@ -156,10 +156,6 @@ export type DeepPartial<T> = T extends Builtin ? T
   : T extends ReadonlyArray<infer U> ? ReadonlyArray<DeepPartial<U>>
   : T extends {} ? { [K in keyof T]?: DeepPartial<T[K]> }
   : Partial<T>;
-
-type KeysOfUnion<T> = T extends T ? keyof T : never;
-export type Exact<P, I extends P> = P extends Builtin ? P
-  : P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
 
 function toTimestamp(date: Date): Timestamp {
   const seconds = numberToLong(Math.trunc(date.getTime() / 1_000));

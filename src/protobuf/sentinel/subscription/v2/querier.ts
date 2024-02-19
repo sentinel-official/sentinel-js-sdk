@@ -166,10 +166,10 @@ export const QuerySubscriptionsRequest = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<QuerySubscriptionsRequest>, I>>(base?: I): QuerySubscriptionsRequest {
-    return QuerySubscriptionsRequest.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<QuerySubscriptionsRequest>): QuerySubscriptionsRequest {
+    return QuerySubscriptionsRequest.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<QuerySubscriptionsRequest>, I>>(object: I): QuerySubscriptionsRequest {
+  fromPartial(object: DeepPartial<QuerySubscriptionsRequest>): QuerySubscriptionsRequest {
     const message = createBaseQuerySubscriptionsRequest();
     message.pagination = (object.pagination !== undefined && object.pagination !== null)
       ? PageRequest.fromPartial(object.pagination)
@@ -241,14 +241,10 @@ export const QuerySubscriptionsForAccountRequest = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<QuerySubscriptionsForAccountRequest>, I>>(
-    base?: I,
-  ): QuerySubscriptionsForAccountRequest {
-    return QuerySubscriptionsForAccountRequest.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<QuerySubscriptionsForAccountRequest>): QuerySubscriptionsForAccountRequest {
+    return QuerySubscriptionsForAccountRequest.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<QuerySubscriptionsForAccountRequest>, I>>(
-    object: I,
-  ): QuerySubscriptionsForAccountRequest {
+  fromPartial(object: DeepPartial<QuerySubscriptionsForAccountRequest>): QuerySubscriptionsForAccountRequest {
     const message = createBaseQuerySubscriptionsForAccountRequest();
     message.address = object.address ?? "";
     message.pagination = (object.pagination !== undefined && object.pagination !== null)
@@ -321,14 +317,10 @@ export const QuerySubscriptionsForNodeRequest = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<QuerySubscriptionsForNodeRequest>, I>>(
-    base?: I,
-  ): QuerySubscriptionsForNodeRequest {
-    return QuerySubscriptionsForNodeRequest.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<QuerySubscriptionsForNodeRequest>): QuerySubscriptionsForNodeRequest {
+    return QuerySubscriptionsForNodeRequest.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<QuerySubscriptionsForNodeRequest>, I>>(
-    object: I,
-  ): QuerySubscriptionsForNodeRequest {
+  fromPartial(object: DeepPartial<QuerySubscriptionsForNodeRequest>): QuerySubscriptionsForNodeRequest {
     const message = createBaseQuerySubscriptionsForNodeRequest();
     message.address = object.address ?? "";
     message.pagination = (object.pagination !== undefined && object.pagination !== null)
@@ -401,14 +393,10 @@ export const QuerySubscriptionsForPlanRequest = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<QuerySubscriptionsForPlanRequest>, I>>(
-    base?: I,
-  ): QuerySubscriptionsForPlanRequest {
-    return QuerySubscriptionsForPlanRequest.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<QuerySubscriptionsForPlanRequest>): QuerySubscriptionsForPlanRequest {
+    return QuerySubscriptionsForPlanRequest.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<QuerySubscriptionsForPlanRequest>, I>>(
-    object: I,
-  ): QuerySubscriptionsForPlanRequest {
+  fromPartial(object: DeepPartial<QuerySubscriptionsForPlanRequest>): QuerySubscriptionsForPlanRequest {
     const message = createBaseQuerySubscriptionsForPlanRequest();
     message.id = (object.id !== undefined && object.id !== null) ? Long.fromValue(object.id) : Long.UZERO;
     message.pagination = (object.pagination !== undefined && object.pagination !== null)
@@ -465,10 +453,10 @@ export const QuerySubscriptionRequest = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<QuerySubscriptionRequest>, I>>(base?: I): QuerySubscriptionRequest {
-    return QuerySubscriptionRequest.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<QuerySubscriptionRequest>): QuerySubscriptionRequest {
+    return QuerySubscriptionRequest.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<QuerySubscriptionRequest>, I>>(object: I): QuerySubscriptionRequest {
+  fromPartial(object: DeepPartial<QuerySubscriptionRequest>): QuerySubscriptionRequest {
     const message = createBaseQuerySubscriptionRequest();
     message.id = (object.id !== undefined && object.id !== null) ? Long.fromValue(object.id) : Long.UZERO;
     return message;
@@ -538,10 +526,10 @@ export const QueryAllocationRequest = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<QueryAllocationRequest>, I>>(base?: I): QueryAllocationRequest {
-    return QueryAllocationRequest.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<QueryAllocationRequest>): QueryAllocationRequest {
+    return QueryAllocationRequest.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<QueryAllocationRequest>, I>>(object: I): QueryAllocationRequest {
+  fromPartial(object: DeepPartial<QueryAllocationRequest>): QueryAllocationRequest {
     const message = createBaseQueryAllocationRequest();
     message.id = (object.id !== undefined && object.id !== null) ? Long.fromValue(object.id) : Long.UZERO;
     message.address = object.address ?? "";
@@ -612,10 +600,10 @@ export const QueryAllocationsRequest = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<QueryAllocationsRequest>, I>>(base?: I): QueryAllocationsRequest {
-    return QueryAllocationsRequest.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<QueryAllocationsRequest>): QueryAllocationsRequest {
+    return QueryAllocationsRequest.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<QueryAllocationsRequest>, I>>(object: I): QueryAllocationsRequest {
+  fromPartial(object: DeepPartial<QueryAllocationsRequest>): QueryAllocationsRequest {
     const message = createBaseQueryAllocationsRequest();
     message.id = (object.id !== undefined && object.id !== null) ? Long.fromValue(object.id) : Long.UZERO;
     message.pagination = (object.pagination !== undefined && object.pagination !== null)
@@ -672,10 +660,10 @@ export const QueryPayoutsRequest = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<QueryPayoutsRequest>, I>>(base?: I): QueryPayoutsRequest {
-    return QueryPayoutsRequest.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<QueryPayoutsRequest>): QueryPayoutsRequest {
+    return QueryPayoutsRequest.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<QueryPayoutsRequest>, I>>(object: I): QueryPayoutsRequest {
+  fromPartial(object: DeepPartial<QueryPayoutsRequest>): QueryPayoutsRequest {
     const message = createBaseQueryPayoutsRequest();
     message.pagination = (object.pagination !== undefined && object.pagination !== null)
       ? PageRequest.fromPartial(object.pagination)
@@ -747,12 +735,10 @@ export const QueryPayoutsForAccountRequest = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<QueryPayoutsForAccountRequest>, I>>(base?: I): QueryPayoutsForAccountRequest {
-    return QueryPayoutsForAccountRequest.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<QueryPayoutsForAccountRequest>): QueryPayoutsForAccountRequest {
+    return QueryPayoutsForAccountRequest.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<QueryPayoutsForAccountRequest>, I>>(
-    object: I,
-  ): QueryPayoutsForAccountRequest {
+  fromPartial(object: DeepPartial<QueryPayoutsForAccountRequest>): QueryPayoutsForAccountRequest {
     const message = createBaseQueryPayoutsForAccountRequest();
     message.address = object.address ?? "";
     message.pagination = (object.pagination !== undefined && object.pagination !== null)
@@ -825,10 +811,10 @@ export const QueryPayoutsForNodeRequest = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<QueryPayoutsForNodeRequest>, I>>(base?: I): QueryPayoutsForNodeRequest {
-    return QueryPayoutsForNodeRequest.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<QueryPayoutsForNodeRequest>): QueryPayoutsForNodeRequest {
+    return QueryPayoutsForNodeRequest.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<QueryPayoutsForNodeRequest>, I>>(object: I): QueryPayoutsForNodeRequest {
+  fromPartial(object: DeepPartial<QueryPayoutsForNodeRequest>): QueryPayoutsForNodeRequest {
     const message = createBaseQueryPayoutsForNodeRequest();
     message.address = object.address ?? "";
     message.pagination = (object.pagination !== undefined && object.pagination !== null)
@@ -885,10 +871,10 @@ export const QueryPayoutRequest = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<QueryPayoutRequest>, I>>(base?: I): QueryPayoutRequest {
-    return QueryPayoutRequest.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<QueryPayoutRequest>): QueryPayoutRequest {
+    return QueryPayoutRequest.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<QueryPayoutRequest>, I>>(object: I): QueryPayoutRequest {
+  fromPartial(object: DeepPartial<QueryPayoutRequest>): QueryPayoutRequest {
     const message = createBaseQueryPayoutRequest();
     message.id = (object.id !== undefined && object.id !== null) ? Long.fromValue(object.id) : Long.UZERO;
     return message;
@@ -929,10 +915,10 @@ export const QueryParamsRequest = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<QueryParamsRequest>, I>>(base?: I): QueryParamsRequest {
-    return QueryParamsRequest.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<QueryParamsRequest>): QueryParamsRequest {
+    return QueryParamsRequest.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<QueryParamsRequest>, I>>(_: I): QueryParamsRequest {
+  fromPartial(_: DeepPartial<QueryParamsRequest>): QueryParamsRequest {
     const message = createBaseQueryParamsRequest();
     return message;
   },
@@ -1003,10 +989,10 @@ export const QuerySubscriptionsResponse = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<QuerySubscriptionsResponse>, I>>(base?: I): QuerySubscriptionsResponse {
-    return QuerySubscriptionsResponse.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<QuerySubscriptionsResponse>): QuerySubscriptionsResponse {
+    return QuerySubscriptionsResponse.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<QuerySubscriptionsResponse>, I>>(object: I): QuerySubscriptionsResponse {
+  fromPartial(object: DeepPartial<QuerySubscriptionsResponse>): QuerySubscriptionsResponse {
     const message = createBaseQuerySubscriptionsResponse();
     message.subscriptions = object.subscriptions?.map((e) => Any.fromPartial(e)) || [];
     message.pagination = (object.pagination !== undefined && object.pagination !== null)
@@ -1081,14 +1067,10 @@ export const QuerySubscriptionsForAccountResponse = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<QuerySubscriptionsForAccountResponse>, I>>(
-    base?: I,
-  ): QuerySubscriptionsForAccountResponse {
-    return QuerySubscriptionsForAccountResponse.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<QuerySubscriptionsForAccountResponse>): QuerySubscriptionsForAccountResponse {
+    return QuerySubscriptionsForAccountResponse.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<QuerySubscriptionsForAccountResponse>, I>>(
-    object: I,
-  ): QuerySubscriptionsForAccountResponse {
+  fromPartial(object: DeepPartial<QuerySubscriptionsForAccountResponse>): QuerySubscriptionsForAccountResponse {
     const message = createBaseQuerySubscriptionsForAccountResponse();
     message.subscriptions = object.subscriptions?.map((e) => Any.fromPartial(e)) || [];
     message.pagination = (object.pagination !== undefined && object.pagination !== null)
@@ -1163,14 +1145,10 @@ export const QuerySubscriptionsForNodeResponse = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<QuerySubscriptionsForNodeResponse>, I>>(
-    base?: I,
-  ): QuerySubscriptionsForNodeResponse {
-    return QuerySubscriptionsForNodeResponse.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<QuerySubscriptionsForNodeResponse>): QuerySubscriptionsForNodeResponse {
+    return QuerySubscriptionsForNodeResponse.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<QuerySubscriptionsForNodeResponse>, I>>(
-    object: I,
-  ): QuerySubscriptionsForNodeResponse {
+  fromPartial(object: DeepPartial<QuerySubscriptionsForNodeResponse>): QuerySubscriptionsForNodeResponse {
     const message = createBaseQuerySubscriptionsForNodeResponse();
     message.subscriptions = object.subscriptions?.map((e) => Any.fromPartial(e)) || [];
     message.pagination = (object.pagination !== undefined && object.pagination !== null)
@@ -1245,14 +1223,10 @@ export const QuerySubscriptionsForPlanResponse = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<QuerySubscriptionsForPlanResponse>, I>>(
-    base?: I,
-  ): QuerySubscriptionsForPlanResponse {
-    return QuerySubscriptionsForPlanResponse.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<QuerySubscriptionsForPlanResponse>): QuerySubscriptionsForPlanResponse {
+    return QuerySubscriptionsForPlanResponse.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<QuerySubscriptionsForPlanResponse>, I>>(
-    object: I,
-  ): QuerySubscriptionsForPlanResponse {
+  fromPartial(object: DeepPartial<QuerySubscriptionsForPlanResponse>): QuerySubscriptionsForPlanResponse {
     const message = createBaseQuerySubscriptionsForPlanResponse();
     message.subscriptions = object.subscriptions?.map((e) => Any.fromPartial(e)) || [];
     message.pagination = (object.pagination !== undefined && object.pagination !== null)
@@ -1309,10 +1283,10 @@ export const QuerySubscriptionResponse = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<QuerySubscriptionResponse>, I>>(base?: I): QuerySubscriptionResponse {
-    return QuerySubscriptionResponse.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<QuerySubscriptionResponse>): QuerySubscriptionResponse {
+    return QuerySubscriptionResponse.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<QuerySubscriptionResponse>, I>>(object: I): QuerySubscriptionResponse {
+  fromPartial(object: DeepPartial<QuerySubscriptionResponse>): QuerySubscriptionResponse {
     const message = createBaseQuerySubscriptionResponse();
     message.subscription = (object.subscription !== undefined && object.subscription !== null)
       ? Any.fromPartial(object.subscription)
@@ -1368,10 +1342,10 @@ export const QueryAllocationResponse = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<QueryAllocationResponse>, I>>(base?: I): QueryAllocationResponse {
-    return QueryAllocationResponse.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<QueryAllocationResponse>): QueryAllocationResponse {
+    return QueryAllocationResponse.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<QueryAllocationResponse>, I>>(object: I): QueryAllocationResponse {
+  fromPartial(object: DeepPartial<QueryAllocationResponse>): QueryAllocationResponse {
     const message = createBaseQueryAllocationResponse();
     message.allocation = (object.allocation !== undefined && object.allocation !== null)
       ? Allocation.fromPartial(object.allocation)
@@ -1445,10 +1419,10 @@ export const QueryAllocationsResponse = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<QueryAllocationsResponse>, I>>(base?: I): QueryAllocationsResponse {
-    return QueryAllocationsResponse.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<QueryAllocationsResponse>): QueryAllocationsResponse {
+    return QueryAllocationsResponse.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<QueryAllocationsResponse>, I>>(object: I): QueryAllocationsResponse {
+  fromPartial(object: DeepPartial<QueryAllocationsResponse>): QueryAllocationsResponse {
     const message = createBaseQueryAllocationsResponse();
     message.allocations = object.allocations?.map((e) => Allocation.fromPartial(e)) || [];
     message.pagination = (object.pagination !== undefined && object.pagination !== null)
@@ -1521,10 +1495,10 @@ export const QueryPayoutsResponse = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<QueryPayoutsResponse>, I>>(base?: I): QueryPayoutsResponse {
-    return QueryPayoutsResponse.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<QueryPayoutsResponse>): QueryPayoutsResponse {
+    return QueryPayoutsResponse.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<QueryPayoutsResponse>, I>>(object: I): QueryPayoutsResponse {
+  fromPartial(object: DeepPartial<QueryPayoutsResponse>): QueryPayoutsResponse {
     const message = createBaseQueryPayoutsResponse();
     message.payouts = object.payouts?.map((e) => Payout.fromPartial(e)) || [];
     message.pagination = (object.pagination !== undefined && object.pagination !== null)
@@ -1597,12 +1571,10 @@ export const QueryPayoutsForAccountResponse = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<QueryPayoutsForAccountResponse>, I>>(base?: I): QueryPayoutsForAccountResponse {
-    return QueryPayoutsForAccountResponse.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<QueryPayoutsForAccountResponse>): QueryPayoutsForAccountResponse {
+    return QueryPayoutsForAccountResponse.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<QueryPayoutsForAccountResponse>, I>>(
-    object: I,
-  ): QueryPayoutsForAccountResponse {
+  fromPartial(object: DeepPartial<QueryPayoutsForAccountResponse>): QueryPayoutsForAccountResponse {
     const message = createBaseQueryPayoutsForAccountResponse();
     message.payouts = object.payouts?.map((e) => Payout.fromPartial(e)) || [];
     message.pagination = (object.pagination !== undefined && object.pagination !== null)
@@ -1675,10 +1647,10 @@ export const QueryPayoutsForNodeResponse = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<QueryPayoutsForNodeResponse>, I>>(base?: I): QueryPayoutsForNodeResponse {
-    return QueryPayoutsForNodeResponse.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<QueryPayoutsForNodeResponse>): QueryPayoutsForNodeResponse {
+    return QueryPayoutsForNodeResponse.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<QueryPayoutsForNodeResponse>, I>>(object: I): QueryPayoutsForNodeResponse {
+  fromPartial(object: DeepPartial<QueryPayoutsForNodeResponse>): QueryPayoutsForNodeResponse {
     const message = createBaseQueryPayoutsForNodeResponse();
     message.payouts = object.payouts?.map((e) => Payout.fromPartial(e)) || [];
     message.pagination = (object.pagination !== undefined && object.pagination !== null)
@@ -1735,10 +1707,10 @@ export const QueryPayoutResponse = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<QueryPayoutResponse>, I>>(base?: I): QueryPayoutResponse {
-    return QueryPayoutResponse.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<QueryPayoutResponse>): QueryPayoutResponse {
+    return QueryPayoutResponse.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<QueryPayoutResponse>, I>>(object: I): QueryPayoutResponse {
+  fromPartial(object: DeepPartial<QueryPayoutResponse>): QueryPayoutResponse {
     const message = createBaseQueryPayoutResponse();
     message.payout = (object.payout !== undefined && object.payout !== null)
       ? Payout.fromPartial(object.payout)
@@ -1794,10 +1766,10 @@ export const QueryParamsResponse = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<QueryParamsResponse>, I>>(base?: I): QueryParamsResponse {
-    return QueryParamsResponse.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<QueryParamsResponse>): QueryParamsResponse {
+    return QueryParamsResponse.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<QueryParamsResponse>, I>>(object: I): QueryParamsResponse {
+  fromPartial(object: DeepPartial<QueryParamsResponse>): QueryParamsResponse {
     const message = createBaseQueryParamsResponse();
     message.params = (object.params !== undefined && object.params !== null)
       ? Params.fromPartial(object.params)
@@ -1929,10 +1901,6 @@ export type DeepPartial<T> = T extends Builtin ? T
   : T extends ReadonlyArray<infer U> ? ReadonlyArray<DeepPartial<U>>
   : T extends {} ? { [K in keyof T]?: DeepPartial<T[K]> }
   : Partial<T>;
-
-type KeysOfUnion<T> = T extends T ? keyof T : never;
-export type Exact<P, I extends P> = P extends Builtin ? P
-  : P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
 
 if (_m0.util.Long !== Long) {
   _m0.util.Long = Long as any;

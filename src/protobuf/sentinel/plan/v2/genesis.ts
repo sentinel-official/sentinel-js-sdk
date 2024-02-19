@@ -73,10 +73,10 @@ export const GenesisPlan = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<GenesisPlan>, I>>(base?: I): GenesisPlan {
-    return GenesisPlan.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<GenesisPlan>): GenesisPlan {
+    return GenesisPlan.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<GenesisPlan>, I>>(object: I): GenesisPlan {
+  fromPartial(object: DeepPartial<GenesisPlan>): GenesisPlan {
     const message = createBaseGenesisPlan();
     message.plan = (object.plan !== undefined && object.plan !== null) ? Plan.fromPartial(object.plan) : undefined;
     message.nodes = object.nodes?.map((e) => e) || [];
@@ -91,10 +91,6 @@ export type DeepPartial<T> = T extends Builtin ? T
   : T extends ReadonlyArray<infer U> ? ReadonlyArray<DeepPartial<U>>
   : T extends {} ? { [K in keyof T]?: DeepPartial<T[K]> }
   : Partial<T>;
-
-type KeysOfUnion<T> = T extends T ? keyof T : never;
-export type Exact<P, I extends P> = P extends Builtin ? P
-  : P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
 
 if (_m0.util.Long !== Long) {
   _m0.util.Long = Long as any;

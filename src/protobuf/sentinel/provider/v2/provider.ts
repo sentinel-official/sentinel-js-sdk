@@ -149,10 +149,10 @@ export const Provider = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<Provider>, I>>(base?: I): Provider {
-    return Provider.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<Provider>): Provider {
+    return Provider.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<Provider>, I>>(object: I): Provider {
+  fromPartial(object: DeepPartial<Provider>): Provider {
     const message = createBaseProvider();
     message.address = object.address ?? "";
     message.name = object.name ?? "";
@@ -172,10 +172,6 @@ export type DeepPartial<T> = T extends Builtin ? T
   : T extends ReadonlyArray<infer U> ? ReadonlyArray<DeepPartial<U>>
   : T extends {} ? { [K in keyof T]?: DeepPartial<T[K]> }
   : Partial<T>;
-
-type KeysOfUnion<T> = T extends T ? keyof T : never;
-export type Exact<P, I extends P> = P extends Builtin ? P
-  : P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
 
 function toTimestamp(date: Date): Timestamp {
   const seconds = numberToLong(Math.trunc(date.getTime() / 1_000));

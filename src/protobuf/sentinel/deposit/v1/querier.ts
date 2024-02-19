@@ -70,10 +70,10 @@ export const QueryDepositsRequest = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<QueryDepositsRequest>, I>>(base?: I): QueryDepositsRequest {
-    return QueryDepositsRequest.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<QueryDepositsRequest>): QueryDepositsRequest {
+    return QueryDepositsRequest.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<QueryDepositsRequest>, I>>(object: I): QueryDepositsRequest {
+  fromPartial(object: DeepPartial<QueryDepositsRequest>): QueryDepositsRequest {
     const message = createBaseQueryDepositsRequest();
     message.pagination = (object.pagination !== undefined && object.pagination !== null)
       ? PageRequest.fromPartial(object.pagination)
@@ -129,10 +129,10 @@ export const QueryDepositRequest = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<QueryDepositRequest>, I>>(base?: I): QueryDepositRequest {
-    return QueryDepositRequest.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<QueryDepositRequest>): QueryDepositRequest {
+    return QueryDepositRequest.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<QueryDepositRequest>, I>>(object: I): QueryDepositRequest {
+  fromPartial(object: DeepPartial<QueryDepositRequest>): QueryDepositRequest {
     const message = createBaseQueryDepositRequest();
     message.address = object.address ?? "";
     return message;
@@ -202,10 +202,10 @@ export const QueryDepositsResponse = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<QueryDepositsResponse>, I>>(base?: I): QueryDepositsResponse {
-    return QueryDepositsResponse.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<QueryDepositsResponse>): QueryDepositsResponse {
+    return QueryDepositsResponse.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<QueryDepositsResponse>, I>>(object: I): QueryDepositsResponse {
+  fromPartial(object: DeepPartial<QueryDepositsResponse>): QueryDepositsResponse {
     const message = createBaseQueryDepositsResponse();
     message.deposits = object.deposits?.map((e) => Deposit.fromPartial(e)) || [];
     message.pagination = (object.pagination !== undefined && object.pagination !== null)
@@ -262,10 +262,10 @@ export const QueryDepositResponse = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<QueryDepositResponse>, I>>(base?: I): QueryDepositResponse {
-    return QueryDepositResponse.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<QueryDepositResponse>): QueryDepositResponse {
+    return QueryDepositResponse.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<QueryDepositResponse>, I>>(object: I): QueryDepositResponse {
+  fromPartial(object: DeepPartial<QueryDepositResponse>): QueryDepositResponse {
     const message = createBaseQueryDepositResponse();
     message.deposit = (object.deposit !== undefined && object.deposit !== null)
       ? Deposit.fromPartial(object.deposit)
@@ -313,10 +313,6 @@ export type DeepPartial<T> = T extends Builtin ? T
   : T extends ReadonlyArray<infer U> ? ReadonlyArray<DeepPartial<U>>
   : T extends {} ? { [K in keyof T]?: DeepPartial<T[K]> }
   : Partial<T>;
-
-type KeysOfUnion<T> = T extends T ? keyof T : never;
-export type Exact<P, I extends P> = P extends Builtin ? P
-  : P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
 
 if (_m0.util.Long !== Long) {
   _m0.util.Long = Long as any;

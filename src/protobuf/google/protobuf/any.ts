@@ -190,10 +190,10 @@ export const Any = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<Any>, I>>(base?: I): Any {
-    return Any.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<Any>): Any {
+    return Any.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<Any>, I>>(object: I): Any {
+  fromPartial(object: DeepPartial<Any>): Any {
     const message = createBaseAny();
     message.typeUrl = object.typeUrl ?? "";
     message.value = object.value ?? new Uint8Array(0);
@@ -233,10 +233,6 @@ export type DeepPartial<T> = T extends Builtin ? T
   : T extends ReadonlyArray<infer U> ? ReadonlyArray<DeepPartial<U>>
   : T extends {} ? { [K in keyof T]?: DeepPartial<T[K]> }
   : Partial<T>;
-
-type KeysOfUnion<T> = T extends T ? keyof T : never;
-export type Exact<P, I extends P> = P extends Builtin ? P
-  : P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
 
 if (_m0.util.Long !== Long) {
   _m0.util.Long = Long as any;

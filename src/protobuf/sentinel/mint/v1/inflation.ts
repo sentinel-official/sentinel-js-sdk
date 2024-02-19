@@ -103,10 +103,10 @@ export const Inflation = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<Inflation>, I>>(base?: I): Inflation {
-    return Inflation.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<Inflation>): Inflation {
+    return Inflation.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<Inflation>, I>>(object: I): Inflation {
+  fromPartial(object: DeepPartial<Inflation>): Inflation {
     const message = createBaseInflation();
     message.max = object.max ?? "";
     message.min = object.min ?? "";
@@ -123,10 +123,6 @@ export type DeepPartial<T> = T extends Builtin ? T
   : T extends ReadonlyArray<infer U> ? ReadonlyArray<DeepPartial<U>>
   : T extends {} ? { [K in keyof T]?: DeepPartial<T[K]> }
   : Partial<T>;
-
-type KeysOfUnion<T> = T extends T ? keyof T : never;
-export type Exact<P, I extends P> = P extends Builtin ? P
-  : P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
 
 function toTimestamp(date: Date): Timestamp {
   const seconds = numberToLong(Math.trunc(date.getTime() / 1_000));

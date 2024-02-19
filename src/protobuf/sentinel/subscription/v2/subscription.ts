@@ -173,10 +173,10 @@ export const BaseSubscription = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<BaseSubscription>, I>>(base?: I): BaseSubscription {
-    return BaseSubscription.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<BaseSubscription>): BaseSubscription {
+    return BaseSubscription.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<BaseSubscription>, I>>(object: I): BaseSubscription {
+  fromPartial(object: DeepPartial<BaseSubscription>): BaseSubscription {
     const message = createBaseBaseSubscription();
     message.id = (object.id !== undefined && object.id !== null) ? Long.fromValue(object.id) : Long.UZERO;
     message.address = object.address ?? "";
@@ -292,10 +292,10 @@ export const NodeSubscription = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<NodeSubscription>, I>>(base?: I): NodeSubscription {
-    return NodeSubscription.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<NodeSubscription>): NodeSubscription {
+    return NodeSubscription.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<NodeSubscription>, I>>(object: I): NodeSubscription {
+  fromPartial(object: DeepPartial<NodeSubscription>): NodeSubscription {
     const message = createBaseNodeSubscription();
     message.base = (object.base !== undefined && object.base !== null)
       ? BaseSubscription.fromPartial(object.base)
@@ -389,10 +389,10 @@ export const PlanSubscription = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<PlanSubscription>, I>>(base?: I): PlanSubscription {
-    return PlanSubscription.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<PlanSubscription>): PlanSubscription {
+    return PlanSubscription.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<PlanSubscription>, I>>(object: I): PlanSubscription {
+  fromPartial(object: DeepPartial<PlanSubscription>): PlanSubscription {
     const message = createBasePlanSubscription();
     message.base = (object.base !== undefined && object.base !== null)
       ? BaseSubscription.fromPartial(object.base)
@@ -412,10 +412,6 @@ export type DeepPartial<T> = T extends Builtin ? T
   : T extends ReadonlyArray<infer U> ? ReadonlyArray<DeepPartial<U>>
   : T extends {} ? { [K in keyof T]?: DeepPartial<T[K]> }
   : Partial<T>;
-
-type KeysOfUnion<T> = T extends T ? keyof T : never;
-export type Exact<P, I extends P> = P extends Builtin ? P
-  : P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
 
 function toTimestamp(date: Date): Timestamp {
   const seconds = numberToLong(Math.trunc(date.getTime() / 1_000));

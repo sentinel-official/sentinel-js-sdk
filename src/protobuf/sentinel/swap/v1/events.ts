@@ -72,10 +72,10 @@ export const EventSwap = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<EventSwap>, I>>(base?: I): EventSwap {
-    return EventSwap.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<EventSwap>): EventSwap {
+    return EventSwap.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<EventSwap>, I>>(object: I): EventSwap {
+  fromPartial(object: DeepPartial<EventSwap>): EventSwap {
     const message = createBaseEventSwap();
     message.txHash = object.txHash ?? new Uint8Array(0);
     message.receiver = object.receiver ?? "";
@@ -115,10 +115,6 @@ export type DeepPartial<T> = T extends Builtin ? T
   : T extends ReadonlyArray<infer U> ? ReadonlyArray<DeepPartial<U>>
   : T extends {} ? { [K in keyof T]?: DeepPartial<T[K]> }
   : Partial<T>;
-
-type KeysOfUnion<T> = T extends T ? keyof T : never;
-export type Exact<P, I extends P> = P extends Builtin ? P
-  : P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
 
 if (_m0.util.Long !== Long) {
   _m0.util.Long = Long as any;

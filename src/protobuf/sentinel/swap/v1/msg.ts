@@ -110,10 +110,10 @@ export const MsgSwapRequest = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<MsgSwapRequest>, I>>(base?: I): MsgSwapRequest {
-    return MsgSwapRequest.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<MsgSwapRequest>): MsgSwapRequest {
+    return MsgSwapRequest.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<MsgSwapRequest>, I>>(object: I): MsgSwapRequest {
+  fromPartial(object: DeepPartial<MsgSwapRequest>): MsgSwapRequest {
     const message = createBaseMsgSwapRequest();
     message.from = object.from ?? "";
     message.txHash = object.txHash ?? new Uint8Array(0);
@@ -157,10 +157,10 @@ export const MsgSwapResponse = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<MsgSwapResponse>, I>>(base?: I): MsgSwapResponse {
-    return MsgSwapResponse.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<MsgSwapResponse>): MsgSwapResponse {
+    return MsgSwapResponse.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<MsgSwapResponse>, I>>(_: I): MsgSwapResponse {
+  fromPartial(_: DeepPartial<MsgSwapResponse>): MsgSwapResponse {
     const message = createBaseMsgSwapResponse();
     return message;
   },
@@ -222,10 +222,6 @@ export type DeepPartial<T> = T extends Builtin ? T
   : T extends ReadonlyArray<infer U> ? ReadonlyArray<DeepPartial<U>>
   : T extends {} ? { [K in keyof T]?: DeepPartial<T[K]> }
   : Partial<T>;
-
-type KeysOfUnion<T> = T extends T ? keyof T : never;
-export type Exact<P, I extends P> = P extends Builtin ? P
-  : P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
 
 if (_m0.util.Long !== Long) {
   _m0.util.Long = Long as any;

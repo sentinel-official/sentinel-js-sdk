@@ -118,10 +118,10 @@ export const MsgStartRequest = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<MsgStartRequest>, I>>(base?: I): MsgStartRequest {
-    return MsgStartRequest.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<MsgStartRequest>): MsgStartRequest {
+    return MsgStartRequest.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<MsgStartRequest>, I>>(object: I): MsgStartRequest {
+  fromPartial(object: DeepPartial<MsgStartRequest>): MsgStartRequest {
     const message = createBaseMsgStartRequest();
     message.from = object.from ?? "";
     message.id = (object.id !== undefined && object.id !== null) ? Long.fromValue(object.id) : Long.UZERO;
@@ -207,10 +207,10 @@ export const MsgUpdateDetailsRequest = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<MsgUpdateDetailsRequest>, I>>(base?: I): MsgUpdateDetailsRequest {
-    return MsgUpdateDetailsRequest.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<MsgUpdateDetailsRequest>): MsgUpdateDetailsRequest {
+    return MsgUpdateDetailsRequest.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<MsgUpdateDetailsRequest>, I>>(object: I): MsgUpdateDetailsRequest {
+  fromPartial(object: DeepPartial<MsgUpdateDetailsRequest>): MsgUpdateDetailsRequest {
     const message = createBaseMsgUpdateDetailsRequest();
     message.from = object.from ?? "";
     message.proof = (object.proof !== undefined && object.proof !== null) ? Proof.fromPartial(object.proof) : undefined;
@@ -296,10 +296,10 @@ export const MsgEndRequest = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<MsgEndRequest>, I>>(base?: I): MsgEndRequest {
-    return MsgEndRequest.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<MsgEndRequest>): MsgEndRequest {
+    return MsgEndRequest.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<MsgEndRequest>, I>>(object: I): MsgEndRequest {
+  fromPartial(object: DeepPartial<MsgEndRequest>): MsgEndRequest {
     const message = createBaseMsgEndRequest();
     message.from = object.from ?? "";
     message.id = (object.id !== undefined && object.id !== null) ? Long.fromValue(object.id) : Long.UZERO;
@@ -344,10 +344,10 @@ export const MsgStartResponse = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<MsgStartResponse>, I>>(base?: I): MsgStartResponse {
-    return MsgStartResponse.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<MsgStartResponse>): MsgStartResponse {
+    return MsgStartResponse.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<MsgStartResponse>, I>>(_: I): MsgStartResponse {
+  fromPartial(_: DeepPartial<MsgStartResponse>): MsgStartResponse {
     const message = createBaseMsgStartResponse();
     return message;
   },
@@ -387,10 +387,10 @@ export const MsgUpdateDetailsResponse = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<MsgUpdateDetailsResponse>, I>>(base?: I): MsgUpdateDetailsResponse {
-    return MsgUpdateDetailsResponse.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<MsgUpdateDetailsResponse>): MsgUpdateDetailsResponse {
+    return MsgUpdateDetailsResponse.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<MsgUpdateDetailsResponse>, I>>(_: I): MsgUpdateDetailsResponse {
+  fromPartial(_: DeepPartial<MsgUpdateDetailsResponse>): MsgUpdateDetailsResponse {
     const message = createBaseMsgUpdateDetailsResponse();
     return message;
   },
@@ -430,10 +430,10 @@ export const MsgEndResponse = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<MsgEndResponse>, I>>(base?: I): MsgEndResponse {
-    return MsgEndResponse.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<MsgEndResponse>): MsgEndResponse {
+    return MsgEndResponse.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<MsgEndResponse>, I>>(_: I): MsgEndResponse {
+  fromPartial(_: DeepPartial<MsgEndResponse>): MsgEndResponse {
     const message = createBaseMsgEndResponse();
     return message;
   },
@@ -511,10 +511,6 @@ export type DeepPartial<T> = T extends Builtin ? T
   : T extends ReadonlyArray<infer U> ? ReadonlyArray<DeepPartial<U>>
   : T extends {} ? { [K in keyof T]?: DeepPartial<T[K]> }
   : Partial<T>;
-
-type KeysOfUnion<T> = T extends T ? keyof T : never;
-export type Exact<P, I extends P> = P extends Builtin ? P
-  : P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
 
 if (_m0.util.Long !== Long) {
   _m0.util.Long = Long as any;

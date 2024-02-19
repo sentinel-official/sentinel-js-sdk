@@ -77,10 +77,10 @@ export const EventAdd = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<EventAdd>, I>>(base?: I): EventAdd {
-    return EventAdd.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<EventAdd>): EventAdd {
+    return EventAdd.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<EventAdd>, I>>(object: I): EventAdd {
+  fromPartial(object: DeepPartial<EventAdd>): EventAdd {
     const message = createBaseEventAdd();
     message.address = object.address ?? "";
     message.coins = object.coins ?? "";
@@ -151,10 +151,10 @@ export const EventSubtract = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<EventSubtract>, I>>(base?: I): EventSubtract {
-    return EventSubtract.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<EventSubtract>): EventSubtract {
+    return EventSubtract.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<EventSubtract>, I>>(object: I): EventSubtract {
+  fromPartial(object: DeepPartial<EventSubtract>): EventSubtract {
     const message = createBaseEventSubtract();
     message.address = object.address ?? "";
     message.coins = object.coins ?? "";
@@ -169,10 +169,6 @@ export type DeepPartial<T> = T extends Builtin ? T
   : T extends ReadonlyArray<infer U> ? ReadonlyArray<DeepPartial<U>>
   : T extends {} ? { [K in keyof T]?: DeepPartial<T[K]> }
   : Partial<T>;
-
-type KeysOfUnion<T> = T extends T ? keyof T : never;
-export type Exact<P, I extends P> = P extends Builtin ? P
-  : P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
 
 if (_m0.util.Long !== Long) {
   _m0.util.Long = Long as any;

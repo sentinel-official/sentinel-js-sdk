@@ -222,10 +222,10 @@ export const Subscription = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<Subscription>, I>>(base?: I): Subscription {
-    return Subscription.fromPartial(base ?? ({} as any));
+  create(base?: DeepPartial<Subscription>): Subscription {
+    return Subscription.fromPartial(base ?? {});
   },
-  fromPartial<I extends Exact<DeepPartial<Subscription>, I>>(object: I): Subscription {
+  fromPartial(object: DeepPartial<Subscription>): Subscription {
     const message = createBaseSubscription();
     message.id = (object.id !== undefined && object.id !== null) ? Long.fromValue(object.id) : Long.UZERO;
     message.owner = object.owner ?? "";
@@ -251,10 +251,6 @@ export type DeepPartial<T> = T extends Builtin ? T
   : T extends ReadonlyArray<infer U> ? ReadonlyArray<DeepPartial<U>>
   : T extends {} ? { [K in keyof T]?: DeepPartial<T[K]> }
   : Partial<T>;
-
-type KeysOfUnion<T> = T extends T ? keyof T : never;
-export type Exact<P, I extends P> = P extends Builtin ? P
-  : P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
 
 function toTimestamp(date: Date): Timestamp {
   const seconds = numberToLong(Math.trunc(date.getTime() / 1_000));
