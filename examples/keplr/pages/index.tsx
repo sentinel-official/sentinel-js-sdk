@@ -5,7 +5,7 @@ const Home: NextPage = () => {
   // https://github.com/cosmos/chain-registry/blob/master/sentinel/chain.json
   // we need a rpc without CORS restriction
   return <NodeSubscription
-    rpcUrl="https://rpc.sentinel.quokkastake.io" />
+    rpcUrl="https://rpc.trinityvalidator.com" />
   }
 
 export default Home

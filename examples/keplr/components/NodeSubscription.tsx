@@ -1,15 +1,14 @@
-import { ChangeEvent, Component, MouseEvent } from "react"
+import { Component } from "react"
 
-// "../../../dist/client" will be fixed after pushing on npm-registry
-import { SentinelClient } from "../../../dist/client"
-import { SigningSentinelClient } from "../../../dist/signingclient"
-import { PageRequest, Status } from "../../../dist/types";
-import { Node } from "../../../dist/protobuf/sentinel/node/v2/node";
+import { SentinelClient, SigningSentinelClient } from "@sentinel-official/sentinel-js-sdk";
+import { Status, PageRequest, Node } from "@sentinel-official/sentinel-js-sdk";
 
-import { Coin } from "@cosmjs/stargate"
+import { GasPrice, Coin } from "@cosmjs/stargate";
+
 import { AccountData, Window as KeplrWindow } from "@keplr-wallet/types";
 
 import styles from '../styles/Home.module.css'
+import Long from "long";
 
 declare global {
     interface Window extends KeplrWindow {}
@@ -18,7 +17,7 @@ declare global {
 interface NodeSubscriptionState {
     denom: string
     balance: string
-    nodes: any[]
+    nodes: Node[]
 }
 
 export interface NodeSubscriptionProps {
@@ -39,12 +38,14 @@ export class NodeSubscription extends Component<NodeSubscriptionProps, NodeSubsc
 
     queryNodes = async() => {
         const client = await SentinelClient.connect(this.props.rpcUrl)
-        const response = await client.sentinelQuery?.node.nodes(1, PageRequest.fromPartial({
+        const response = await client.sentinelQuery?.node.nodes(Status.STATUS_ACTIVE, PageRequest.fromPartial({
             limit: 500,
             countTotal: true
         }))
-        console.log(response.nodes)
-        this.setState({nodes: response.nodes})
+        if(response !== undefined){
+            console.log(response.nodes)
+            this.setState({nodes: response.nodes})
+        }
     }
 
     onSubscribeClicked = async(node: any) => {
@@ -55,20 +56,21 @@ export class NodeSubscription extends Component<NodeSubscriptionProps, NodeSubsc
             return
         }
         const { rpcUrl } = this.props
+
         // Create the signing client
         const offlineSigner = window.getOfflineSigner!("sentinelhub-2")
         const signingClient = await SigningSentinelClient.connectWithSigner(
             rpcUrl,
             offlineSigner,
-            {gasPrice: "0.5udvpn"}
+            {gasPrice: GasPrice.fromString("0.5udvpn")}
         )
         // Get the address and balance of your user
         const account: AccountData = (await offlineSigner.getAccounts())[0]
         const subscribeResult = await signingClient.nodeSubscribe(
             account.address,
             dvpnNode.address,
-            1,
-            0,
+            new Long(1),
+            new Long(0),
             "udvpn"
         )
         // Print the result to the console

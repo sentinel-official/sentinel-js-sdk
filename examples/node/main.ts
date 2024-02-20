@@ -1,13 +1,12 @@
-
-import { SentinelClient } from "../src/client";
-import { SigningSentinelClient } from "../src/signingclient";
-import { Status } from "../src/types";
-import { PageRequest } from "../src/types";
+import { SentinelClient, SigningSentinelClient } from "@sentinel-official/sentinel-js-sdk";
+import { Status, PageRequest } from "@sentinel-official/sentinel-js-sdk";
 
 import { DirectSecp256k1HdWallet } from "@cosmjs/proto-signing"
 import { GasPrice } from "@cosmjs/stargate"
 
 import Long from "long";
+
+import * as readline from 'readline/promises';
 
 const queryNodes = async () => {
     const rpc = "https://rpc.sentinel.co:443"
@@ -23,7 +22,13 @@ const queryNodes = async () => {
 }
 
 const subscribeToNode = async (sentnode: string, gygabyte: number, denom: string) => {
-    const mnemonic = "please never share your secret"
+    const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout
+    });
+
+    const mnemonic = await rl.question('Write your mnemonic here, please: ');
+    rl.close();
 
     const wallet = await DirectSecp256k1HdWallet.fromMnemonic(mnemonic, { prefix: "sent" });
     const [account] = await wallet.getAccounts();
@@ -46,6 +51,7 @@ const subscribeToNode = async (sentnode: string, gygabyte: number, denom: string
     )
     console.log(tx)
 }
+
 
 const main = async () => {
     const nodes = await queryNodes()
