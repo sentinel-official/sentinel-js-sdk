@@ -1,9 +1,27 @@
 import { Tendermint34Client } from "@cosmjs/tendermint-rpc";
-import { DeliverTxResponse, SigningStargateClient, SigningStargateClientOptions, StdFee } from "@cosmjs/stargate"
+import { DeliverTxResponse, SigningStargateClient, SigningStargateClientOptions } from "@cosmjs/stargate"
 import { buildSentinelQueryClient, SentinelQueryClient } from "./modules/queries"
 import { SentinelRegistry } from "./modules";
-import { Coin, OfflineSigner, Registry } from "@cosmjs/proto-signing";
+import { OfflineSigner, Registry } from "@cosmjs/proto-signing";
 import Long from "long";
+
+import {
+    NodeRegisterTx,
+    NodeUpdateDetailsTx,
+    NodeUpdateStatusTx,
+    NodeSubscribeTx,
+    PlanCreateTx,
+    PlanUpdateStatusTx,
+    PlanLinkUnlinkNodeTx,
+    PlanSubscribeTx,
+    ProvideRegisterTx,
+    ProviderUpdateTx,
+    SessionStartTx,
+    SessionUpdateDetailsTx,
+    SessionEndTx,
+    SubscriptionCancelTx,
+    SubscriptionAllocateTx,
+ } from "./interfaces"
 
 import {
     MsgRegisterEncodeObject as NodeMsgRegisterEncodeObject,
@@ -56,10 +74,6 @@ import {
     MsgCancelTypeUrl,
     MsgAllocateTypeUrl
 } from "./modules/subscription";
-
-import { Status } from "./protobuf/sentinel/types/v1/status";
-import { Duration } from "./protobuf/google/protobuf/duration";
-import { Proof } from "./protobuf/sentinel/session/v2/proof";
 
 function createDefaultRegistry(): Registry {
     return new Registry(SentinelRegistry);
@@ -114,15 +128,15 @@ export class SigningSentinelClient extends SigningStargateClient {
         if (tmClient) this.sentinelQuery = buildSentinelQueryClient(tmClient)
     }
 
-    public async nodeRegister(
-        from: string,
-        gigabytePrices: Coin[],
-        hourlyPrices: Coin[],
-        remoteUrl: string,
-
-        fee: StdFee | "auto" | number = "auto",
-        memo: string = "",
-    ): Promise<DeliverTxResponse> {
+    public nodeRegister({
+        from,
+        gigabytePrices,
+        hourlyPrices,
+        remoteUrl,
+        broadcast = true,
+        fee = "auto",
+        memo = ""
+    }: NodeRegisterTx): Promise<DeliverTxResponse> | NodeMsgRegisterEncodeObject {
         const msg: NodeMsgRegisterEncodeObject = {
             typeUrl: NodeMsgRegisterTypeUrl,
             value: {
@@ -132,18 +146,19 @@ export class SigningSentinelClient extends SigningStargateClient {
                 remoteUrl
             }
         }
-        return this.signAndBroadcast(from, [msg], fee, memo)
+        if(broadcast === true && fee !== undefined && memo !== undefined) return this.signAndBroadcast(from, [msg], fee, memo)
+        else return msg
     }
 
-    public async nodeUpdateDetails(
-        from: string,
-        gigabytePrices: Coin[],
-        hourlyPrices: Coin[],
-        remoteUrl: string,
-
-        fee: StdFee | "auto" | number = "auto",
-        memo: string = "",
-    ): Promise<DeliverTxResponse> {
+    public nodeUpdateDetails({
+        from,
+        gigabytePrices,
+        hourlyPrices,
+        remoteUrl,
+        broadcast = true,
+        fee = "auto",
+        memo = "",
+    }: NodeUpdateDetailsTx): Promise<DeliverTxResponse> | NodeMsgUpdateDetailsEncodeObject {
         const msg: NodeMsgUpdateDetailsEncodeObject = {
             typeUrl: NodeMsgUpdateDetailsTypeUrl,
             value: {
@@ -153,16 +168,17 @@ export class SigningSentinelClient extends SigningStargateClient {
                 remoteUrl
             }
         }
-        return this.signAndBroadcast(from, [msg], fee, memo)
+        if(broadcast === true && fee !== undefined && memo !== undefined) return this.signAndBroadcast(from, [msg], fee, memo)
+        else return msg
     }
 
-    public async nodeUpdateStatus(
-        from: string,
-        status: Status,
-
-        fee: StdFee | "auto" | number = "auto",
-        memo: string = "",
-    ): Promise<DeliverTxResponse> {
+    public nodeUpdateStatus({
+        from,
+        status,
+        broadcast = true,
+        fee = "auto",
+        memo = "",
+    }: NodeUpdateStatusTx): Promise<DeliverTxResponse> | NodeMsgUpdateStatusEncodeObject {
         const msg: NodeMsgUpdateStatusEncodeObject = {
             typeUrl: NodeMsgUpdateStatusTypeUrl,
             value: {
@@ -170,19 +186,20 @@ export class SigningSentinelClient extends SigningStargateClient {
                 status
             }
         }
-        return this.signAndBroadcast(from, [msg], fee, memo)
+        if(broadcast === true && fee !== undefined && memo !== undefined) return this.signAndBroadcast(from, [msg], fee, memo)
+        else return msg
     }
 
-    public async nodeSubscribe(
-        from: string,
-        nodeAddress: string,
-        gigabytes: Long = Long.ZERO,
-        hours: Long = Long.ZERO,
-        denom: string = "udvpn",
-
-        fee: StdFee | "auto" | number = "auto",
-        memo: string = "",
-    ): Promise<DeliverTxResponse> {
+    public nodeSubscribe({
+        from,
+        nodeAddress,
+        gigabytes = Long.ZERO,
+        hours = Long.ZERO,
+        denom = "udvpn",
+        broadcast = true,
+        fee = "auto",
+        memo = "",
+    }: NodeSubscribeTx): Promise<DeliverTxResponse> | NodeMsgSubscribeEncodeObject {
         const msg: NodeMsgSubscribeEncodeObject = {
             typeUrl: NodeMsgSubscribeTypeUrl,
             value: {
@@ -193,18 +210,19 @@ export class SigningSentinelClient extends SigningStargateClient {
                 denom
             }
         }
-        return this.signAndBroadcast(from, [msg], fee, memo)
+        if(broadcast === true && fee !== undefined && memo !== undefined) return this.signAndBroadcast(from, [msg], fee, memo)
+        else return msg
     }
 
-    public async planCreate(
-        from: string,
-        duration: Duration | undefined,
-        gigabytes: Long,
-        prices: Coin[],
-
-        fee: StdFee | "auto" | number = "auto",
-        memo: string = "",
-    ): Promise<DeliverTxResponse> {
+    public planCreate({
+        from,
+        duration,
+        gigabytes,
+        prices,
+        broadcast = true,
+        fee = "auto",
+        memo = "",
+    }: PlanCreateTx): Promise<DeliverTxResponse> | MsgCreateEncodeObject {
         const msg: MsgCreateEncodeObject = {
             typeUrl: MsgCreateTypeUrl,
             value: {
@@ -214,17 +232,18 @@ export class SigningSentinelClient extends SigningStargateClient {
                 prices
             }
         }
-        return this.signAndBroadcast(from, [msg], fee, memo)
+        if(broadcast === true && fee !== undefined && memo !== undefined) return this.signAndBroadcast(from, [msg], fee, memo)
+        else return msg
     }
 
-    public async planUpdateStatus(
-        from: string,
-        id: Long,
-        status: Status,
-
-        fee: StdFee | "auto" | number = "auto",
-        memo: string = "",
-    ): Promise<DeliverTxResponse> {
+    public planUpdateStatus({
+        from,
+        id,
+        status,
+        broadcast = true,
+        fee = "auto",
+        memo = "",
+    }: PlanUpdateStatusTx): Promise<DeliverTxResponse> | PlanMsgUpdateStatusEncodeObject {
         const msg: PlanMsgUpdateStatusEncodeObject = {
             typeUrl: PlanMsgUpdateStatusTypeUrl,
             value: {
@@ -233,17 +252,18 @@ export class SigningSentinelClient extends SigningStargateClient {
                 status
             }
         }
-        return this.signAndBroadcast(from, [msg], fee, memo)
+        if(broadcast === true && fee !== undefined && memo !== undefined) return this.signAndBroadcast(from, [msg], fee, memo)
+        else return msg
     }
 
-    public async planLinkNode(
-        from: string,
-        id: Long,
-        nodeAddress: string,
-
-        fee: StdFee | "auto" | number = "auto",
-        memo: string = "",
-    ): Promise<DeliverTxResponse> {
+    public planLinkNode({
+        from,
+        id,
+        nodeAddress,
+        broadcast = true,
+        fee = "auto",
+        memo = "",
+    }: PlanLinkUnlinkNodeTx): Promise<DeliverTxResponse> | MsgLinkNodeEncodeObject {
         const msg: MsgLinkNodeEncodeObject = {
             typeUrl: MsgLinkNodeTypeUrl,
             value: {
@@ -252,17 +272,18 @@ export class SigningSentinelClient extends SigningStargateClient {
                 nodeAddress
             }
         }
-        return this.signAndBroadcast(from, [msg], fee, memo)
+        if(broadcast === true && fee !== undefined && memo !== undefined) return this.signAndBroadcast(from, [msg], fee, memo)
+        else return msg
     }
 
-    public async planUnlinkNode(
-        from: string,
-        id: Long,
-        nodeAddress: string,
-
-        fee: StdFee | "auto" | number = "auto",
-        memo: string = "",
-    ): Promise<DeliverTxResponse> {
+    public planUnlinkNode({
+        from,
+        id,
+        nodeAddress,
+        broadcast = true,
+        fee = "auto",
+        memo = "",
+    }: PlanLinkUnlinkNodeTx): Promise<DeliverTxResponse> | MsgUnlinkNodeEncodeObject {
         const msg: MsgUnlinkNodeEncodeObject = {
             typeUrl: MsgUnlinkNodeTypeUrl,
             value: {
@@ -271,17 +292,18 @@ export class SigningSentinelClient extends SigningStargateClient {
                 nodeAddress
             }
         }
-        return this.signAndBroadcast(from, [msg], fee, memo)
+        if(broadcast === true && fee !== undefined && memo !== undefined) return this.signAndBroadcast(from, [msg], fee, memo)
+        else return msg
     }
 
-    public async planSubscribe(
-        from: string,
-        id: Long,
-        denom: string = "udvpn",
-
-        fee: StdFee | "auto" | number = "auto",
-        memo: string = "",
-    ): Promise<DeliverTxResponse> {
+    public planSubscribe({
+        from,
+        id,
+        denom = "udvpn",
+        broadcast = true,
+        fee = "auto",
+        memo = "",
+    }: PlanSubscribeTx ): Promise<DeliverTxResponse> | PlanMsgSubscribeEncodeObject {
         const msg: PlanMsgSubscribeEncodeObject = {
             typeUrl: PlanMsgSubscribeTypeUrl,
             value: {
@@ -290,19 +312,20 @@ export class SigningSentinelClient extends SigningStargateClient {
                 denom
             }
         }
-        return this.signAndBroadcast(from, [msg], fee, memo)
+        if(broadcast === true && fee !== undefined && memo !== undefined) return this.signAndBroadcast(from, [msg], fee, memo)
+        else return msg
     }
 
-    public async providerRegister(
-        from: string,
-        name: string,
-        identity: string,
-        website: string,
-        description: string,
-
-        fee: StdFee | "auto" | number = "auto",
-        memo: string = "",
-    ): Promise<DeliverTxResponse> {
+    public providerRegister({
+        from,
+        name,
+        identity,
+        website,
+        description,
+        broadcast = true,
+        fee = "auto",
+        memo = "",
+    }: ProvideRegisterTx): Promise<DeliverTxResponse> | ProviderMsgRegisterEncodeObject{
         const msg: ProviderMsgRegisterEncodeObject = {
             typeUrl: ProviderMsgRegisterTypeUrl,
             value: {
@@ -313,20 +336,21 @@ export class SigningSentinelClient extends SigningStargateClient {
                 description
             }
         }
-        return this.signAndBroadcast(from, [msg], fee, memo)
+        if(broadcast === true && fee !== undefined && memo !== undefined) return this.signAndBroadcast(from, [msg], fee, memo)
+        else return msg
     }
 
-    public async providerUpdate(
-        from: string,
-        name: string,
-        identity: string,
-        website: string,
-        description: string,
-        status: Status,
-
-        fee: StdFee | "auto" | number = "auto",
-        memo: string = "",
-    ): Promise<DeliverTxResponse> {
+    public providerUpdate({
+        from,
+        name,
+        identity,
+        website,
+        description,
+        status,
+        broadcast = true,
+        fee = "auto",
+        memo = "",
+    }: ProviderUpdateTx): Promise<DeliverTxResponse> | MsgUpdateEncodeObject{
         const msg: MsgUpdateEncodeObject = {
             typeUrl: MsgUpdateTypeUrl,
             value: {
@@ -338,17 +362,18 @@ export class SigningSentinelClient extends SigningStargateClient {
                 status
             }
         }
-        return this.signAndBroadcast(from, [msg], fee, memo)
+        if(broadcast === true && fee !== undefined && memo !== undefined) return this.signAndBroadcast(from, [msg], fee, memo)
+        else return msg
     }
 
-    public async sessionStart(
-        from: string,
-        id: Long,
-        address: string,
-
-        fee: StdFee | "auto" | number = "auto",
-        memo: string = "",
-    ): Promise<DeliverTxResponse> {
+    public sessionStart({
+        from,
+        id,
+        address,
+        broadcast = true,
+        fee = "auto",
+        memo = "",
+    }: SessionStartTx): Promise<DeliverTxResponse> | MsgStartEncodeObject{
         const msg: MsgStartEncodeObject = {
             typeUrl: MsgStartTypeUrl,
             value: {
@@ -357,17 +382,18 @@ export class SigningSentinelClient extends SigningStargateClient {
                 address
             }
         }
-        return this.signAndBroadcast(from, [msg], fee, memo)
+        if(broadcast === true && fee !== undefined && memo !== undefined) return this.signAndBroadcast(from, [msg], fee, memo)
+        else return msg
     }
 
-    public async sessionUpdateDetails(
-        from: string,
-        proof: Proof | undefined,
-        signature: Uint8Array,
-
-        fee: StdFee | "auto" | number = "auto",
-        memo: string = "",
-    ): Promise<DeliverTxResponse> {
+    public sessionUpdateDetails({
+        from,
+        proof,
+        signature,
+        broadcast = true,
+        fee = "auto",
+        memo = "",
+    }: SessionUpdateDetailsTx ): Promise<DeliverTxResponse> | SessionMsgUpdateDetailsEncodeObject {
         const msg: SessionMsgUpdateDetailsEncodeObject = {
             typeUrl: SessionMsgUpdateDetailsTypeUrl,
             value: {
@@ -376,17 +402,18 @@ export class SigningSentinelClient extends SigningStargateClient {
                 signature
             }
         }
-        return this.signAndBroadcast(from, [msg], fee, memo)
+        if(broadcast === true && fee !== undefined && memo !== undefined) return this.signAndBroadcast(from, [msg], fee, memo)
+        else return msg
     }
 
-    public async sessionEnd(
-        from: string,
-        id: Long,
-        rating: Long,
-
-        fee: StdFee | "auto" | number = "auto",
-        memo: string = "",
-    ): Promise<DeliverTxResponse> {
+    public sessionEnd({
+        from,
+        id,
+        rating,
+        broadcast = true,
+        fee = "auto",
+        memo = "",
+    }: SessionEndTx): Promise<DeliverTxResponse> | MsgEndEncodeObject {
         const msg: MsgEndEncodeObject = {
             typeUrl: MsgEndTypeUrl,
             value: {
@@ -395,16 +422,17 @@ export class SigningSentinelClient extends SigningStargateClient {
                 rating
             }
         }
-        return this.signAndBroadcast(from, [msg], fee, memo)
+        if(broadcast === true && fee !== undefined && memo !== undefined) return this.signAndBroadcast(from, [msg], fee, memo)
+        else return msg
     }
 
-    public async subscriptionCancel(
-        from: string,
-        id: Long,
-
-        fee: StdFee | "auto" | number = "auto",
-        memo: string = "",
-    ): Promise<DeliverTxResponse> {
+    public subscriptionCancel({
+        from,
+        id,
+        broadcast = true,
+        fee = "auto",
+        memo = "",
+    }: SubscriptionCancelTx): Promise<DeliverTxResponse> | MsgCancelEncodeObject {
         const msg: MsgCancelEncodeObject = {
             typeUrl: MsgCancelTypeUrl,
             value: {
@@ -412,18 +440,19 @@ export class SigningSentinelClient extends SigningStargateClient {
                 id,
             }
         }
-        return this.signAndBroadcast(from, [msg], fee, memo)
+        if(broadcast === true && fee !== undefined && memo !== undefined) return this.signAndBroadcast(from, [msg], fee, memo)
+        else return msg
     }
 
-    public async subscriptionAllocate(
-        from: string,
-        id: Long,
-        address: string,
-        bytes: string,
-
-        fee: StdFee | "auto" | number = "auto",
-        memo: string = "",
-    ): Promise<DeliverTxResponse> {
+    public subscriptionAllocate({
+        from,
+        id,
+        address,
+        bytes,
+        broadcast = true,
+        fee = "auto",
+        memo = "",
+    }: SubscriptionAllocateTx): Promise<DeliverTxResponse> | MsgAllocateEncodeObject {
         const msg: MsgAllocateEncodeObject = {
             typeUrl: MsgAllocateTypeUrl,
             value: {
@@ -433,7 +462,8 @@ export class SigningSentinelClient extends SigningStargateClient {
                 bytes
             }
         }
-        return this.signAndBroadcast(from, [msg], fee, memo)
+        if(broadcast === true && fee !== undefined && memo !== undefined) return this.signAndBroadcast(from, [msg], fee, memo)
+        else return msg
     }
 
 }
