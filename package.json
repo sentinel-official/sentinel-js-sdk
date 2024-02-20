@@ -5,7 +5,8 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "rm -rf dist/* && touch dist/.gitkeep && tsc"
+    "build": "rm -rf dist/* && touch dist/.gitkeep && tsc",
+    "docs": "rm -rf docs/* && typedoc"
   },
   "files": [
     "dist",
@@ -29,6 +30,7 @@
   },
   "devDependencies": {
     "ts-proto": "^1.167.0",
+    "typedoc": "^0.25.8",
     "typescript": "^5.3.3"
   }
 }
