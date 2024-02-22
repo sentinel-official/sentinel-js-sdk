@@ -1,5 +1,6 @@
 import { SentinelClient, SigningSentinelClient } from "@sentinel-official/sentinel-js-sdk";
 import { Status, PageRequest } from "@sentinel-official/sentinel-js-sdk";
+import { TxNodeSubscribe, nodeSubscribe } from "@sentinel-official/sentinel-js-sdk";
 
 import { DirectSecp256k1HdWallet } from "@cosmjs/proto-signing"
 import { GasPrice } from "@cosmjs/stargate"
@@ -42,13 +43,16 @@ const subscribeToNode = async (sentnode: string, gygabyte: number, denom: string
     })
 
     console.log(account.address)
-    const tx = await client.sentinelTx.node.subscribe(
-        account.address,
-        sentnode,
-        Long.fromNumber(gygabyte, true),
-        Long.fromInt(0, true),
-        denom
-    )
+    const args: TxNodeSubscribe = {
+        from: account.address,
+        nodeAddress: sentnode,
+        gigabytes: Long.fromNumber(gygabyte, true),
+        denom,  // same name
+    }
+    const msg = nodeSubscribe(args)
+    console.log(msg)
+
+    const tx = client.signAndBroadcast(account.address, [msg], "auto", "")
     console.log(tx)
 }
 

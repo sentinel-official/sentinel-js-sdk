@@ -3,77 +3,53 @@ import { DeliverTxResponse, SigningStargateClient, SigningStargateClientOptions 
 import { buildSentinelQueryClient, SentinelQueryClient } from "./modules/queries"
 import { SentinelRegistry } from "./modules";
 import { OfflineSigner, Registry } from "@cosmjs/proto-signing";
-import Long from "long";
 
 import {
-    NodeRegisterTx,
-    NodeUpdateDetailsTx,
-    NodeUpdateStatusTx,
-    NodeSubscribeTx,
-    PlanCreateTx,
-    PlanUpdateStatusTx,
-    PlanLinkUnlinkNodeTx,
-    PlanSubscribeTx,
-    ProvideRegisterTx,
-    ProviderUpdateTx,
-    SessionStartTx,
-    SessionUpdateDetailsTx,
-    SessionEndTx,
-    SubscriptionCancelTx,
-    SubscriptionAllocateTx,
- } from "./interfaces"
-
-import {
-    MsgRegisterEncodeObject as NodeMsgRegisterEncodeObject,
-    MsgUpdateDetailsEncodeObject as NodeMsgUpdateDetailsEncodeObject,
-    MsgUpdateStatusEncodeObject as NodeMsgUpdateStatusEncodeObject,
-    MsgSubscribeEncodeObject as NodeMsgSubscribeEncodeObject,
-
-    MsgRegisterTypeUrl as NodeMsgRegisterTypeUrl,
-    MsgUpdateDetailsTypeUrl as NodeMsgUpdateDetailsTypeUrl,
-    MsgUpdateStatusTypeUrl as NodeMsgUpdateStatusTypeUrl,
-    MsgSubscribeTypeUrl as NodeMsgSubscribeTypeUrl
+    TxNodeRegister,
+    TxNodeUpdateDetails,
+    TxNodeUpdateStatus,
+    TxNodeSubscribe,
+    nodeRegister,
+    nodeUpdateDetails,
+    nodeUpdateStatus,
+    nodeSubscribe,
 } from './modules/node'
 
 import {
-    MsgCreateEncodeObject,
-    MsgUpdateStatusEncodeObject as PlanMsgUpdateStatusEncodeObject,
-    MsgLinkNodeEncodeObject,
-    MsgUnlinkNodeEncodeObject,
-    MsgSubscribeEncodeObject as PlanMsgSubscribeEncodeObject,
-
-    MsgCreateTypeUrl,
-    MsgUpdateStatusTypeUrl as PlanMsgUpdateStatusTypeUrl,
-    MsgLinkNodeTypeUrl,
-    MsgUnlinkNodeTypeUrl,
-    MsgSubscribeTypeUrl as PlanMsgSubscribeTypeUrl
-} from "./modules/plan";
-
-import {
-    MsgRegisterEncodeObject as ProviderMsgRegisterEncodeObject,
-    MsgUpdateEncodeObject,
-
-    MsgRegisterTypeUrl as ProviderMsgRegisterTypeUrl,
-    MsgUpdateTypeUrl
-} from "./modules/provider";
+    TxPlanCreate,
+    TxPlanUpdateStatus,
+    TxPlanLinkNode,
+    TxPlanUnlinkNode,
+    TxPlanSubscribe,
+    planCreate,
+    planUpdateStatus,
+    planLinkNode,
+    planUnlinkNode,
+    planSubscribe,
+} from './modules/plan'
 
 import {
-    MsgStartEncodeObject,
-    MsgUpdateDetailsEncodeObject as SessionMsgUpdateDetailsEncodeObject,
-    MsgEndEncodeObject,
-
-    MsgStartTypeUrl,
-    MsgUpdateDetailsTypeUrl as SessionMsgUpdateDetailsTypeUrl,
-    MsgEndTypeUrl,
-} from "./modules/session";
+    TxProvideRegister,
+    TxProviderUpdate,
+    providerRegister,
+    providerUpdate
+} from './modules/provider'
 
 import {
-    MsgCancelEncodeObject,
-    MsgAllocateEncodeObject,
+    TxSessionStart,
+    TxSessionUpdateDetails,
+    TxSessionEnd,
+    sessionStart,
+    sessionUpdateDetails,
+    sessionEnd,
+} from './modules/session'
 
-    MsgCancelTypeUrl,
-    MsgAllocateTypeUrl
-} from "./modules/subscription";
+import {
+    TxSubscriptionCancel,
+    TxSubscriptionAllocate,
+    subscriptionCancel,
+    subscriptionAllocate
+} from './modules/subscription'
 
 function createDefaultRegistry(): Registry {
     return new Registry(SentinelRegistry);
@@ -128,342 +104,100 @@ export class SigningSentinelClient extends SigningStargateClient {
         if (tmClient) this.sentinelQuery = buildSentinelQueryClient(tmClient)
     }
 
-    public nodeRegister({
-        from,
-        gigabytePrices,
-        hourlyPrices,
-        remoteUrl,
-        broadcast = true,
-        fee = "auto",
-        memo = ""
-    }: NodeRegisterTx): Promise<DeliverTxResponse> | NodeMsgRegisterEncodeObject {
-        const msg: NodeMsgRegisterEncodeObject = {
-            typeUrl: NodeMsgRegisterTypeUrl,
-            value: {
-                from,
-                gigabytePrices,
-                hourlyPrices,
-                remoteUrl
-            }
-        }
-        if(broadcast === true && fee !== undefined && memo !== undefined) return this.signAndBroadcast(from, [msg], fee, memo)
-        else return msg
+    public async nodeRegister(args: TxNodeRegister): Promise<DeliverTxResponse> {
+        const {fee, memo, ...params} = args
+        const msg = nodeRegister(params)
+        return this.signAndBroadcast(args.from, [msg], fee || "auto", memo)
     }
 
-    public nodeUpdateDetails({
-        from,
-        gigabytePrices,
-        hourlyPrices,
-        remoteUrl,
-        broadcast = true,
-        fee = "auto",
-        memo = "",
-    }: NodeUpdateDetailsTx): Promise<DeliverTxResponse> | NodeMsgUpdateDetailsEncodeObject {
-        const msg: NodeMsgUpdateDetailsEncodeObject = {
-            typeUrl: NodeMsgUpdateDetailsTypeUrl,
-            value: {
-                from,
-                gigabytePrices,
-                hourlyPrices,
-                remoteUrl
-            }
-        }
-        if(broadcast === true && fee !== undefined && memo !== undefined) return this.signAndBroadcast(from, [msg], fee, memo)
-        else return msg
+    public async nodeUpdateDetails(args: TxNodeUpdateDetails): Promise<DeliverTxResponse> {
+        const {fee, memo, ...params} = args
+        const msg = nodeUpdateDetails(params)
+        return this.signAndBroadcast(args.from, [msg], fee || "auto", memo)
     }
 
-    public nodeUpdateStatus({
-        from,
-        status,
-        broadcast = true,
-        fee = "auto",
-        memo = "",
-    }: NodeUpdateStatusTx): Promise<DeliverTxResponse> | NodeMsgUpdateStatusEncodeObject {
-        const msg: NodeMsgUpdateStatusEncodeObject = {
-            typeUrl: NodeMsgUpdateStatusTypeUrl,
-            value: {
-                from,
-                status
-            }
-        }
-        if(broadcast === true && fee !== undefined && memo !== undefined) return this.signAndBroadcast(from, [msg], fee, memo)
-        else return msg
+    public async nodeUpdateStatus(args: TxNodeUpdateStatus): Promise<DeliverTxResponse> {
+        const {fee, memo, ...params} = args
+        const msg = nodeUpdateStatus(params)
+        return this.signAndBroadcast(args.from, [msg], fee || "auto", memo)
     }
 
-    public nodeSubscribe({
-        from,
-        nodeAddress,
-        gigabytes = Long.ZERO,
-        hours = Long.ZERO,
-        denom = "udvpn",
-        broadcast = true,
-        fee = "auto",
-        memo = "",
-    }: NodeSubscribeTx): Promise<DeliverTxResponse> | NodeMsgSubscribeEncodeObject {
-        const msg: NodeMsgSubscribeEncodeObject = {
-            typeUrl: NodeMsgSubscribeTypeUrl,
-            value: {
-                from,
-                nodeAddress,
-                gigabytes,
-                hours,
-                denom
-            }
-        }
-        if(broadcast === true && fee !== undefined && memo !== undefined) return this.signAndBroadcast(from, [msg], fee, memo)
-        else return msg
+    public async nodeSubscribe(args: TxNodeSubscribe): Promise<DeliverTxResponse> {
+        const {fee, memo, ...params} = args
+        const msg = nodeSubscribe(params)
+        return this.signAndBroadcast(args.from, [msg], fee || "auto", memo)
     }
 
-    public planCreate({
-        from,
-        duration,
-        gigabytes,
-        prices,
-        broadcast = true,
-        fee = "auto",
-        memo = "",
-    }: PlanCreateTx): Promise<DeliverTxResponse> | MsgCreateEncodeObject {
-        const msg: MsgCreateEncodeObject = {
-            typeUrl: MsgCreateTypeUrl,
-            value: {
-                from,
-                duration,
-                gigabytes,
-                prices
-            }
-        }
-        if(broadcast === true && fee !== undefined && memo !== undefined) return this.signAndBroadcast(from, [msg], fee, memo)
-        else return msg
+    public async planCreate(args: TxPlanCreate): Promise<DeliverTxResponse> {
+        const {fee, memo, ...params} = args
+        const msg = planCreate(params)
+        return this.signAndBroadcast(args.from, [msg], fee || "auto", memo)
     }
 
-    public planUpdateStatus({
-        from,
-        id,
-        status,
-        broadcast = true,
-        fee = "auto",
-        memo = "",
-    }: PlanUpdateStatusTx): Promise<DeliverTxResponse> | PlanMsgUpdateStatusEncodeObject {
-        const msg: PlanMsgUpdateStatusEncodeObject = {
-            typeUrl: PlanMsgUpdateStatusTypeUrl,
-            value: {
-                from,
-                id,
-                status
-            }
-        }
-        if(broadcast === true && fee !== undefined && memo !== undefined) return this.signAndBroadcast(from, [msg], fee, memo)
-        else return msg
+    public async planUpdateStatus(args: TxPlanUpdateStatus): Promise<DeliverTxResponse> {
+        const {fee, memo, ...params} = args
+        const msg = planUpdateStatus(params)
+        return this.signAndBroadcast(args.from, [msg], fee || "auto", memo)
     }
 
-    public planLinkNode({
-        from,
-        id,
-        nodeAddress,
-        broadcast = true,
-        fee = "auto",
-        memo = "",
-    }: PlanLinkUnlinkNodeTx): Promise<DeliverTxResponse> | MsgLinkNodeEncodeObject {
-        const msg: MsgLinkNodeEncodeObject = {
-            typeUrl: MsgLinkNodeTypeUrl,
-            value: {
-                from,
-                id,
-                nodeAddress
-            }
-        }
-        if(broadcast === true && fee !== undefined && memo !== undefined) return this.signAndBroadcast(from, [msg], fee, memo)
-        else return msg
+    public async planLinkNode(args: TxPlanLinkNode): Promise<DeliverTxResponse> {
+        const {fee, memo, ...params} = args
+        const msg = planLinkNode(params)
+        return this.signAndBroadcast(args.from, [msg], fee || "auto", memo)
     }
 
-    public planUnlinkNode({
-        from,
-        id,
-        nodeAddress,
-        broadcast = true,
-        fee = "auto",
-        memo = "",
-    }: PlanLinkUnlinkNodeTx): Promise<DeliverTxResponse> | MsgUnlinkNodeEncodeObject {
-        const msg: MsgUnlinkNodeEncodeObject = {
-            typeUrl: MsgUnlinkNodeTypeUrl,
-            value: {
-                from,
-                id,
-                nodeAddress
-            }
-        }
-        if(broadcast === true && fee !== undefined && memo !== undefined) return this.signAndBroadcast(from, [msg], fee, memo)
-        else return msg
+    public async planUnlinkNode(args: TxPlanUnlinkNode): Promise<DeliverTxResponse> {
+        const {fee, memo, ...params} = args
+        const msg = planUnlinkNode(params)
+        return this.signAndBroadcast(args.from, [msg], fee || "auto", memo)
     }
 
-    public planSubscribe({
-        from,
-        id,
-        denom = "udvpn",
-        broadcast = true,
-        fee = "auto",
-        memo = "",
-    }: PlanSubscribeTx ): Promise<DeliverTxResponse> | PlanMsgSubscribeEncodeObject {
-        const msg: PlanMsgSubscribeEncodeObject = {
-            typeUrl: PlanMsgSubscribeTypeUrl,
-            value: {
-                from,
-                id,
-                denom
-            }
-        }
-        if(broadcast === true && fee !== undefined && memo !== undefined) return this.signAndBroadcast(from, [msg], fee, memo)
-        else return msg
+    public async planSubscribe(args: TxPlanSubscribe): Promise<DeliverTxResponse> {
+        const {fee, memo, ...params} = args
+        const msg = planSubscribe(params)
+        return this.signAndBroadcast(args.from, [msg], fee || "auto", memo)
     }
 
-    public providerRegister({
-        from,
-        name,
-        identity,
-        website,
-        description,
-        broadcast = true,
-        fee = "auto",
-        memo = "",
-    }: ProvideRegisterTx): Promise<DeliverTxResponse> | ProviderMsgRegisterEncodeObject{
-        const msg: ProviderMsgRegisterEncodeObject = {
-            typeUrl: ProviderMsgRegisterTypeUrl,
-            value: {
-                from,
-                name,
-                identity,
-                website,
-                description
-            }
-        }
-        if(broadcast === true && fee !== undefined && memo !== undefined) return this.signAndBroadcast(from, [msg], fee, memo)
-        else return msg
+    public async providerRegister(args: TxProvideRegister): Promise<DeliverTxResponse> {
+        const {fee, memo, ...params} = args
+        const msg = providerRegister(params)
+        return this.signAndBroadcast(args.from, [msg], fee || "auto", memo)
     }
 
-    public providerUpdate({
-        from,
-        name,
-        identity,
-        website,
-        description,
-        status,
-        broadcast = true,
-        fee = "auto",
-        memo = "",
-    }: ProviderUpdateTx): Promise<DeliverTxResponse> | MsgUpdateEncodeObject{
-        const msg: MsgUpdateEncodeObject = {
-            typeUrl: MsgUpdateTypeUrl,
-            value: {
-                from,
-                name,
-                identity,
-                website,
-                description,
-                status
-            }
-        }
-        if(broadcast === true && fee !== undefined && memo !== undefined) return this.signAndBroadcast(from, [msg], fee, memo)
-        else return msg
+    public async providerUpdate(args: TxProviderUpdate): Promise<DeliverTxResponse> {
+        const {fee, memo, ...params} = args
+        const msg = providerUpdate(params)
+        return this.signAndBroadcast(args.from, [msg], fee || "auto", memo)
     }
 
-    public sessionStart({
-        from,
-        id,
-        address,
-        broadcast = true,
-        fee = "auto",
-        memo = "",
-    }: SessionStartTx): Promise<DeliverTxResponse> | MsgStartEncodeObject{
-        const msg: MsgStartEncodeObject = {
-            typeUrl: MsgStartTypeUrl,
-            value: {
-                from,
-                id,
-                address
-            }
-        }
-        if(broadcast === true && fee !== undefined && memo !== undefined) return this.signAndBroadcast(from, [msg], fee, memo)
-        else return msg
+    public async sessionStart(args: TxSessionStart): Promise<DeliverTxResponse> {
+        const {fee, memo, ...params} = args
+        const msg = sessionStart(params)
+        return this.signAndBroadcast(args.from, [msg], fee || "auto", memo)
     }
 
-    public sessionUpdateDetails({
-        from,
-        proof,
-        signature,
-        broadcast = true,
-        fee = "auto",
-        memo = "",
-    }: SessionUpdateDetailsTx ): Promise<DeliverTxResponse> | SessionMsgUpdateDetailsEncodeObject {
-        const msg: SessionMsgUpdateDetailsEncodeObject = {
-            typeUrl: SessionMsgUpdateDetailsTypeUrl,
-            value: {
-                from,
-                proof,
-                signature
-            }
-        }
-        if(broadcast === true && fee !== undefined && memo !== undefined) return this.signAndBroadcast(from, [msg], fee, memo)
-        else return msg
+    public async sessionUpdateDetails(args: TxSessionUpdateDetails): Promise<DeliverTxResponse> {
+        const {fee, memo, ...params} = args
+        const msg = sessionUpdateDetails(params)
+        return this.signAndBroadcast(args.from, [msg], fee || "auto", memo)
     }
 
-    public sessionEnd({
-        from,
-        id,
-        rating,
-        broadcast = true,
-        fee = "auto",
-        memo = "",
-    }: SessionEndTx): Promise<DeliverTxResponse> | MsgEndEncodeObject {
-        const msg: MsgEndEncodeObject = {
-            typeUrl: MsgEndTypeUrl,
-            value: {
-                from,
-                id,
-                rating
-            }
-        }
-        if(broadcast === true && fee !== undefined && memo !== undefined) return this.signAndBroadcast(from, [msg], fee, memo)
-        else return msg
+    public async sessionEnd(args: TxSessionEnd): Promise<DeliverTxResponse> {
+        const {fee, memo, ...params} = args
+        const msg = sessionEnd(params)
+        return this.signAndBroadcast(args.from, [msg], fee || "auto", memo)
     }
 
-    public subscriptionCancel({
-        from,
-        id,
-        broadcast = true,
-        fee = "auto",
-        memo = "",
-    }: SubscriptionCancelTx): Promise<DeliverTxResponse> | MsgCancelEncodeObject {
-        const msg: MsgCancelEncodeObject = {
-            typeUrl: MsgCancelTypeUrl,
-            value: {
-                from,
-                id,
-            }
-        }
-        if(broadcast === true && fee !== undefined && memo !== undefined) return this.signAndBroadcast(from, [msg], fee, memo)
-        else return msg
+    public async subscriptionCancel(args: TxSubscriptionCancel): Promise<DeliverTxResponse> {
+        const {fee, memo, ...params} = args
+        const msg = subscriptionCancel(params)
+        return this.signAndBroadcast(args.from, [msg], fee || "auto", memo)
     }
 
-    public subscriptionAllocate({
-        from,
-        id,
-        address,
-        bytes,
-        broadcast = true,
-        fee = "auto",
-        memo = "",
-    }: SubscriptionAllocateTx): Promise<DeliverTxResponse> | MsgAllocateEncodeObject {
-        const msg: MsgAllocateEncodeObject = {
-            typeUrl: MsgAllocateTypeUrl,
-            value: {
-                from,
-                id,
-                address,
-                bytes
-            }
-        }
-        if(broadcast === true && fee !== undefined && memo !== undefined) return this.signAndBroadcast(from, [msg], fee, memo)
-        else return msg
+    public async subscriptionAllocate(args: TxSubscriptionAllocate): Promise<DeliverTxResponse> {
+        const {fee, memo, ...params} = args
+        const msg = subscriptionAllocate(params)
+        return this.signAndBroadcast(args.from, [msg], fee || "auto", memo)
     }
 
 }
