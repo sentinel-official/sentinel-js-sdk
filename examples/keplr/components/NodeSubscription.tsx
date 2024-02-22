@@ -66,13 +66,11 @@ export class NodeSubscription extends Component<NodeSubscriptionProps, NodeSubsc
         )
         // Get the address and balance of your user
         const account: AccountData = (await offlineSigner.getAccounts())[0]
-        const subscribeResult = await signingClient.nodeSubscribe(
-            account.address,
-            dvpnNode.address,
-            new Long(1),
-            new Long(0),
-            "udvpn"
-        )
+        const subscribeResult = await signingClient.nodeSubscribe({
+            from: account.address,
+            nodeAddress: dvpnNode.address,
+            gigabytes: new Long(1)
+        })
         // Print the result to the console
         console.log(subscribeResult)
     }
