@@ -1,6 +1,9 @@
 import { SentinelClient, SigningSentinelClient } from "@sentinel-official/sentinel-js-sdk";
 import { Status, PageRequest } from "@sentinel-official/sentinel-js-sdk";
 import { TxNodeSubscribe, nodeSubscribe } from "@sentinel-official/sentinel-js-sdk";
+import { searchEvent } from "@sentinel-official/sentinel-js-sdk";
+
+import { NodeEventCreateSubscription, isNodeEventCreateSubscription } from "@sentinel-official/sentinel-js-sdk";
 
 import { DirectSecp256k1HdWallet } from "@cosmjs/proto-signing"
 import { GasPrice } from "@cosmjs/stargate"
@@ -52,8 +55,16 @@ const subscribeToNode = async (sentnode: string, gygabyte: number, denom: string
     const msg = nodeSubscribe(args)
     console.log(msg)
 
-    const tx = client.signAndBroadcast(account.address, [msg], "auto", "")
+    const tx = await client.signAndBroadcast(account.address, [msg], "auto", "")
     console.log(tx)
+
+    const eventCreateSubscription = searchEvent(NodeEventCreateSubscription.type, tx.events);
+    if(eventCreateSubscription) {
+        console.log("isSubscriptionEventAllocate", isNodeEventCreateSubscription(eventCreateSubscription))
+        const eventParsed = NodeEventCreateSubscription.parse(eventCreateSubscription)
+        console.log(eventParsed)
+        console.log(`Your subscription id is: ${eventParsed.value.id}`)
+    } else console.log("eventCreateSubscription, not founded")
 }
 
 

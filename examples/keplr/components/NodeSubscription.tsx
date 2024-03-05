@@ -2,6 +2,8 @@ import { Component } from "react"
 
 import { SentinelClient, SigningSentinelClient } from "@sentinel-official/sentinel-js-sdk";
 import { Status, PageRequest, Node } from "@sentinel-official/sentinel-js-sdk";
+import { searchEvent } from "@sentinel-official/sentinel-js-sdk";
+import { NodeEventCreateSubscription, isNodeEventCreateSubscription } from "@sentinel-official/sentinel-js-sdk";
 
 import { GasPrice, Coin } from "@cosmjs/stargate";
 
@@ -26,7 +28,7 @@ export interface NodeSubscriptionProps {
 
 export class NodeSubscription extends Component<NodeSubscriptionProps, NodeSubscriptionState> {
     // Set the initial state
-    constructor(props:NodeSubscriptionProps) {
+    constructor(props: NodeSubscriptionProps) {
         super(props)
         this.state = {
             denom: "Loading...",
@@ -73,6 +75,14 @@ export class NodeSubscription extends Component<NodeSubscriptionProps, NodeSubsc
         })
         // Print the result to the console
         console.log(subscribeResult)
+
+        const eventCreateSubscription = searchEvent(NodeEventCreateSubscription.type, subscribeResult.events);
+        if(eventCreateSubscription) {
+            console.log("isSubscriptionEventAllocate", isNodeEventCreateSubscription(eventCreateSubscription))
+            const eventParsed = NodeEventCreateSubscription.parse(eventCreateSubscription)
+            console.log(eventParsed)
+            alert(`Your subscription id is: ${eventParsed.value.id}`)
+        } else alert("eventCreateSubscription, not founded")
     }
 
     render() {
