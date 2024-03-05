@@ -91,6 +91,37 @@ const tx1 = client.nodeSubscribe(args)
 const tx2 = client.node.subscribe(args)
 ```
 
+It is up to you if you want to `await` the tx or use a callback
+```javascript
+const tx1 = await client.nodeSubscribe(args)
+client.nodeSubscribe(args).then(tx => { do stuff... })
+```
+
+## events parsing
+`client.signAndBroadcast` or implicit call trought, for example, `client.nodeSubscribe` or `client.node.subscribe` return a [DeliverTxResponse](https://cosmos.github.io/cosmjs/latest/stargate/interfaces/DeliverTxResponse.html). You can search for a determinate event using the method `searchEvent`. For example if you are looking for `sentinel.node.v2.EventCreateSubscription`, you can do the following:
+```javascript
+import { searchEvent } from "@sentinel-official/sentinel-js-sdk";
+const eventCreateSubscription = searchEvent(sentinel.node.v2.EventCreateSubscription, tx.events);
+```
+or better
+```javascript
+import { searchEvent } from "@sentinel-official/sentinel-js-sdk";
+import { NodeEventCreateSubscription } from "@sentinel-official/sentinel-js-sdk";
+const eventCreateSubscription = searchEvent(NodeEventCreateSubscription.type, tx.events);
+```
+
+The single event can also be parsed via the appropriate interface, following the example:
+```javascript
+import { searchEvent } from "@sentinel-official/sentinel-js-sdk";
+import { NodeEventCreateSubscription, isNodeEventCreateSubscription } from "@sentinel-official/sentinel-js-sdk";
+
+const eventCreateSubscription = searchEvent(NodeEventCreateSubscription.type, tx.events);
+if(eventCreateSubscription && isNodeEventCreateSubscription(eventCreateSubscription)) {
+    const eventParsed = NodeEventCreateSubscription.parse(eventCreateSubscription)
+    console.log(`Your subscription id is: ${eventParsed.value.id}`)
+} else console.log("eventCreateSubscription, not founded")
+```
+
 ## protobuf
 All the .proto files are compiled using [protoc](https://grpc.io/docs/protoc-installation/) and [ts-proto](https://github.com/stephenh/ts-proto) as plugin. The compiled .ts proto files are under src/protobuf. If you want to compile again you can use [scripts/generate-proto.sh](scripts/generate-proto.sh). The script requires `git` and `protoc`, it will automatically download all the .proto definitions from [sentinel-hub](https://github.com/sentinel-official/hub/tree/development/proto/sentinel) and relative third parties.
 
