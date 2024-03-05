@@ -14,4 +14,6 @@ export { Node } from "./modules/node";
 export { Plan } from "./modules/plan";
 export { Provider } from "./modules/provider";
 export { Session } from "./modules/session";
+
 export { Subscription } from "./modules/subscription";
+export { Quota } from "./modules/subscription";

@@ -1,4 +1,6 @@
-export const MsgRegisterTypeUrl = "/sentinel.node.v2.MsgRegisterRequest";
-export const MsgUpdateDetailsTypeUrl = "/sentinel.node.v2.MsgUpdateDetailsRequest";
-export const MsgUpdateStatusTypeUrl = "/sentinel.node.v2.MsgUpdateStatusRequest";
-export const MsgSubscribeTypeUrl = "/sentinel.node.v2.MsgSubscribeRequest";
+export const protobufPackage = "sentinel.node.v2";
+
+export const MsgRegisterTypeUrl = `/${protobufPackage}.MsgRegisterRequest`;
+export const MsgUpdateDetailsTypeUrl = `/${protobufPackage}.MsgUpdateDetailsRequest`;
+export const MsgUpdateStatusTypeUrl = `/${protobufPackage}.MsgUpdateStatusRequest`;
+export const MsgSubscribeTypeUrl = `/${protobufPackage}.MsgSubscribeRequest`;

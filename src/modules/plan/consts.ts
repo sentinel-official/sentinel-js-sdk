@@ -1,5 +1,7 @@
-export const MsgCreateTypeUrl = "/sentinel.plan.v2.MsgCreateRequest"
-export const MsgUpdateStatusTypeUrl = "/sentinel.plan.v2.MsgUpdateStatusRequest"
-export const MsgLinkNodeTypeUrl = "/sentinel.plan.v2.MsgLinkNodeRequest"
-export const MsgUnlinkNodeTypeUrl = "/sentinel.plan.v2.MsgUnlinkNodeRequest"
-export const MsgSubscribeTypeUrl = "/sentinel.plan.v2.MsgSubscribeRequest"
+export const protobufPackage = "sentinel.plan.v2";
+
+export const MsgCreateTypeUrl = `/${protobufPackage}.MsgCreateRequest`
+export const MsgUpdateStatusTypeUrl = `/${protobufPackage}.MsgUpdateStatusRequest`
+export const MsgLinkNodeTypeUrl = `/${protobufPackage}.MsgLinkNodeRequest`
+export const MsgUnlinkNodeTypeUrl = `/${protobufPackage}.MsgUnlinkNodeRequest`
+export const MsgSubscribeTypeUrl = `/${protobufPackage}.MsgSubscribeRequest`

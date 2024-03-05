@@ -1,2 +1,4 @@
-export const MsgCancelTypeUrl = "/sentinel.subscription.v2.MsgCancelRequest"
-export const MsgAllocateTypeUrl = "/sentinel.subscription.v2.MsgAllocateRequest"
+export const protobufPackage = "sentinel.subscription.v2";
+
+export const MsgCancelTypeUrl = `/${protobufPackage}.MsgCancelRequest`
+export const MsgAllocateTypeUrl = `/${protobufPackage}.MsgAllocateRequest`
