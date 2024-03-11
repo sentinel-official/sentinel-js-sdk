@@ -8,4 +8,7 @@ export * from "./session/transactions"
 export * from "./subscription/transactions"
 
 export * from "./node/events"
+export * from "./plan/events"
+export * from "./provider/events"
+export * from "./session/events"
 export * from "./subscription/events"

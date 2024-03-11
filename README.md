@@ -7,6 +7,8 @@ The SDK exstends the followings:
 - [@cosmjs/stargate/SigningStargateClient](https://cosmos.github.io/cosmjs/latest/stargate/classes/SigningStargateClient.html) `SigningSentinelClient`
 - [@cosmjs/stargate/QueryClient](https://cosmos.github.io/cosmjs/latest/stargate/classes/QueryClient.html) as `client.sentinelQuery`
 
+Full documentation: https://sentinel-official.github.io/sentinel-js-sdk/
+
 ## clients
 ```javascript
 import { SentinelClient } from "@sentinel-official/sentinel-js-sdk";
