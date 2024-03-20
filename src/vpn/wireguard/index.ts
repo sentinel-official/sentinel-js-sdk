@@ -1,4 +1,4 @@
-import { generateKeyPairSync  } from "crypto"
+import { generateKeyPairSync } from "crypto"
 import { uintArrayTob64 } from "../../utils"
 import findFreePorts from "find-free-ports"
 import * as fs from 'fs';
@@ -31,28 +31,33 @@ export class Wireguard {
     interface: Interface | null
     peer: Peer | null
 
-    publicKey?: string
-    privateKey?: string
+    publicKey: string
+    privateKey: string
 
-    constructor(){
+    constructor() {
         this.interface = null;
         this.peer = null;
-        this.buildKeys();
+
+        const keys = this.genKeys();
+        this.publicKey = keys.pub
+        this.privateKey = keys.prv
     }
 
-    public buildKeys(){
+    public genKeys(): { [k: string]: string } {
         // https://www.reddit.com/r/WireGuard/comments/k5ksax/how_do_i_generate_wireguard_keys_in_js_without/
         const keys = generateKeyPairSync("x25519", {
             publicKeyEncoding: { format: "der", type: "spki" },
             privateKeyEncoding: { format: "der", type: "pkcs8" }
         });
-        this.publicKey = keys.publicKey.subarray(12).toString("base64")
-        this.privateKey = keys.privateKey.subarray(16).toString("base64")
+        return {
+            pub: keys.publicKey.subarray(12).toString("base64"),
+            prv: keys.privateKey.subarray(16).toString("base64"),
+        }
     }
 
-    public async parse(content: string){
+    public async parseConfig(content: string) {
         var wgBuff = Buffer.from(content, 'base64');
-        if(wgBuff.length === 58 && this.privateKey){
+        if (wgBuff.length === 58 && this.privateKey) {
             const [listenPort] = await findFreePorts(1)
 
             const ipv4Address = [...wgBuff.subarray(0, 4)].join(".") + "/32"
@@ -65,7 +70,7 @@ export class Wireguard {
                 dns: ["10.8.0.1", "1.0.0.1", "1.1.1.1"],
             }
 
-            const publicKey = uintArrayTob64(Array.from(wgBuff.subarray(26,58)));
+            const publicKey = uintArrayTob64(Array.from(wgBuff.subarray(26, 58)));
             const host = [...wgBuff.subarray(20, 24)].join(".");
             const port = (wgBuff[24] & -1) << 8 | wgBuff[25] & -1;
 
@@ -78,8 +83,8 @@ export class Wireguard {
         }
     }
 
-    public write(output: string){
-        if(this.interface && this.peer){
+    public writeConfig(output: string) {
+        if (this.interface && this.peer) {
             // ungly, but betten than nothing :)
             var config = "[Interface]\n"
             config += "Address = " + this.interface.addresses.join(",") + "\n"
@@ -97,7 +102,7 @@ export class Wireguard {
             config += "PublicKey = " + this.peer.publicKey + "\n"
             config += "AllowedIPs = " + this.peer.allowedIPs.join(",") + "\n"
             config += "Endpoint = " + this.peer.endpoint + "\n"
-            if(this.peer.persistentKeepAlive > 0) config += "PersistentKeepalive = " + this.peer.persistentKeepAlive + "\n"
+            if (this.peer.persistentKeepAlive > 0) config += "PersistentKeepalive = " + this.peer.persistentKeepAlive + "\n"
 
             if (this.peer.presharedKey) config += "PresharedKey = " + this.peer.presharedKey + "\n"
 
