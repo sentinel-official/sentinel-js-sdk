@@ -1,4 +1,5 @@
 // Credits: https://github.com/vast-api/t-v2ray/blob/master/types/v2ray-transport.d.ts
+// https://www.v2ray.com/en/configuration/transport.html
 
 declare namespace V2RayTransport {
     namespace Tcp {
@@ -24,14 +25,17 @@ declare namespace V2RayTransport {
         }
     }
     interface Tcp {
-        acceptProxyProtocol?: boolean;
-        header: Tcp.NoneHeader | Tcp.HttpHeader;
+        // https://www.v2ray.com/en/configuration/transport/tcp.html
+        // acceptProxyProtocol?: boolean;
+        // header: Tcp.NoneHeader | Tcp.HttpHeader;
+        header: Record<string, Tcp.NoneHeader | Tcp.HttpHeader>;
     }
 
     namespace Kcp {
         type Type = "none" | "srtp" | "utp" | "wechat-video" | "dtls" | "wireguard";
     }
     interface Kcp {
+        // https://www.v2ray.com/en/configuration/transport/mkcp.html
         mtu?: number;
         tti?: number;
         uplinkCapacity?: number;
@@ -45,23 +49,27 @@ declare namespace V2RayTransport {
     }
 
     interface WebSocket {
-        acceptProxyProtocol?: boolean;
+        // https://www.v2ray.com/en/configuration/transport/websocket.html
+        // acceptProxyProtocol?: boolean;
         path?: string;
-        headers: Record<string, string[]>;
+        headers: Record<string, string>;
     }
 
     interface Http {
+        // https://www.v2ray.com/en/configuration/transport/h2.html
         host: string[];
         path?: string;
     }
 
     interface DomainSocket {
+        // https://www.v2ray.com/en/configuration/transport/domainsocket.html
         path: string;
-        abstract?: boolean;
-        padding?: boolean;
+        // abstract?: boolean;
+        // padding?: boolean;
     }
 
     interface Quic {
+        // https://www.v2ray.com/en/configuration/transport/quic.html
         security: "none" | "aes-128-gcm" | "chacha20-poly1305";
         key: string;
         header: {
@@ -113,6 +121,7 @@ declare namespace StreamSettings {
 }
 
 interface StreamSettings extends V2RayTransport {
+    // https://www.v2ray.com/en/configuration/transport/tcp.html
     network: StreamSettings.Network;
     security?: StreamSettings.Security;
     tlsSettings?: StreamSettings.TLS;

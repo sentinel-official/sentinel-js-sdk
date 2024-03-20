@@ -2,26 +2,51 @@
 
 declare namespace V2RayProtocol {
     interface Blackhole {
+        // https://www.v2ray.com/en/configuration/protocols/blackhole.html
         response: { type: "http" | "none" };
     }
+
     interface Dns {
+        // https://www.v2ray.com/en/configuration/protocols/dns.html
         network: "tcp" | "udp";
         address: string;
         port: number;
     }
+
     interface DokodemoDoor {
         address?: string;
         port: number;
         network: "tcp" | "udp" | "tcp,udp";
         timeout?: number;
+        // timeout is not present on ConfigurationObject but it exist in the example
         followRedirect?: boolean;
         userLevel?: number;
     }
+
     interface Freedom {
+        // https://www.v2ray.com/en/configuration/protocols/freedom.html
         domainStrategy: "AsIs" | "UseIP" | "UseIPv4" | "UseIPv6";
         redirect: string;
         userLevel?: number;
     }
+
+    namespace MTProto {
+        interface User {
+            // https://www.v2ray.com/en/configuration/protocols/mtproto.html#userobject
+            email: string,
+            level: string,
+            secret: string
+        }
+    }
+    interface MTProtoInbound {
+        // https://www.v2ray.com/en/configuration/protocols/mtproto.html
+        users: MTProto.User[]
+    }
+    interface MTProtoOutbound {
+        // https://www.v2ray.com/en/configuration/protocols/mtproto.html
+    }
+
+
     namespace HTTP {
         interface User {
             user: string;
@@ -29,12 +54,12 @@ declare namespace V2RayProtocol {
         }
     }
     interface HTTPInbound {
-        timeout?: number;
+        timeout?: number; // ?
         accounts: HTTP.User[];
         allowTransparent?: boolean;
         userLevel?: number;
     }
-    namespace HTTPOutbound {
+    /* namespace HTTPOutbound {
         interface Server {
             address: string;
             port: number;
@@ -43,21 +68,28 @@ declare namespace V2RayProtocol {
     }
     interface HTTPOutbound {
         servers: HTTPOutbound.Server[];
-    }
+    } */
+
     export namespace Shadowsocks {
         type Method =
+            | "aes-256-cfb"
+            | "aes-128-cfb"
+            | "chacha20"
+            | "chacha20-ietf"
             | "aes-256-gcm"
             | "aes-128-gcm"
             | "chacha20-poly1305"
             | "chacha20-ietf-poly1305"
-            | "none"
-            | "plain";
+            | "none"  // ?
+            | "plain" // ?;
     }
     interface ShadowsocksInbound {
+        // https://www.v2ray.com/en/configuration/protocols/shadowsocks.html#inboundconfigurationobject
         email?: string;
         method: Shadowsocks.Method;
         password: string;
         level?: number;
+        ota?: boolean;
         network: "tcp" | "udp" | "tcp,udp";
     }
     namespace ShadowsocksOutbound {
@@ -67,12 +99,15 @@ declare namespace V2RayProtocol {
             port: number;
             method: Shadowsocks.Method;
             password: string;
+            ora?: boolean;
             level?: number;
         }
     }
     interface ShadowsocksOutbound {
+        // https://www.v2ray.com/en/configuration/protocols/shadowsocks.html#outboundconfigurationobject
         servers: ShadowsocksOutbound.Server[];
     }
+
     namespace SocksInbound {
         interface Account {
             user: string;
@@ -80,6 +115,7 @@ declare namespace V2RayProtocol {
         }
     }
     interface SocksInbound {
+        // https://www.v2ray.com/en/configuration/protocols/socks.html#inboundconfigurationobject
         auth?: "noauth" | "password";
         accounts?: SocksInbound.Account[];
         udp?: boolean;
@@ -93,14 +129,17 @@ declare namespace V2RayProtocol {
             level?: number;
         }
         interface Server {
+            // https://www.v2ray.com/en/configuration/protocols/socks.html#serverobject
             address: string;
             port: number;
             users: User[];
         }
     }
     interface SocksOutbound {
+        // https://www.v2ray.com/en/configuration/protocols/shadowsocks.html#outboundconfigurationobject
         servers: SocksOutbound.Server[];
     }
+
     namespace VMessOutbound {
         interface User {
             id: string;
@@ -109,12 +148,14 @@ declare namespace V2RayProtocol {
             level?: number;
         }
         interface Server {
+            // https://www.v2ray.com/en/configuration/protocols/vmess.html#serverobject
             address: string;
             port: number;
             users: User[];
         }
     }
     interface VMessOutbound {
+        // https://www.v2ray.com/en/configuration/protocols/vmess.html#outboundconfigurationobject
         vnext: VMessOutbound.Server[];
     }
     namespace VMessInbound {
@@ -133,13 +174,16 @@ declare namespace V2RayProtocol {
         }
     }
     interface VMessInbound {
+        // https://www.v2ray.com/en/configuration/protocols/vmess.html#inboundconfigurationobject
         clients: VMessInbound.Client[];
         default?: VMessInbound.Default;
         detour?: VMessInbound.Detour;
         disableInsecureEncryption?: boolean;
     }
+
     type InboundProtocols =
         | DokodemoDoor
+        | MTProtoInbound
         | HTTPInbound
         | ShadowsocksInbound
         | SocksInbound
@@ -148,7 +192,8 @@ declare namespace V2RayProtocol {
         | Blackhole
         | Dns
         | Freedom
-        | HTTPOutbound
+        | MTProtoOutbound
+        // | HTTPOutbound
         | ShadowsocksOutbound
         | SocksOutbound
         | VMessOutbound;
@@ -163,7 +208,7 @@ declare namespace V2RayProtocol {
         | "blackhole"
         | "dns"
         | "freedom"
-        | "http"
+        // | "http"
         | "mtproto"
         | "shadowsocks"
         | "socks"
