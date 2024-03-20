@@ -25,6 +25,7 @@
   "dependencies": {
     "@cosmjs/proto-signing": "^0.32.2",
     "@cosmjs/stargate": "^0.32.2",
+    "find-free-ports": "^3.1.1",
     "long": "^5.2.3",
     "node-fetch": "^3.3.2",
     "secp256k1": "^5.0.0",
