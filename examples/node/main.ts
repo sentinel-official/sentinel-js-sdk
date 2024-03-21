@@ -18,14 +18,12 @@ import {
     sessionStart,
     searchEvent,
     nodeStatus,
-    NodeEventCreateSubscription
+    NodeEventCreateSubscription,
+    privKeyFromMnemonic
 } from "@sentinel-official/sentinel-js-sdk";
-
 
 import { DirectSecp256k1HdWallet } from "@cosmjs/proto-signing"
 import { GasPrice, assertIsDeliverTxSuccess } from "@cosmjs/stargate"
-import { Bip39, Slip10Curve, EnglishMnemonic, Slip10 } from "@cosmjs/crypto"
-import { makeCosmoshubPath } from "@cosmjs/amino"
 
 import Long from "long";
 
@@ -62,8 +60,7 @@ const main = async () => {
     console.log(`Wallet: ${account.address}`)
 
     // Export private key in order to signSessionId
-    const seed = await Bip39.mnemonicToSeed(new EnglishMnemonic(wallet.mnemonic), "");
-    const { privkey } = Slip10.derivePath(Slip10Curve.Secp256k1, seed, makeCosmoshubPath(0));
+    const privkey = await privKeyFromMnemonic({mnemonic: wallet.mnemonic})
     // console.log(privkey)
 
     const customDenom = "udvpn"

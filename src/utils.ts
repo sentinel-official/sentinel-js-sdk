@@ -1,5 +1,9 @@
 import { Event, Attribute } from "@cosmjs/stargate"
+import { Bip39, Slip10Curve, EnglishMnemonic, Slip10, HdPath } from "@cosmjs/crypto"
+import { makeCosmoshubPath } from "@cosmjs/amino"
+
 import { createHash } from "crypto"
+
 import Long from "long";
 import secp256k1 from "secp256k1";
 import axios from 'axios';
@@ -132,4 +136,16 @@ export async function postSession(key: string, signature: string, address: strin
         if(axios.isAxiosError(error)) return error.response?.data as NodeResponse
         else throw error
     }
+}
+
+/**
+ * Export the private key as Uint8Array starting from mnemonic
+ *
+ * @param param0 {mnemonic, bip39Password, hdPath}, where mnemonic is the secret, bip39Password optionals, hdPath optional, default = 'm/44'/118'/0'/0/a'
+ * @returns the private key as Uint8Array
+ */
+export async function privKeyFromMnemonic({mnemonic, bip39Password, hdPath}: { mnemonic: string, bip39Password?: string, hdPath?: HdPath }): Promise<Uint8Array>{
+    const seed = await Bip39.mnemonicToSeed(new EnglishMnemonic(mnemonic), bip39Password || "");
+    const { privkey } = Slip10.derivePath(Slip10Curve.Secp256k1, seed, hdPath || makeCosmoshubPath(0));
+    return privkey
 }
