@@ -7,6 +7,12 @@ import https from 'https'
 
 import { NodeResponse, NodeStatus } from "./types";
 
+/**
+ * Convert an array of stargate/Attribute in to javascript object
+ *
+ * @param attributes array of event Attributes
+ * @returns Object with key: value, where key is in camelCase and value is escaped
+ */
 export function parseAttributes(attributes: readonly Attribute[] | Attribute[]): any {
     return Object.fromEntries(attributes.map((x: Attribute) => [
         x.key.replace(/_([a-z])/g, (_, p1) => p1.toUpperCase()),
@@ -14,6 +20,13 @@ export function parseAttributes(attributes: readonly Attribute[] | Attribute[]):
     ]))
 }
 
+/**
+ * Iterate over the events and search for a determinale eventUrl
+ *
+ * @param eventUrl the event url you are looking for
+ * @param events array of Event
+ * @returns null if event wasn't founded, else the event
+ */
 export function searchEvent(eventUrl: string, events: readonly Event[] | Event[]): Event | null {
     for(let index = 0; index < events.length; index++){
         if (events[index].type === eventUrl) return events[index]
@@ -22,6 +35,12 @@ export function searchEvent(eventUrl: string, events: readonly Event[] | Event[]
 }
 
 // https://stackoverflow.com/questions/8482309/converting-javascript-integer-to-byte-array-and-back
+/**
+ * Convert number to byteArray
+ *
+ * @param long the number you want to convert
+ * @returns  the byteArray
+ */
 function longToByteArray(long: Long | number): number[] {
     // probably in case of Long type we should use the methods "and/add" etc
     // we want to represent the input as a 8-bytes array
@@ -34,11 +53,23 @@ function longToByteArray(long: Long | number): number[] {
     return byteArray;
 }
 
+/**
+ * Encode a uintArray to a base64 string
+ *
+ * @param value array of number
+ * @returns base64 encoding
+ */
 export function uintArrayTob64(value: number[]): string {
     return btoa(String.fromCharCode.apply(null, value))
 }
 
-
+/**
+ * Convert the session identifier as Uint64ToBigEndian and sign using secp256k1
+ *
+ * @param privkey the private key exported from wallet or mnemonic used for sign the sessionId
+ * @param sessionId the sessionId you want to sign
+ * @returns base64 representation of signature
+ */
 export function signSessionId(privkey: Uint8Array, sessionId: Long | number): string {
     const sessionIdByteArray = longToByteArray(sessionId)
     sessionIdByteArray.reverse()
@@ -51,6 +82,12 @@ export function signSessionId(privkey: Uint8Array, sessionId: Long | number): st
     return signature
 }
 
+/**
+ * [GET] request to /status endpoint of a remoteUrl with ssl verification disbled
+ *
+ * @param remoteUrl node endpoint
+ * @returns NodeStatus information
+ */
 export async function nodeStatus(remoteUrl: string): Promise<NodeStatus> {
     const httpsAgent = new https.Agent({
         rejectUnauthorized: false
@@ -60,6 +97,16 @@ export async function nodeStatus(remoteUrl: string): Promise<NodeStatus> {
     return (response.data as NodeResponse).result as NodeStatus
 }
 
+/**
+ * [POST] request to a /accounts/${address}/sessions/${sessionId} with ssl verification disbled, in order to get a valid base64 vpn configuration
+ *
+ * @param key publicKey for wg or uuid for v2ray
+ * @param signature signature of Uint64ToBigEndian sessionId
+ * @param address sent address of the session owner
+ * @param sessionId session identifier
+ * @param remoteUrl node endpoint
+ * @returns NodeResponse with vpn configuration or error code and message
+ */
 export async function postSession(key: string, signature: string, address: string, sessionId: Long | number, remoteUrl: string): Promise<NodeResponse> {
     const httpsAgent = new https.Agent({
         rejectUnauthorized: false,
