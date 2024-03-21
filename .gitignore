@@ -131,3 +131,6 @@ dist/*
 !dist/.gitkeep
 
 scripts/*.proto
+
+v2ray_config.json
+wg0.conf
