@@ -121,7 +121,7 @@ const eventCreateSubscription = searchEvent(NodeEventCreateSubscription.type, tx
 if(eventCreateSubscription && isNodeEventCreateSubscription(eventCreateSubscription)) {
     const eventParsed = NodeEventCreateSubscription.parse(eventCreateSubscription)
     console.log(`Your subscription id is: ${eventParsed.value.id}`)
-} else console.log("eventCreateSubscription, not founded")
+} else console.log("eventCreateSubscription, not found")
 ```
 
 ## protobuf

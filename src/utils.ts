@@ -29,7 +29,7 @@ export function parseAttributes(attributes: readonly Attribute[] | Attribute[]):
  *
  * @param eventUrl the event url you are looking for
  * @param events array of Event
- * @returns null if event wasn't founded, else the event
+ * @returns null if event wasn't found, else the event
  */
 export function searchEvent(eventUrl: string, events: readonly Event[] | Event[]): Event | null {
     for(let index = 0; index < events.length; index++){

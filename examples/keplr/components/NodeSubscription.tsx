@@ -82,7 +82,7 @@ export class NodeSubscription extends Component<NodeSubscriptionProps, NodeSubsc
             const eventParsed = NodeEventCreateSubscription.parse(eventCreateSubscription)
             console.log(eventParsed)
             alert(`Your subscription id is: ${eventParsed.value.id}`)
-        } else alert("eventCreateSubscription, not founded")
+        } else alert("eventCreateSubscription, not found")
     }
 
     render() {
