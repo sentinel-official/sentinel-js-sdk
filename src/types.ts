@@ -18,9 +18,15 @@ export { Session } from "./modules/session";
 export { Subscription } from "./modules/subscription";
 export { Quota } from "./modules/subscription";
 
+export interface NodeResponseError {
+    code: number,
+    message: string
+}
+
 export interface NodeResponse {
     success: boolean,
-    result: NodeStatus | string
+    result?: NodeStatus | string
+    error?: NodeResponseError
 }
 
 export interface NodeStatus {
