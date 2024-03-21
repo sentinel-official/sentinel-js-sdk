@@ -2,9 +2,8 @@ import { Event, Attribute } from "@cosmjs/stargate"
 import { createHash } from "crypto"
 import Long from "long";
 import secp256k1 from "secp256k1";
-import fetch from 'node-fetch';
+import axios from 'axios';
 import https from 'https'
-import urlJoin from 'url-join';
 
 import { NodeResponse, NodeStatus } from "./types";
 
@@ -42,11 +41,9 @@ export function uintArrayTob64(value: number[]): string {
 
 export function signSessionId(privkey: Uint8Array, sessionId: Long | number): string {
     const sessionIdByteArray = longToByteArray(sessionId)
-    sessionIdByteArray.reverse
-    const hashed = createHash('sha256').update(Buffer.from(sessionIdByteArray)).digest();
+    sessionIdByteArray.reverse()
 
-    // var accounts = await wallet.getAccountsWithPrivkeys();
-    // var privateAccount2 = accounts.find(({ address }) => address === account.address);
+    const hashed = createHash('sha256').update(Buffer.from(sessionIdByteArray)).digest();
 
     const sigObj = secp256k1.ecdsaSign(hashed, privkey)
     const signature = uintArrayTob64(Array.from(sigObj.signature));
@@ -56,35 +53,36 @@ export function signSessionId(privkey: Uint8Array, sessionId: Long | number): st
 
 export async function nodeStatus(remoteUrl: string): Promise<NodeStatus> {
     const httpsAgent = new https.Agent({
-        rejectUnauthorized: false,
+        rejectUnauthorized: false
     });
 
-    const response = await fetch(
-        urlJoin(remoteUrl, "/status"),
-        {method: 'GET', agent: httpsAgent}
-    );
-    const jsonResponse = await response.json()
-    return (jsonResponse as NodeResponse).result as NodeStatus
+    const response = await axios.get(remoteUrl.replace(/\/$/g, '').trim() + "/status", { httpsAgent })
+    return (response.data as NodeResponse).result as NodeStatus
 }
 
-export async function postSession(key: string, signature: string, address: string, sessionId: Long | number, remoteUrl: string): Promise<string> {
+export async function postSession(key: string, signature: string, address: string, sessionId: Long | number, remoteUrl: string): Promise<NodeResponse> {
     const httpsAgent = new https.Agent({
         rejectUnauthorized: false,
     });
 
-    const body = {key, signature}
-    const response = await fetch(
-        urlJoin(remoteUrl, `/accounts/${address}/sessions/${sessionId}`),
-        {
-            method: 'GET',
-            agent: httpsAgent,
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            "body": JSON.stringify(body)
-        }
-    );
-    const jsonResponse = await response.json()
-    return (jsonResponse as NodeResponse).result as string
+    const data = {key, signature}
+    const url = remoteUrl.replace(/\/$/g, '').trim() + `/accounts/${address}/sessions/${sessionId}`
+    const options = {
+        url,
+        method: 'POST',
+        agent: httpsAgent,
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        data,
+        httpsAgent
+    }
+    try {
+        const response = await axios(options);
+        return response.data as NodeResponse
+    } catch (error) {
+        if(axios.isAxiosError(error)) return error.response?.data as NodeResponse
+        else throw error
+    }
 }
