@@ -125,6 +125,6 @@ export class V2Ray {
     }
 
     public writeConfig(output: string) {
-        fs.writeFileSync(output, JSON.stringify(this.config));
+        fs.writeFileSync(output, JSON.stringify(this.config, null, 4));
     }
 }

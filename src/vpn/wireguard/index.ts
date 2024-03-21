@@ -98,7 +98,7 @@ export class Wireguard {
             if (this.interface.preDown) config += "PreDown = " + this.interface.preDown + "\n"
             if (this.interface.postDown) config += "PostDown = " + this.interface.postDown + "\n"
 
-            config += "[Peer]\n"
+            config += "\n[Peer]\n"
             config += "PublicKey = " + this.peer.publicKey + "\n"
             config += "AllowedIPs = " + this.peer.allowedIPs.join(",") + "\n"
             config += "Endpoint = " + this.peer.endpoint + "\n"
