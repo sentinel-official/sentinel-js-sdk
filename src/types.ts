@@ -5,12 +5,18 @@ export { Coin } from "./protobuf/cosmos/base/v1beta1/coin";
 export { PageRequest } from "./protobuf/cosmos/base/query/v1beta1/pagination";
 
 import { StdFee } from "@cosmjs/stargate";
+
 export interface TxParams {
     fee?: StdFee | "auto" | number,
     memo?: string,
 }
 
 export { Node } from "./modules/node";
+export enum NodeVPNType {
+    WIREGUARD = 1,
+    V2RAY = 2
+}
+
 export { Plan } from "./modules/plan";
 export { Provider } from "./modules/provider";
 export { Session } from "./modules/session";
@@ -46,7 +52,8 @@ export interface NodeStatus {
     operator: string,
     peers: number,
     gigabyte_prices: string,
+    hourly_prices: string,
     qos:{max_peers: number},
-    type: number,
+    type: NodeVPNType
     version: string
 }

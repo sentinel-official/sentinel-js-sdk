@@ -19,7 +19,8 @@ import {
     searchEvent,
     nodeStatus,
     NodeEventCreateSubscription,
-    privKeyFromMnemonic
+    privKeyFromMnemonic,
+    NodeVPNType
 } from "@sentinel-official/sentinel-js-sdk";
 
 import { DirectSecp256k1HdWallet } from "@cosmjs/proto-signing"
@@ -82,9 +83,9 @@ const main = async () => {
             try {
                 var status = await nodeStatus(nodes.nodes[i].remoteUrl)
                 console.log(status)
-                if (status.type == 1) wgNode = { node: nodes.nodes[i], status }
-                else if(status.type == 2) v2Node = { node: nodes.nodes[i], status }
-                if (v2Node !== null && wgNode !== null) break // both nodes was founded
+                if (status.type == NodeVPNType.WIREGUARD) wgNode = { node: nodes.nodes[i], status }
+                else if(status.type == NodeVPNType.V2RAY) v2Node = { node: nodes.nodes[i], status }
+                if (v2Node !== null && wgNode !== null) break // both nodes was found
             } catch (error) {
                 console.error(error)
             }
@@ -93,77 +94,80 @@ const main = async () => {
 
     console.log("\n\n")
 
-    if(v2Node !== null && wgNode !== null){
-        selectedNodes.push(v2Node);
-        selectedNodes.push(wgNode);
+    if (v2Node === null || wgNode === null) {
+        console.log('Could not find either V2Ray or Wireguard node.')
+        return
+    }
 
-        for(const node of selectedNodes){
-            var subscribeArgs: TxNodeSubscribe = {
-                from: account.address,
-                nodeAddress: node.node.address,
-                gigabytes: Long.fromNumber(1, true),
-                denom: "udvpn",  // same name
-            }
-            var subscribeTx = await client.signAndBroadcast(account.address, [nodeSubscribe(subscribeArgs)], "auto", "sentinel-js-sdk")
-            assertIsDeliverTxSuccess(subscribeTx)
-            var eventCreateSubscription = searchEvent(NodeEventCreateSubscription.type, subscribeTx.events);
-            if(eventCreateSubscription) {
+    selectedNodes.push(v2Node);
+    selectedNodes.push(wgNode);
 
-                // console.log("isSubscriptionEventAllocate", isNodeEventCreateSubscription(eventCreateSubscription))
-                var subscriptionEventParsed = NodeEventCreateSubscription.parse(eventCreateSubscription)
-                console.log("Event parsed", subscriptionEventParsed)
-                var subscriptionId = subscriptionEventParsed.value.id
-                console.log(`Your subscription id is: ${subscriptionId}`)
-
-                var sessionStartArgs:  TxSessionStart = {
-                    from: account.address,
-                    id: subscriptionId,
-                    address: node.node.address
-                }
-                var sessionStartTx = await client.signAndBroadcast(account.address, [sessionStart(sessionStartArgs)], "auto", "sentinel-js-sdk")
-                assertIsDeliverTxSuccess(sessionStartTx)
-
-                var eventSessionStart = searchEvent(SessionEventStart.type, sessionStartTx.events);
-                if(eventSessionStart){
-                    var sessionStartEventParsed = SessionEventStart.parse(eventSessionStart)
-                    console.log("Event parsed", sessionStartEventParsed)
-                    var sessionId = sessionStartEventParsed.value.id
-                    console.log(`Your session id is: ${sessionId}`)
-
-                    await new Promise(f => setTimeout(f, 10000));
-                    // wait for rpc sync... else 'session 123456789 does not exist'
-
-                    // make sure the session exist on chain, let's query the chain
-                    var session = await client.sentinelQuery?.session.session(sessionId)
-                    console.log("Session on chain: ", session)
-
-                    var signature = signSessionId(privkey, sessionId)
-
-                    if(node.status.type == 1){
-                        console.log("Wireguard")
-                        var wgConfig = new Wireguard()
-                        var wgPostResponse = await postSession(wgConfig.publicKey, signature, account.address, sessionId, node.node.remoteUrl)
-                        console.log(wgPostResponse)
-                        if (wgPostResponse.success === true){
-                            await wgConfig.parseConfig(wgPostResponse.result as string)
-                            wgConfig.writeConfig("wg0.conf")
-                        }
-                    }
-                    else if(node.status.type == 2){
-                        console.log("V2Ray")
-                        var v2Config = new V2Ray()
-                        var v2PostResponse = await postSession(v2Config.getKey(), signature, account.address, sessionId, node.node.remoteUrl)
-                        console.log(v2PostResponse)
-                        if (v2PostResponse.success === true){
-                            await v2Config.parseConfig(v2PostResponse.result as string)
-                            v2Config.writeConfig("v2ray_config.json")
-                        }
-                    }
-
-                } else console.log("eventSessionStart, not founded")
-            } else console.log("eventCreateSubscription, not founded")
-
+    for(const node of selectedNodes){
+        var subscribeArgs: TxNodeSubscribe = {
+            from: account.address,
+            nodeAddress: node.node.address,
+            gigabytes: Long.fromNumber(1, true),
+            denom: "udvpn",  // same name
         }
+        var subscribeTx = await client.signAndBroadcast(account.address, [nodeSubscribe(subscribeArgs)], "auto", "sentinel-js-sdk")
+        assertIsDeliverTxSuccess(subscribeTx)
+        var eventCreateSubscription = searchEvent(NodeEventCreateSubscription.type, subscribeTx.events);
+        if(eventCreateSubscription) {
+
+            // console.log("isSubscriptionEventAllocate", isNodeEventCreateSubscription(eventCreateSubscription))
+            var subscriptionEventParsed = NodeEventCreateSubscription.parse(eventCreateSubscription)
+            console.log("Event parsed", subscriptionEventParsed)
+            var subscriptionId = subscriptionEventParsed.value.id
+            console.log(`Your subscription id is: ${subscriptionId}`)
+
+            var sessionStartArgs:  TxSessionStart = {
+                from: account.address,
+                id: subscriptionId,
+                address: node.node.address
+            }
+            var sessionStartTx = await client.signAndBroadcast(account.address, [sessionStart(sessionStartArgs)], "auto", "sentinel-js-sdk")
+            assertIsDeliverTxSuccess(sessionStartTx)
+
+            var eventSessionStart = searchEvent(SessionEventStart.type, sessionStartTx.events);
+            if(eventSessionStart){
+                var sessionStartEventParsed = SessionEventStart.parse(eventSessionStart)
+                console.log("Event parsed", sessionStartEventParsed)
+                var sessionId = sessionStartEventParsed.value.id
+                console.log(`Your session id is: ${sessionId}`)
+
+                await new Promise(f => setTimeout(f, 10000));
+                // wait for rpc sync... else 'session 123456789 does not exist'
+
+                // make sure the session exist on chain, let's query the chain
+                var session = await client.sentinelQuery?.session.session(sessionId)
+                console.log("Session on chain: ", session)
+
+                var signature = signSessionId(privkey, sessionId)
+
+                if(node.status.type == NodeVPNType.WIREGUARD){
+                    console.log("Wireguard")
+                    var wgConfig = new Wireguard()
+                    var wgPostResponse = await postSession(wgConfig.publicKey, signature, account.address, sessionId, node.node.remoteUrl)
+                    console.log(wgPostResponse)
+                    if (wgPostResponse.success === true){
+                        await wgConfig.parseConfig(wgPostResponse.result as string)
+                        wgConfig.writeConfig("wg0.conf")
+                    }
+                }
+                else if(node.status.type == NodeVPNType.V2RAY){
+                    console.log("V2Ray")
+                    var v2Config = new V2Ray()
+                    var v2PostResponse = await postSession(v2Config.getKey(), signature, account.address, sessionId, node.node.remoteUrl)
+                    console.log(v2PostResponse)
+                    if (v2PostResponse.success === true){
+                        await v2Config.parseConfig(v2PostResponse.result as string)
+                        v2Config.writeConfig("v2ray_config.json")
+                    }
+                }
+
+            } else console.log("eventSessionStart, not found")
+        } else console.log("eventCreateSubscription, not found")
+
     }
 }
 
