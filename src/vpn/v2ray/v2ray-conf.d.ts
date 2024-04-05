@@ -43,7 +43,7 @@ declare namespace V2RayConf {
     }
 
     namespace Routing {
-        type domainStrategy = "AsIs" | "IPIfNonMatch" | "IPOnDemand";
+        type DomainStrategy = "AsIs" | "IPIfNonMatch" | "IPOnDemand";
         namespace Rule {
             type Type = "field";
         }
@@ -56,11 +56,11 @@ declare namespace V2RayConf {
             ip?: string[];
             port?: number | string;
             // sourcePort?: number | string;
-            network?: Rule.Network;
+            network?: Network;
             source?: string[];
             user?: string[];
             inboundTag?: string[];
-            protocol?: Rule.Protocol[];
+            protocol?: Protocol[];
             attrs?: string;
             // (V2Ray 4.18+) A Starlark script, used for detecting traffic attributes. When this script returns true, this rule takes effect.
             outboundTag?: string;
