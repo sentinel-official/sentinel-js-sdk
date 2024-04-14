@@ -145,7 +145,6 @@ npm link @sentinel-official/sentinel-js-sdk
 ```bash
 cd examples/keplr
 npm i
-npm i @sentinel-official/sentinel-js-sdk
 npm run dev
 ```
 Navigate to: http://127.0.0.1:3000/.
@@ -153,8 +152,6 @@ Navigate to: http://127.0.0.1:3000/.
 ```bash
 cd examples/node
 npm i
-npm i @sentinel-official/sentinel-js-sdk
-npm i ts-node
 ts-node main.ts
 ```
 
