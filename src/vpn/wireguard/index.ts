@@ -61,7 +61,9 @@ export class Wireguard {
             const [listenPort] = await findFreePorts(1)
 
             const ipv4Address = [...wgBuff.subarray(0, 4)].join(".") + "/32"
-            const ipv6Address = [...wgBuff.subarray(4, 20)].join(":") + "/128"
+            // const ipv6Address = [...wgBuff.subarray(4, 20)].join(":") + "/128"
+            // Short version: .match(/.{1,4}/g).map((val) => val.replace(/^0+/, '')).join(':').replace(/0000\:/g, ':').replace(/:{2,}/g, '::')
+            const ipv6Address = wgBuff.subarray(4, 20).toString('hex').match(/.{1,4}/g).join(':') + "/128"
 
             this.interface = {
                 privateKey: this.privateKey,
