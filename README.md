@@ -2,6 +2,12 @@
 
 The Sentinel JS SDK relays on [CosmJS](https://github.com/cosmos/cosmjs) and it was developed following the official [tutorial](https://tutorials.cosmos.network/tutorials/7-cosmjs/), it take also inspiration from other open source Cosmos SDK.
 
+![NPM Version](https://img.shields.io/npm/v/%40sentinel-official%2Fsentinel-js-sdk)
+![NPM Downloads](https://img.shields.io/npm/dm/%40sentinel-official%2Fsentinel-js-sdk)
+![GitHub Repo stars](https://img.shields.io/github/stars/sentinel-official/sentinel-js-sdk)
+![GitHub forks](https://img.shields.io/github/forks/sentinel-official/sentinel-js-sdk)
+
+
 The SDK exstends the followings:
 - [@cosmjs/stargate/StargateClient](https://cosmos.github.io/cosmjs/latest/stargate/classes/StargateClient.html) as `SentinelClient`
 - [@cosmjs/stargate/SigningStargateClient](https://cosmos.github.io/cosmjs/latest/stargate/classes/SigningStargateClient.html) `SigningSentinelClient`
