@@ -94,7 +94,7 @@ const main = async () => {
 
     console.log("\n\n")
 
-    if (v2Node === null || wgNode === null) {
+    if (v2Node === null && wgNode === null) {
         console.log('Could not find either V2Ray or Wireguard node.')
         return
     }
