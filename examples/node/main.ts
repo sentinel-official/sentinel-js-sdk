@@ -99,8 +99,8 @@ const main = async () => {
         return
     }
 
-    selectedNodes.push(v2Node);
-    selectedNodes.push(wgNode);
+    if(v2Node !== null) selectedNodes.push(v2Node);
+    if(wgNode !== null) selectedNodes.push(wgNode);
 
     for(const node of selectedNodes){
         var subscribeArgs: TxNodeSubscribe = {
