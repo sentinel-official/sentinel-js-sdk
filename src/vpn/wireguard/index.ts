@@ -1,6 +1,9 @@
-import { generateKeyPairSync } from "crypto"
+import { generateKeyPairSync, randomBytes } from "crypto"
+import { spawn } from "child_process";
 import { uintArrayTob64 } from "../../utils"
 import findFreePorts from "find-free-ports"
+
+import * as path from 'path';
 import * as fs from 'fs';
 
 interface Interface {
@@ -108,5 +111,40 @@ export class Wireguard {
 
             fs.writeFileSync(output, config);
         }
+    }
+
+    public connect(configFile: string | undefined) {
+        if(configFile == undefined){
+            configFile = path.join(fs.mkdtempSync("wg-sentinel-sdk"), randomBytes(32).toString('hex') + ".conf")
+            // Hope the config are in "memory"
+            this.writeConfig(configFile)
+        }
+        const child = spawn(`wg-quick up ${configFile}`)
+        child.stdout.setEncoding('utf8');
+        child.stdout.on('data', function(data) {
+            console.log('stdout: ' + data);
+        });
+
+        child.stderr.setEncoding('utf8');
+        child.stderr.on('data', function(data) {
+            console.log('stderr: ' + data);
+        });
+
+        // child.on('close', function(code) {});
+    }
+
+    public disconnect(configFile: string){
+        const child = spawn(`wg-quick down ${configFile}`);
+        child.stdout.setEncoding('utf8');
+        child.stdout.on('data', function(data) {
+            console.log('stdout: ' + data);
+        });
+
+        child.stderr.setEncoding('utf8');
+        child.stderr.on('data', function(data) {
+            console.log('stderr: ' + data);
+        });
+
+        // child.on('close', function(code) {});
     }
 }

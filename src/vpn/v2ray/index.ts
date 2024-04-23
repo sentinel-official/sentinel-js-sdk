@@ -1,5 +1,8 @@
-import { randomUUID } from "crypto"
+import { randomUUID, randomBytes } from "crypto"
+import { spawn, ChildProcessWithoutNullStreams } from "child_process";
 import findFreePorts from "find-free-ports"
+
+import * as path from 'path';
 import * as fs from 'fs';
 
 import V2RayConf from "./v2ray-conf";
@@ -15,7 +18,10 @@ export class V2Ray {
     config: V2RayConf
     uuid: string
 
+    child: null | ChildProcessWithoutNullStreams;
+
     constructor() {
+        this.child = null;
         this.uuid = this.genuuid();
 
         // initialize default configuration values from:  https://github.com/sentinel-official/cli-client/blob/master/services/v2ray/types/config.go
@@ -126,5 +132,18 @@ export class V2Ray {
 
     public writeConfig(output: string) {
         fs.writeFileSync(output, JSON.stringify(this.config, null, 4));
+    }
+
+    public connect(configFile: string | undefined){
+        if(configFile == undefined){
+            configFile = path.join(fs.mkdtempSync("v2ray-sentinel-sdk"), randomBytes(32).toString('hex') + ".conf")
+            // Hope the config are in "memory"
+            this.writeConfig(configFile)
+        }
+        this.child = spawn(`v2ray run --config ${configFile}`)
+    }
+
+    public disconnect(){
+        if(this.child) this.child.kill('SIGINT');
     }
 }
