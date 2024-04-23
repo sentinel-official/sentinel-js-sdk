@@ -4,6 +4,7 @@ import findFreePorts from "find-free-ports"
 
 import * as path from 'path';
 import * as fs from 'fs';
+import * as os from 'os';
 
 import V2RayConf from "./v2ray-conf";
 import { V2RayStreamSettings } from "./v2ray-transport";
@@ -134,16 +135,20 @@ export class V2Ray {
         fs.writeFileSync(output, JSON.stringify(this.config, null, 4));
     }
 
-    public connect(configFile: string | undefined){
+    public connect(configFile?: string): number | undefined {
         if(configFile == undefined){
-            configFile = path.join(fs.mkdtempSync("v2ray-sentinel-sdk"), randomBytes(32).toString('hex') + ".conf")
+            const randomFile = "v2ray_" + randomBytes(8).toString('hex') + ".json"
+            const tempDirectory = fs.mkdtempSync(path.join(os.tmpdir(), 'sentinel-js-sdk'))
+            configFile = path.join(tempDirectory, randomFile)
             // Hope the config are in "memory"
             this.writeConfig(configFile)
         }
-        this.child = spawn(`v2ray run --config ${configFile}`)
+        this.child = spawn("v2ray", ["run", "--config", configFile])
+        return this.child.pid
     }
 
-    public disconnect(){
-        if(this.child) this.child.kill('SIGINT');
+    public disconnect(): boolean {
+        if(this.child) return this.child.kill('SIGINT');
+        return false
     }
 }
