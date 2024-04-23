@@ -66,17 +66,20 @@ export class Wireguard {
         if (wgBuff.length === 58 && this.privateKey) {
             const [listenPort] = await findFreePorts(1)
 
-            const ipv4Address = [...wgBuff.subarray(0, 4)].join(".") + "/32"
-            // const ipv6Address = [...wgBuff.subarray(4, 20)].join(":") + "/128"
-            // Short version: .match(/.{1,4}/g).map((val) => val.replace(/^0+/, '')).join(':').replace(/0000\:/g, ':').replace(/:{2,}/g, '::')
-            const ipv6Address = wgBuff.subarray(4, 20).toString('hex').match(/.{1,4}/g).join(':') + "/128"
-
             this.interface = {
                 privateKey: this.privateKey,
-                addresses: [ipv4Address, ipv6Address],
+                addresses: [],
                 listenPort: listenPort,
                 dns: ["10.8.0.1", "1.0.0.1", "1.1.1.1"],
             }
+
+            const ipv4Address = [...wgBuff.subarray(0, 4)].join(".") + "/32"
+            if(ipv4Address) this.interface.addresses.push(ipv4Address)
+
+            // const ipv6Address = [...wgBuff.subarray(4, 20)].join(":") + "/128"
+            // Short version: .match(/.{1,4}/g).map((val) => val.replace(/^0+/, '')).join(':').replace(/0000\:/g, ':').replace(/:{2,}/g, '::')
+            const ipv6Address = wgBuff.subarray(4, 20).toString('hex').match(/.{1,4}/g)?.join(':') + "/128"
+            if(ipv6Address) this.interface.addresses.push(ipv6Address)
 
             const publicKey = uintArrayTob64(Array.from(wgBuff.subarray(26, 58)));
             const host = [...wgBuff.subarray(20, 24)].join(".");
