@@ -5,6 +5,7 @@ import findFreePorts from "find-free-ports"
 
 import * as path from 'path';
 import * as fs from 'fs';
+import * as os from 'os';
 
 interface Interface {
     privateKey: string,
@@ -28,6 +29,8 @@ interface Peer {
     persistentKeepAlive: number
 }
 
+// oh, well... https://www.npmjs.com/package/wireguard-tools
+// Warning, in order to use connect and disconnect method we need sudoers permission
 export class Wireguard {
     // https://github.com/sentinel-official/cli-client/blob/master/services/wireguard/types/config.go
     // https://github.com/pirate/wireguard-docs?tab=readme-ov-file
@@ -113,38 +116,53 @@ export class Wireguard {
         }
     }
 
-    public connect(configFile: string | undefined) {
+    public connect(configFile?: string) {
         if(configFile == undefined){
-            configFile = path.join(fs.mkdtempSync("wg-sentinel-sdk"), randomBytes(32).toString('hex') + ".conf")
+            // const randomFile = "wg_" + randomBytes(8).toString('hex') + ".conf"
+            // pkexec wg-quick up /tmp/sentinel-js-sdkR2Resv/wg_76294e9ab0aac67f.conf
+            // wg-quick: The config file must be a valid interface name, followed by .conf
+
+            /* Recommended INTERFACE names include `wg0' or `wgvpn0' or even `wgmgmtlan0'.  However,  the
+            number  at  the  end  is  in  fact  optional,  and  really  any  free-form  string  [a-zA-
+            Z0-9_=+.-]{1,15} will work. So even interface names corresponding to geographic  locations
+            would suffice, such as `cincinnati', `nyc', or `paris', if that's somehow desirable */
+
+            const randomFile = "wgsent0.conf"
+            const tempDirectory = fs.mkdtempSync(path.join(os.tmpdir(), 'sentinel-js-sdk'))
+            configFile = path.join(tempDirectory, randomFile)
             // Hope the config are in "memory"
             this.writeConfig(configFile)
         }
-        const child = spawn(`wg-quick up ${configFile}`)
+        const child = spawn("wg-quick", ["up", configFile])
         child.stdout.setEncoding('utf8');
         child.stdout.on('data', function(data) {
-            console.log('stdout: ' + data);
+            console.log('stdout: ' + data.trim());
         });
 
         child.stderr.setEncoding('utf8');
         child.stderr.on('data', function(data) {
-            console.log('stderr: ' + data);
+            console.log('stderr: ' + data.trim());
         });
 
-        // child.on('close', function(code) {});
+        child.on('close', (code) => {
+            console.log(`exited with code ${code}.`);
+        });
     }
 
     public disconnect(configFile: string){
-        const child = spawn(`wg-quick down ${configFile}`);
+        const child = spawn("wg-quick", ["down", configFile])
         child.stdout.setEncoding('utf8');
         child.stdout.on('data', function(data) {
-            console.log('stdout: ' + data);
+            console.log('stdout: ' + data.trim());
         });
 
         child.stderr.setEncoding('utf8');
         child.stderr.on('data', function(data) {
-            console.log('stderr: ' + data);
+            console.log('stderr: ' + data.trim());
         });
 
-        // child.on('close', function(code) {});
+        child.on('close', (code) => {
+            console.log(`exited with code ${code}.`);
+        });
     }
 }
