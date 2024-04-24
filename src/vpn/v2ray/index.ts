@@ -131,8 +131,14 @@ export class V2Ray {
         }
     }
 
-    public writeConfig(output: string) {
+    public writeConfig(output?: string): string {
+        if(output == undefined){
+            const randomFile = "v2ray_" + randomBytes(8).toString('hex') + ".json"
+            const tempDirectory = fs.mkdtempSync(path.join(os.tmpdir(), 'sentinel-js-sdk'))
+            output = path.join(tempDirectory, randomFile)
+        }
         fs.writeFileSync(output, JSON.stringify(this.config, null, 4));
+        return output;
     }
 
     public connect(configFile?: string): number | undefined {

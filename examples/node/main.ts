@@ -29,6 +29,8 @@ import { GasPrice, assertIsDeliverTxSuccess } from "@cosmjs/stargate"
 import Long from "long";
 
 import * as readline from 'readline/promises';
+import * as process from 'process';
+import path from "path";
 
 const queryNodes = async (limit: number) => {
     const rpc = "https://rpc.sentinel.co:443"
@@ -163,15 +165,19 @@ const main = async () => {
                     console.log(wgPostResponse)
                     if (wgPostResponse.success === true){
                         await wg.parseConfig(wgPostResponse.result as string)
-                        wg.writeConfig("./wg0.conf")
-                        wg.connect("./wg0.conf")
+
+                        const wgConfFile = path.join(process.cwd(), "wgsent0.conf")
+                        wg.writeConfig(wgConfFile)
+                        console.log(`Wireguard configuration file stored at: ${wgConfFile}`)
+
+                        wg.connect(wgConfFile)
 
                         const rl1 = readline.createInterface({ input: process.stdin, output: process.stdout });
                         console.log("Wireguard connection was started, please test you connection.")
                         await rl1.question('Once you have finished press enter, the session will be ended');
                         rl1.close();
 
-                        wg.disconnect("./wg0.conf")
+                        wg.disconnect(wgConfFile)
                     }
                 }
                 else if(node.status.type == NodeVPNType.V2RAY){
@@ -181,8 +187,10 @@ const main = async () => {
                     console.log(v2PostResponse)
                     if (v2PostResponse.success === true){
                         await v2ray.parseConfig(v2PostResponse.result as string)
-                        v2ray.writeConfig("./v2ray_config.json")
-                        const v2Pid = v2ray.connect("./v2ray_config.json")
+
+                        // Test v2ray with temp config.
+                        // v2ray.writeConfig()
+                        const v2Pid = v2ray.connect()
 
                         const rl2 = readline.createInterface({ input: process.stdin, output: process.stdout });
                         console.log(`V2Ray client was started. Pid: ${v2Pid}.`)

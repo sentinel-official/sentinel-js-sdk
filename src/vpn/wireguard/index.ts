@@ -94,7 +94,12 @@ export class Wireguard {
         }
     }
 
-    public writeConfig(output: string) {
+    public writeConfig(output?: string): string | null {
+        if(output == undefined){
+            const tempDirectory = fs.mkdtempSync(path.join(os.tmpdir(), 'sentinel-js-sdk'))
+            output = path.join(tempDirectory, "wgsent0.conf")
+        }
+
         if (this.interface && this.peer) {
             // ungly, but betten than nothing :)
             var config = "[Interface]\n"
@@ -118,7 +123,9 @@ export class Wireguard {
             if (this.peer.presharedKey) config += "PresharedKey = " + this.peer.presharedKey + "\n"
 
             fs.writeFileSync(output, config);
+            return output
         }
+        return null
     }
 
     public connect(configFile?: string) {
