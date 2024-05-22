@@ -9,7 +9,7 @@ import secp256k1 from "secp256k1";
 import axios from 'axios';
 import https from 'https'
 
-import { NodeResponse, NodeStatus } from "./types";
+import { NodeResponse, NodeStatus, GeoIPLocation } from "./types";
 
 /**
  * Convert an array of stargate/Attribute in to javascript object
@@ -149,3 +149,19 @@ export async function privKeyFromMnemonic({mnemonic, bip39Password, hdPath}: { m
     const { privkey } = Slip10.derivePath(Slip10Curve.Secp256k1, seed, hdPath || makeCosmoshubPath(0));
     return privkey
 }
+
+/**
+ * Fetch location using ip-api service
+ *
+ * @param address if provided will fetch a determinate IP, else the current one
+ * @returns GeoIPLocation with all geo-ip information like city country etc
+ */
+export async function fetchLocation(address?: string): Promise<GeoIPLocation> {
+    const httpsAgent = new https.Agent({
+        rejectUnauthorized: false
+    });
+
+    const response = await axios.get("http://ip-api.com/json/" + (address || ''), { httpsAgent })
+    return response.data as GeoIPLocation
+}
+
