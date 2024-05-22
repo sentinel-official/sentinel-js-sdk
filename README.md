@@ -47,6 +47,18 @@ const client = await SigningSentinelClient.connectWithSigner(rpc, wallet)
 
 You can also set other default parameters: https://cosmos.github.io/cosmjs/latest/stargate/interfaces/SigningStargateClientOptions.html.
 
+In order to subscribe to chain events you need a websocket client
+```javascript
+import { SentinelWsClient } from "@sentinel-official/sentinel-js-sdk";
+const client = new SentinelWsClient("wss://rpc.sentinel.quokkastake.io");
+const stream = client.subscribe("tm.event='NewBlock'")
+stream.addListener({
+    next: data => console.log(data),
+    error: err => console.error(err),
+    complete: () => console.log('completed'),
+});
+```
+
 ## query
 ```javascript
 import { Status, PageRequest } from "@sentinel-official/sentinel-js-sdk";
