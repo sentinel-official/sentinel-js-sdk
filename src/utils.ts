@@ -1,15 +1,16 @@
 import { Event, Attribute } from "@cosmjs/stargate"
 import { Bip39, Slip10Curve, EnglishMnemonic, Slip10, HdPath } from "@cosmjs/crypto"
 import { makeCosmoshubPath } from "@cosmjs/amino"
-
 import { createHash } from "crypto"
 
 import Long from "long";
 import secp256k1 from "secp256k1";
 import axios from 'axios';
-import https from 'https'
+import https from 'https';
+import speedTest from 'speedtest-net'
 
 import { NodeResponse, NodeStatus, GeoIPLocation } from "./types";
+import { ResultEvent } from "speedtest-net";
 
 /**
  * Convert an array of stargate/Attribute in to javascript object
@@ -165,3 +166,16 @@ export async function fetchLocation(address?: string): Promise<GeoIPLocation> {
     return response.data as GeoIPLocation
 }
 
+// https://github.com/sentinel-official/dvpn-node/blob/development/utils/speedtest.go
+// https://github.com/ddsol/speedtest.net/pull/129
+/**
+ * Perform a speed test using speedtest-net service
+ *
+ * @returns ResultEvent from speed test contains ping, download, upload and other useful info about the network
+ */
+export async function findInternetSpeed(): Promise<ResultEvent>{
+    return await speedTest({
+        acceptLicense: true,
+        acceptGdpr: true
+    })
+}

@@ -25,10 +25,12 @@
   "dependencies": {
     "@cosmjs/proto-signing": "^0.32.2",
     "@cosmjs/stargate": "^0.32.2",
+    "@types/speedtest-net": "^2.1.5",
     "axios": "^1.6.8",
     "find-free-ports": "^3.1.1",
     "long": "^5.2.3",
-    "secp256k1": "^5.0.0"
+    "secp256k1": "^5.0.0",
+    "speedtest-net": "^2.2.0"
   },
   "devDependencies": {
     "@types/secp256k1": "^4.0.6",
