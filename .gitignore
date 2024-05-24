@@ -133,4 +133,4 @@ dist/*
 scripts/*.proto
 
 v2ray_config.json
-wg0.conf
+wg*.conf

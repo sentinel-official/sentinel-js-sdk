@@ -1,6 +1,10 @@
-import { randomUUID } from "crypto"
+import { randomUUID, randomBytes } from "crypto"
+import { spawn, ChildProcessWithoutNullStreams } from "child_process";
 import findFreePorts from "find-free-ports"
+
+import * as path from 'path';
 import * as fs from 'fs';
+import * as os from 'os';
 
 import V2RayConf from "./v2ray-conf";
 import { V2RayStreamSettings } from "./v2ray-transport";
@@ -15,7 +19,10 @@ export class V2Ray {
     config: V2RayConf
     uuid: string
 
+    child: null | ChildProcessWithoutNullStreams;
+
     constructor() {
+        this.child = null;
         this.uuid = this.genuuid();
 
         // initialize default configuration values from:  https://github.com/sentinel-official/cli-client/blob/master/services/v2ray/types/config.go
@@ -124,7 +131,30 @@ export class V2Ray {
         }
     }
 
-    public writeConfig(output: string) {
+    public writeConfig(output?: string): string {
+        if(output == undefined){
+            const randomFile = "v2ray_" + randomBytes(8).toString('hex') + ".json"
+            const tempDirectory = fs.mkdtempSync(path.join(os.tmpdir(), 'sentinel-js-sdk'))
+            output = path.join(tempDirectory, randomFile)
+        }
         fs.writeFileSync(output, JSON.stringify(this.config, null, 4));
+        return output;
+    }
+
+    public connect(configFile?: string): number | undefined {
+        if(configFile == undefined){
+            const randomFile = "v2ray_" + randomBytes(8).toString('hex') + ".json"
+            const tempDirectory = fs.mkdtempSync(path.join(os.tmpdir(), 'sentinel-js-sdk'))
+            configFile = path.join(tempDirectory, randomFile)
+            // Hope the config are in "memory"
+            this.writeConfig(configFile)
+        }
+        this.child = spawn("v2ray", ["run", "--config", configFile])
+        return this.child.pid
+    }
+
+    public disconnect(): boolean {
+        if(this.child) return this.child.kill('SIGINT');
+        return false
     }
 }

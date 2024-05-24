@@ -29,6 +29,8 @@ import { GasPrice, assertIsDeliverTxSuccess } from "@cosmjs/stargate"
 import Long from "long";
 
 import * as readline from 'readline/promises';
+import * as process from 'process';
+import path from "path";
 
 const queryNodes = async (limit: number) => {
     const rpc = "https://rpc.sentinel.co:443"
@@ -92,6 +94,18 @@ const main = async () => {
         }
     }
 
+    /* var v2ChaiNode = await queryNode("sentnode1234")
+    if(v2ChaiNode) {
+        var v2StatusNode = await nodeStatus(v2ChaiNode.remoteUrl)
+        v2Node = { node: v2ChaiNode, status: v2StatusNode }
+    }
+
+    var wgChaiNode = await queryNode("sentnode1234")
+    if(wgChaiNode) {
+        var wgStatusNode = await nodeStatus(wgChaiNode.remoteUrl)
+        wgNode = { node: wgChaiNode, status: wgStatusNode }
+    } */
+
     console.log("\n\n")
 
     if (v2Node === null && wgNode === null) {
@@ -146,22 +160,54 @@ const main = async () => {
 
                 if(node.status.type == NodeVPNType.WIREGUARD){
                     console.log("Wireguard")
-                    var wgConfig = new Wireguard()
-                    var wgPostResponse = await postSession(wgConfig.publicKey, signature, account.address, sessionId, node.node.remoteUrl)
+                    var wg = new Wireguard()
+                    var wgPostResponse = await postSession(wg.publicKey, signature, account.address, sessionId, node.node.remoteUrl)
                     console.log(wgPostResponse)
                     if (wgPostResponse.success === true){
-                        await wgConfig.parseConfig(wgPostResponse.result as string)
-                        wgConfig.writeConfig("wg0.conf")
+                        await wg.parseConfig(wgPostResponse.result as string)
+
+                        const wgConfFile = path.join(process.cwd(), "wgsent0.conf")
+                        wg.writeConfig(wgConfFile)
+                        console.log(`Wireguard configuration file stored at: ${wgConfFile}`)
+
+                        wg.connect(wgConfFile)
+
+                        const rl1 = readline.createInterface({ input: process.stdin, output: process.stdout });
+                        console.log("Wireguard connection was started, please test you connection.")
+                        await rl1.question('Once you have finished press enter, the session will be ended');
+                        rl1.close();
+
+                        wg.show().then(
+                            (data: any) => { console.log("async result"); console.log(data) },
+                            (err: any) => { console.error("async error:\n" + err); }
+                        );
+
+                        wg.disconnect(wgConfFile)
                     }
                 }
                 else if(node.status.type == NodeVPNType.V2RAY){
                     console.log("V2Ray")
-                    var v2Config = new V2Ray()
-                    var v2PostResponse = await postSession(v2Config.getKey(), signature, account.address, sessionId, node.node.remoteUrl)
+                    var v2ray = new V2Ray()
+                    var v2PostResponse = await postSession(v2ray.getKey(), signature, account.address, sessionId, node.node.remoteUrl)
                     console.log(v2PostResponse)
                     if (v2PostResponse.success === true){
-                        await v2Config.parseConfig(v2PostResponse.result as string)
-                        v2Config.writeConfig("v2ray_config.json")
+                        await v2ray.parseConfig(v2PostResponse.result as string)
+
+                        // Test v2ray with temp config.
+                        // v2ray.writeConfig()
+                        const v2Pid = v2ray.connect()
+
+                        const rl2 = readline.createInterface({ input: process.stdin, output: process.stdout });
+                        console.log(`V2Ray client was started. Pid: ${v2Pid}.`)
+                        console.log("You can test the following protocols: ")
+                        v2ray.config.inbounds.forEach((inbound: any) => {
+                            console.log(`- ${inbound.protocol} on ${inbound.listen}:${inbound.port}`)
+                        })
+
+                        await rl2.question('Once you have finished press enter, the session will be ended');
+                        rl2.close();
+
+                        v2ray.disconnect()
                     }
                 }
 
