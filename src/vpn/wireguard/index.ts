@@ -29,6 +29,7 @@ interface Peer {
     persistentKeepAlive: number
 }
 
+
 // oh, well... https://www.npmjs.com/package/wireguard-tools
 // Warning, in order to use connect and disconnect method we need sudoers permission
 export class Wireguard {
@@ -176,5 +177,50 @@ export class Wireguard {
         child.on('close', (code) => {
             console.log(`exited with code ${code}.`);
         });
+    }
+
+    /* usage:
+     * show().then(data => {console.log("async result:\n" + data);}, err => {console.error("async error:\n" + err);});
+     */
+    public async show(configFile?: string){
+        const interfaceName = configFile ? configFile.split("/").slice(-1)[0].replace(".conf", "") : "wgsent0"
+        const child = spawn("wg", ["show", interfaceName, "dump"])
+        child.stdout.setEncoding('utf8');
+        child.stderr.setEncoding('utf8');
+
+        var peers: Array<any> = []
+
+        for await (const chunk of child.stdout) {
+            console.log('stdout: ', chunk.trim());
+
+            const lines = chunk.trim().split("\n")
+            lines.shift() // Remove the first element, It's the interface.
+            const keys = [
+                "publicKey",
+                "privateKey",
+                "endpoint",
+                "allowedIps",
+                "latestHandshakes",
+                "transferIn",
+                "transferOut",
+                "persistentKeepalive",
+            ]
+            lines.forEach((x: string) => {
+                var peer: any = {}
+                x.split("\t").forEach((v: string, i: number) => peer[keys[i]] = v)
+                peers.push(peer)
+            })
+        }
+        let error = "";
+        for await (const chunk of child.stderr) {
+            console.error('stderr: ', chunk.trim());
+            error += chunk;
+        }
+        const exitCode = await new Promise( (resolve, reject) => {
+            child.on('close', resolve);
+        });
+
+        if(exitCode) throw new Error(`subprocess error exit ${exitCode}, ${error}`);
+        return peers;
     }
 }

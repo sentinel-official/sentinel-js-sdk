@@ -177,6 +177,11 @@ const main = async () => {
                         await rl1.question('Once you have finished press enter, the session will be ended');
                         rl1.close();
 
+                        wg.show().then(
+                            (data: any) => { console.log("async result"); console.log(data) },
+                            (err: any) => { console.error("async error:\n" + err); }
+                        );
+
                         wg.disconnect(wgConfFile)
                     }
                 }
