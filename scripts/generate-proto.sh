@@ -36,19 +36,21 @@ mkdir -p $TMP_FOLDER
 # Remove folder
 
 # Sentinel hub
-echo -e "\n${YELLOW}Cloning sentinel-official/hub@v0.11.5 /proto/sentinel${ENDCOLOR}"
-git clone -n --depth=1 --branch v0.11.5 https://github.com/sentinel-official/hub.git sentinel && \
+echo -e "\n${YELLOW}Cloning sentinel-official/hub@v12.0.0-rc8 /proto/sentinel${ENDCOLOR}"
+git clone -n --depth=1 --branch v12.0.0-rc8 https://github.com/sentinel-official/hub.git sentinel && \
   git -C sentinel sparse-checkout set --no-cone proto/sentinel && \
   git -C sentinel checkout && \
   mv sentinel/proto/sentinel $TMP_FOLDER && \
   rm -rf sentinel/
 
 # 3th parties
-echo -e "\n${YELLOW}Cloning cosmos/cosmos-sdk@v0.45.4 /proto/cosmos${ENDCOLOR}"
-git clone -n --depth=1 --branch v0.45.4 https://github.com/cosmos/cosmos-sdk.git cosmos && \
-  git -C cosmos sparse-checkout set --no-cone proto/cosmos && \
+echo -e "\n${YELLOW}Cloning cosmos/cosmos-sdk@v0.47.0 /proto/*${ENDCOLOR}"
+git clone -n --depth=1 --branch v0.47.0 https://github.com/cosmos/cosmos-sdk.git cosmos && \
+  git -C cosmos sparse-checkout set --no-cone proto/ && \
   git -C cosmos checkout && \
   mv cosmos/proto/cosmos $TMP_FOLDER && \
+  mv cosmos/proto/amino $TMP_FOLDER && \
+  mv cosmos/proto/tendermint $TMP_FOLDER && \
   rm -rf cosmos/
 
 echo -e "\n${YELLOW}Cloning cosmos/cosmos-proto@main /proto/cosmos_proto${ENDCOLOR}"
