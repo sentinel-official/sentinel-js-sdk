@@ -5,41 +5,123 @@ import { Proof } from "./proof";
 
 export const protobufPackage = "sentinel.session.v2";
 
-/** MsgStartRequest defines the SDK message for starting a session */
-export interface MsgStartRequest {
-  from: string;
-  id: Long;
-  address: string;
-}
-
-/** MsgUpdateDetailsRequest defines the SDK message for updating a session */
-export interface MsgUpdateDetailsRequest {
-  from: string;
-  proof?: Proof | undefined;
-  signature: Uint8Array;
-}
-
-/** MsgEndRequest defines the SDK message for ending a session */
 export interface MsgEndRequest {
   from: string;
   id: Long;
   rating: Long;
 }
 
-/** MsgStartResponse defines the response of message MsgStartRequest */
+export interface MsgStartRequest {
+  from: string;
+  id: Long;
+  address: string;
+}
+
+export interface MsgUpdateDetailsRequest {
+  from: string;
+  proof?: Proof | undefined;
+  signature: Uint8Array;
+}
+
+export interface MsgEndResponse {
+}
+
 export interface MsgStartResponse {
 }
 
-/**
- * MsgUpdateDetailsResponse defines the response of message
- * MsgUpdateDetailsRequest
- */
 export interface MsgUpdateDetailsResponse {
 }
 
-/** MsgEndResponse defines the response of message MsgEndRequest */
-export interface MsgEndResponse {
+function createBaseMsgEndRequest(): MsgEndRequest {
+  return { from: "", id: Long.UZERO, rating: Long.UZERO };
 }
+
+export const MsgEndRequest = {
+  encode(message: MsgEndRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.from !== "") {
+      writer.uint32(10).string(message.from);
+    }
+    if (!message.id.isZero()) {
+      writer.uint32(16).uint64(message.id);
+    }
+    if (!message.rating.isZero()) {
+      writer.uint32(24).uint64(message.rating);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgEndRequest {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMsgEndRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.from = reader.string();
+          continue;
+        case 2:
+          if (tag !== 16) {
+            break;
+          }
+
+          message.id = reader.uint64() as Long;
+          continue;
+        case 3:
+          if (tag !== 24) {
+            break;
+          }
+
+          message.rating = reader.uint64() as Long;
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): MsgEndRequest {
+    return {
+      from: isSet(object.from) ? globalThis.String(object.from) : "",
+      id: isSet(object.id) ? Long.fromValue(object.id) : Long.UZERO,
+      rating: isSet(object.rating) ? Long.fromValue(object.rating) : Long.UZERO,
+    };
+  },
+
+  toJSON(message: MsgEndRequest): unknown {
+    const obj: any = {};
+    if (message.from !== "") {
+      obj.from = message.from;
+    }
+    if (!message.id.isZero()) {
+      obj.id = (message.id || Long.UZERO).toString();
+    }
+    if (!message.rating.isZero()) {
+      obj.rating = (message.rating || Long.UZERO).toString();
+    }
+    return obj;
+  },
+
+  create(base?: DeepPartial<MsgEndRequest>): MsgEndRequest {
+    return MsgEndRequest.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<MsgEndRequest>): MsgEndRequest {
+    const message = createBaseMsgEndRequest();
+    message.from = object.from ?? "";
+    message.id = (object.id !== undefined && object.id !== null) ? Long.fromValue(object.id) : Long.UZERO;
+    message.rating = (object.rating !== undefined && object.rating !== null)
+      ? Long.fromValue(object.rating)
+      : Long.UZERO;
+    return message;
+  },
+};
 
 function createBaseMsgStartRequest(): MsgStartRequest {
   return { from: "", id: Long.UZERO, address: "" };
@@ -219,52 +301,22 @@ export const MsgUpdateDetailsRequest = {
   },
 };
 
-function createBaseMsgEndRequest(): MsgEndRequest {
-  return { from: "", id: Long.UZERO, rating: Long.UZERO };
+function createBaseMsgEndResponse(): MsgEndResponse {
+  return {};
 }
 
-export const MsgEndRequest = {
-  encode(message: MsgEndRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.from !== "") {
-      writer.uint32(10).string(message.from);
-    }
-    if (!message.id.isZero()) {
-      writer.uint32(16).uint64(message.id);
-    }
-    if (!message.rating.isZero()) {
-      writer.uint32(24).uint64(message.rating);
-    }
+export const MsgEndResponse = {
+  encode(_: MsgEndResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     return writer;
   },
 
-  decode(input: _m0.Reader | Uint8Array, length?: number): MsgEndRequest {
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgEndResponse {
     const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseMsgEndRequest();
+    const message = createBaseMsgEndResponse();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
-        case 1:
-          if (tag !== 10) {
-            break;
-          }
-
-          message.from = reader.string();
-          continue;
-        case 2:
-          if (tag !== 16) {
-            break;
-          }
-
-          message.id = reader.uint64() as Long;
-          continue;
-        case 3:
-          if (tag !== 24) {
-            break;
-          }
-
-          message.rating = reader.uint64() as Long;
-          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -274,38 +326,20 @@ export const MsgEndRequest = {
     return message;
   },
 
-  fromJSON(object: any): MsgEndRequest {
-    return {
-      from: isSet(object.from) ? globalThis.String(object.from) : "",
-      id: isSet(object.id) ? Long.fromValue(object.id) : Long.UZERO,
-      rating: isSet(object.rating) ? Long.fromValue(object.rating) : Long.UZERO,
-    };
+  fromJSON(_: any): MsgEndResponse {
+    return {};
   },
 
-  toJSON(message: MsgEndRequest): unknown {
+  toJSON(_: MsgEndResponse): unknown {
     const obj: any = {};
-    if (message.from !== "") {
-      obj.from = message.from;
-    }
-    if (!message.id.isZero()) {
-      obj.id = (message.id || Long.UZERO).toString();
-    }
-    if (!message.rating.isZero()) {
-      obj.rating = (message.rating || Long.UZERO).toString();
-    }
     return obj;
   },
 
-  create(base?: DeepPartial<MsgEndRequest>): MsgEndRequest {
-    return MsgEndRequest.fromPartial(base ?? {});
+  create(base?: DeepPartial<MsgEndResponse>): MsgEndResponse {
+    return MsgEndResponse.fromPartial(base ?? {});
   },
-  fromPartial(object: DeepPartial<MsgEndRequest>): MsgEndRequest {
-    const message = createBaseMsgEndRequest();
-    message.from = object.from ?? "";
-    message.id = (object.id !== undefined && object.id !== null) ? Long.fromValue(object.id) : Long.UZERO;
-    message.rating = (object.rating !== undefined && object.rating !== null)
-      ? Long.fromValue(object.rating)
-      : Long.UZERO;
+  fromPartial(_: DeepPartial<MsgEndResponse>): MsgEndResponse {
+    const message = createBaseMsgEndResponse();
     return message;
   },
 };
@@ -392,49 +426,6 @@ export const MsgUpdateDetailsResponse = {
   },
   fromPartial(_: DeepPartial<MsgUpdateDetailsResponse>): MsgUpdateDetailsResponse {
     const message = createBaseMsgUpdateDetailsResponse();
-    return message;
-  },
-};
-
-function createBaseMsgEndResponse(): MsgEndResponse {
-  return {};
-}
-
-export const MsgEndResponse = {
-  encode(_: MsgEndResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    return writer;
-  },
-
-  decode(input: _m0.Reader | Uint8Array, length?: number): MsgEndResponse {
-    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseMsgEndResponse();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skipType(tag & 7);
-    }
-    return message;
-  },
-
-  fromJSON(_: any): MsgEndResponse {
-    return {};
-  },
-
-  toJSON(_: MsgEndResponse): unknown {
-    const obj: any = {};
-    return obj;
-  },
-
-  create(base?: DeepPartial<MsgEndResponse>): MsgEndResponse {
-    return MsgEndResponse.fromPartial(base ?? {});
-  },
-  fromPartial(_: DeepPartial<MsgEndResponse>): MsgEndResponse {
-    const message = createBaseMsgEndResponse();
     return message;
   },
 };

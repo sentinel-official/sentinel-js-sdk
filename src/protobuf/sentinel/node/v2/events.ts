@@ -5,6 +5,12 @@ import { Status, statusFromJSON, statusToJSON } from "../../types/v1/status";
 
 export const protobufPackage = "sentinel.node.v2";
 
+export interface EventCreateSubscription {
+  address: string;
+  nodeAddress: string;
+  id: Long;
+}
+
 export interface EventRegister {
   address: string;
 }
@@ -21,11 +27,94 @@ export interface EventUpdateStatus {
   address: string;
 }
 
-export interface EventCreateSubscription {
-  address: string;
-  nodeAddress: string;
-  id: Long;
+function createBaseEventCreateSubscription(): EventCreateSubscription {
+  return { address: "", nodeAddress: "", id: Long.UZERO };
 }
+
+export const EventCreateSubscription = {
+  encode(message: EventCreateSubscription, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.address !== "") {
+      writer.uint32(10).string(message.address);
+    }
+    if (message.nodeAddress !== "") {
+      writer.uint32(18).string(message.nodeAddress);
+    }
+    if (!message.id.isZero()) {
+      writer.uint32(24).uint64(message.id);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): EventCreateSubscription {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseEventCreateSubscription();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.address = reader.string();
+          continue;
+        case 2:
+          if (tag !== 18) {
+            break;
+          }
+
+          message.nodeAddress = reader.string();
+          continue;
+        case 3:
+          if (tag !== 24) {
+            break;
+          }
+
+          message.id = reader.uint64() as Long;
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): EventCreateSubscription {
+    return {
+      address: isSet(object.address) ? globalThis.String(object.address) : "",
+      nodeAddress: isSet(object.nodeAddress) ? globalThis.String(object.nodeAddress) : "",
+      id: isSet(object.id) ? Long.fromValue(object.id) : Long.UZERO,
+    };
+  },
+
+  toJSON(message: EventCreateSubscription): unknown {
+    const obj: any = {};
+    if (message.address !== "") {
+      obj.address = message.address;
+    }
+    if (message.nodeAddress !== "") {
+      obj.nodeAddress = message.nodeAddress;
+    }
+    if (!message.id.isZero()) {
+      obj.id = (message.id || Long.UZERO).toString();
+    }
+    return obj;
+  },
+
+  create(base?: DeepPartial<EventCreateSubscription>): EventCreateSubscription {
+    return EventCreateSubscription.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<EventCreateSubscription>): EventCreateSubscription {
+    const message = createBaseEventCreateSubscription();
+    message.address = object.address ?? "";
+    message.nodeAddress = object.nodeAddress ?? "";
+    message.id = (object.id !== undefined && object.id !== null) ? Long.fromValue(object.id) : Long.UZERO;
+    return message;
+  },
+};
 
 function createBaseEventRegister(): EventRegister {
   return { address: "" };
@@ -258,95 +347,6 @@ export const EventUpdateStatus = {
     const message = createBaseEventUpdateStatus();
     message.status = object.status ?? 0;
     message.address = object.address ?? "";
-    return message;
-  },
-};
-
-function createBaseEventCreateSubscription(): EventCreateSubscription {
-  return { address: "", nodeAddress: "", id: Long.UZERO };
-}
-
-export const EventCreateSubscription = {
-  encode(message: EventCreateSubscription, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.address !== "") {
-      writer.uint32(10).string(message.address);
-    }
-    if (message.nodeAddress !== "") {
-      writer.uint32(18).string(message.nodeAddress);
-    }
-    if (!message.id.isZero()) {
-      writer.uint32(24).uint64(message.id);
-    }
-    return writer;
-  },
-
-  decode(input: _m0.Reader | Uint8Array, length?: number): EventCreateSubscription {
-    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseEventCreateSubscription();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1:
-          if (tag !== 10) {
-            break;
-          }
-
-          message.address = reader.string();
-          continue;
-        case 2:
-          if (tag !== 18) {
-            break;
-          }
-
-          message.nodeAddress = reader.string();
-          continue;
-        case 3:
-          if (tag !== 24) {
-            break;
-          }
-
-          message.id = reader.uint64() as Long;
-          continue;
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skipType(tag & 7);
-    }
-    return message;
-  },
-
-  fromJSON(object: any): EventCreateSubscription {
-    return {
-      address: isSet(object.address) ? globalThis.String(object.address) : "",
-      nodeAddress: isSet(object.nodeAddress) ? globalThis.String(object.nodeAddress) : "",
-      id: isSet(object.id) ? Long.fromValue(object.id) : Long.UZERO,
-    };
-  },
-
-  toJSON(message: EventCreateSubscription): unknown {
-    const obj: any = {};
-    if (message.address !== "") {
-      obj.address = message.address;
-    }
-    if (message.nodeAddress !== "") {
-      obj.nodeAddress = message.nodeAddress;
-    }
-    if (!message.id.isZero()) {
-      obj.id = (message.id || Long.UZERO).toString();
-    }
-    return obj;
-  },
-
-  create(base?: DeepPartial<EventCreateSubscription>): EventCreateSubscription {
-    return EventCreateSubscription.fromPartial(base ?? {});
-  },
-  fromPartial(object: DeepPartial<EventCreateSubscription>): EventCreateSubscription {
-    const message = createBaseEventCreateSubscription();
-    message.address = object.address ?? "";
-    message.nodeAddress = object.nodeAddress ?? "";
-    message.id = (object.id !== undefined && object.id !== null) ? Long.fromValue(object.id) : Long.UZERO;
     return message;
   },
 };

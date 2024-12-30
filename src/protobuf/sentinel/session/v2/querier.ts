@@ -16,6 +16,12 @@ export interface QuerySessionsForAccountRequest {
   pagination?: PageRequest | undefined;
 }
 
+export interface QuerySessionsForAllocationRequest {
+  id: Long;
+  address: string;
+  pagination?: PageRequest | undefined;
+}
+
 export interface QuerySessionsForNodeRequest {
   address: string;
   pagination?: PageRequest | undefined;
@@ -23,12 +29,6 @@ export interface QuerySessionsForNodeRequest {
 
 export interface QuerySessionsForSubscriptionRequest {
   id: Long;
-  pagination?: PageRequest | undefined;
-}
-
-export interface QuerySessionsForAllocationRequest {
-  id: Long;
-  address: string;
   pagination?: PageRequest | undefined;
 }
 
@@ -49,17 +49,17 @@ export interface QuerySessionsForAccountResponse {
   pagination?: PageResponse | undefined;
 }
 
+export interface QuerySessionsForAllocationResponse {
+  sessions: Session[];
+  pagination?: PageResponse | undefined;
+}
+
 export interface QuerySessionsForNodeResponse {
   sessions: Session[];
   pagination?: PageResponse | undefined;
 }
 
 export interface QuerySessionsForSubscriptionResponse {
-  sessions: Session[];
-  pagination?: PageResponse | undefined;
-}
-
-export interface QuerySessionsForAllocationResponse {
   sessions: Session[];
   pagination?: PageResponse | undefined;
 }
@@ -199,6 +199,97 @@ export const QuerySessionsForAccountRequest = {
   },
   fromPartial(object: DeepPartial<QuerySessionsForAccountRequest>): QuerySessionsForAccountRequest {
     const message = createBaseQuerySessionsForAccountRequest();
+    message.address = object.address ?? "";
+    message.pagination = (object.pagination !== undefined && object.pagination !== null)
+      ? PageRequest.fromPartial(object.pagination)
+      : undefined;
+    return message;
+  },
+};
+
+function createBaseQuerySessionsForAllocationRequest(): QuerySessionsForAllocationRequest {
+  return { id: Long.UZERO, address: "", pagination: undefined };
+}
+
+export const QuerySessionsForAllocationRequest = {
+  encode(message: QuerySessionsForAllocationRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (!message.id.isZero()) {
+      writer.uint32(8).uint64(message.id);
+    }
+    if (message.address !== "") {
+      writer.uint32(18).string(message.address);
+    }
+    if (message.pagination !== undefined) {
+      PageRequest.encode(message.pagination, writer.uint32(26).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): QuerySessionsForAllocationRequest {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseQuerySessionsForAllocationRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 8) {
+            break;
+          }
+
+          message.id = reader.uint64() as Long;
+          continue;
+        case 2:
+          if (tag !== 18) {
+            break;
+          }
+
+          message.address = reader.string();
+          continue;
+        case 3:
+          if (tag !== 26) {
+            break;
+          }
+
+          message.pagination = PageRequest.decode(reader, reader.uint32());
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): QuerySessionsForAllocationRequest {
+    return {
+      id: isSet(object.id) ? Long.fromValue(object.id) : Long.UZERO,
+      address: isSet(object.address) ? globalThis.String(object.address) : "",
+      pagination: isSet(object.pagination) ? PageRequest.fromJSON(object.pagination) : undefined,
+    };
+  },
+
+  toJSON(message: QuerySessionsForAllocationRequest): unknown {
+    const obj: any = {};
+    if (!message.id.isZero()) {
+      obj.id = (message.id || Long.UZERO).toString();
+    }
+    if (message.address !== "") {
+      obj.address = message.address;
+    }
+    if (message.pagination !== undefined) {
+      obj.pagination = PageRequest.toJSON(message.pagination);
+    }
+    return obj;
+  },
+
+  create(base?: DeepPartial<QuerySessionsForAllocationRequest>): QuerySessionsForAllocationRequest {
+    return QuerySessionsForAllocationRequest.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<QuerySessionsForAllocationRequest>): QuerySessionsForAllocationRequest {
+    const message = createBaseQuerySessionsForAllocationRequest();
+    message.id = (object.id !== undefined && object.id !== null) ? Long.fromValue(object.id) : Long.UZERO;
     message.address = object.address ?? "";
     message.pagination = (object.pagination !== undefined && object.pagination !== null)
       ? PageRequest.fromPartial(object.pagination)
@@ -352,97 +443,6 @@ export const QuerySessionsForSubscriptionRequest = {
   fromPartial(object: DeepPartial<QuerySessionsForSubscriptionRequest>): QuerySessionsForSubscriptionRequest {
     const message = createBaseQuerySessionsForSubscriptionRequest();
     message.id = (object.id !== undefined && object.id !== null) ? Long.fromValue(object.id) : Long.UZERO;
-    message.pagination = (object.pagination !== undefined && object.pagination !== null)
-      ? PageRequest.fromPartial(object.pagination)
-      : undefined;
-    return message;
-  },
-};
-
-function createBaseQuerySessionsForAllocationRequest(): QuerySessionsForAllocationRequest {
-  return { id: Long.UZERO, address: "", pagination: undefined };
-}
-
-export const QuerySessionsForAllocationRequest = {
-  encode(message: QuerySessionsForAllocationRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (!message.id.isZero()) {
-      writer.uint32(8).uint64(message.id);
-    }
-    if (message.address !== "") {
-      writer.uint32(18).string(message.address);
-    }
-    if (message.pagination !== undefined) {
-      PageRequest.encode(message.pagination, writer.uint32(26).fork()).ldelim();
-    }
-    return writer;
-  },
-
-  decode(input: _m0.Reader | Uint8Array, length?: number): QuerySessionsForAllocationRequest {
-    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseQuerySessionsForAllocationRequest();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1:
-          if (tag !== 8) {
-            break;
-          }
-
-          message.id = reader.uint64() as Long;
-          continue;
-        case 2:
-          if (tag !== 18) {
-            break;
-          }
-
-          message.address = reader.string();
-          continue;
-        case 3:
-          if (tag !== 26) {
-            break;
-          }
-
-          message.pagination = PageRequest.decode(reader, reader.uint32());
-          continue;
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skipType(tag & 7);
-    }
-    return message;
-  },
-
-  fromJSON(object: any): QuerySessionsForAllocationRequest {
-    return {
-      id: isSet(object.id) ? Long.fromValue(object.id) : Long.UZERO,
-      address: isSet(object.address) ? globalThis.String(object.address) : "",
-      pagination: isSet(object.pagination) ? PageRequest.fromJSON(object.pagination) : undefined,
-    };
-  },
-
-  toJSON(message: QuerySessionsForAllocationRequest): unknown {
-    const obj: any = {};
-    if (!message.id.isZero()) {
-      obj.id = (message.id || Long.UZERO).toString();
-    }
-    if (message.address !== "") {
-      obj.address = message.address;
-    }
-    if (message.pagination !== undefined) {
-      obj.pagination = PageRequest.toJSON(message.pagination);
-    }
-    return obj;
-  },
-
-  create(base?: DeepPartial<QuerySessionsForAllocationRequest>): QuerySessionsForAllocationRequest {
-    return QuerySessionsForAllocationRequest.fromPartial(base ?? {});
-  },
-  fromPartial(object: DeepPartial<QuerySessionsForAllocationRequest>): QuerySessionsForAllocationRequest {
-    const message = createBaseQuerySessionsForAllocationRequest();
-    message.id = (object.id !== undefined && object.id !== null) ? Long.fromValue(object.id) : Long.UZERO;
-    message.address = object.address ?? "";
     message.pagination = (object.pagination !== undefined && object.pagination !== null)
       ? PageRequest.fromPartial(object.pagination)
       : undefined;
@@ -702,6 +702,82 @@ export const QuerySessionsForAccountResponse = {
   },
 };
 
+function createBaseQuerySessionsForAllocationResponse(): QuerySessionsForAllocationResponse {
+  return { sessions: [], pagination: undefined };
+}
+
+export const QuerySessionsForAllocationResponse = {
+  encode(message: QuerySessionsForAllocationResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    for (const v of message.sessions) {
+      Session.encode(v!, writer.uint32(10).fork()).ldelim();
+    }
+    if (message.pagination !== undefined) {
+      PageResponse.encode(message.pagination, writer.uint32(18).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): QuerySessionsForAllocationResponse {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseQuerySessionsForAllocationResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.sessions.push(Session.decode(reader, reader.uint32()));
+          continue;
+        case 2:
+          if (tag !== 18) {
+            break;
+          }
+
+          message.pagination = PageResponse.decode(reader, reader.uint32());
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): QuerySessionsForAllocationResponse {
+    return {
+      sessions: globalThis.Array.isArray(object?.sessions) ? object.sessions.map((e: any) => Session.fromJSON(e)) : [],
+      pagination: isSet(object.pagination) ? PageResponse.fromJSON(object.pagination) : undefined,
+    };
+  },
+
+  toJSON(message: QuerySessionsForAllocationResponse): unknown {
+    const obj: any = {};
+    if (message.sessions?.length) {
+      obj.sessions = message.sessions.map((e) => Session.toJSON(e));
+    }
+    if (message.pagination !== undefined) {
+      obj.pagination = PageResponse.toJSON(message.pagination);
+    }
+    return obj;
+  },
+
+  create(base?: DeepPartial<QuerySessionsForAllocationResponse>): QuerySessionsForAllocationResponse {
+    return QuerySessionsForAllocationResponse.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<QuerySessionsForAllocationResponse>): QuerySessionsForAllocationResponse {
+    const message = createBaseQuerySessionsForAllocationResponse();
+    message.sessions = object.sessions?.map((e) => Session.fromPartial(e)) || [];
+    message.pagination = (object.pagination !== undefined && object.pagination !== null)
+      ? PageResponse.fromPartial(object.pagination)
+      : undefined;
+    return message;
+  },
+};
+
 function createBaseQuerySessionsForNodeResponse(): QuerySessionsForNodeResponse {
   return { sessions: [], pagination: undefined };
 }
@@ -854,82 +930,6 @@ export const QuerySessionsForSubscriptionResponse = {
   },
 };
 
-function createBaseQuerySessionsForAllocationResponse(): QuerySessionsForAllocationResponse {
-  return { sessions: [], pagination: undefined };
-}
-
-export const QuerySessionsForAllocationResponse = {
-  encode(message: QuerySessionsForAllocationResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    for (const v of message.sessions) {
-      Session.encode(v!, writer.uint32(10).fork()).ldelim();
-    }
-    if (message.pagination !== undefined) {
-      PageResponse.encode(message.pagination, writer.uint32(18).fork()).ldelim();
-    }
-    return writer;
-  },
-
-  decode(input: _m0.Reader | Uint8Array, length?: number): QuerySessionsForAllocationResponse {
-    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseQuerySessionsForAllocationResponse();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1:
-          if (tag !== 10) {
-            break;
-          }
-
-          message.sessions.push(Session.decode(reader, reader.uint32()));
-          continue;
-        case 2:
-          if (tag !== 18) {
-            break;
-          }
-
-          message.pagination = PageResponse.decode(reader, reader.uint32());
-          continue;
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skipType(tag & 7);
-    }
-    return message;
-  },
-
-  fromJSON(object: any): QuerySessionsForAllocationResponse {
-    return {
-      sessions: globalThis.Array.isArray(object?.sessions) ? object.sessions.map((e: any) => Session.fromJSON(e)) : [],
-      pagination: isSet(object.pagination) ? PageResponse.fromJSON(object.pagination) : undefined,
-    };
-  },
-
-  toJSON(message: QuerySessionsForAllocationResponse): unknown {
-    const obj: any = {};
-    if (message.sessions?.length) {
-      obj.sessions = message.sessions.map((e) => Session.toJSON(e));
-    }
-    if (message.pagination !== undefined) {
-      obj.pagination = PageResponse.toJSON(message.pagination);
-    }
-    return obj;
-  },
-
-  create(base?: DeepPartial<QuerySessionsForAllocationResponse>): QuerySessionsForAllocationResponse {
-    return QuerySessionsForAllocationResponse.fromPartial(base ?? {});
-  },
-  fromPartial(object: DeepPartial<QuerySessionsForAllocationResponse>): QuerySessionsForAllocationResponse {
-    const message = createBaseQuerySessionsForAllocationResponse();
-    message.sessions = object.sessions?.map((e) => Session.fromPartial(e)) || [];
-    message.pagination = (object.pagination !== undefined && object.pagination !== null)
-      ? PageResponse.fromPartial(object.pagination)
-      : undefined;
-    return message;
-  },
-};
-
 function createBaseQuerySessionResponse(): QuerySessionResponse {
   return { session: undefined };
 }
@@ -1051,11 +1051,11 @@ export const QueryParamsResponse = {
 export interface QueryService {
   QuerySessions(request: QuerySessionsRequest): Promise<QuerySessionsResponse>;
   QuerySessionsForAccount(request: QuerySessionsForAccountRequest): Promise<QuerySessionsForAccountResponse>;
+  QuerySessionsForAllocation(request: QuerySessionsForAllocationRequest): Promise<QuerySessionsForAllocationResponse>;
   QuerySessionsForNode(request: QuerySessionsForNodeRequest): Promise<QuerySessionsForNodeResponse>;
   QuerySessionsForSubscription(
     request: QuerySessionsForSubscriptionRequest,
   ): Promise<QuerySessionsForSubscriptionResponse>;
-  QuerySessionsForAllocation(request: QuerySessionsForAllocationRequest): Promise<QuerySessionsForAllocationResponse>;
   QuerySession(request: QuerySessionRequest): Promise<QuerySessionResponse>;
   QueryParams(request: QueryParamsRequest): Promise<QueryParamsResponse>;
 }
@@ -1069,9 +1069,9 @@ export class QueryServiceClientImpl implements QueryService {
     this.rpc = rpc;
     this.QuerySessions = this.QuerySessions.bind(this);
     this.QuerySessionsForAccount = this.QuerySessionsForAccount.bind(this);
+    this.QuerySessionsForAllocation = this.QuerySessionsForAllocation.bind(this);
     this.QuerySessionsForNode = this.QuerySessionsForNode.bind(this);
     this.QuerySessionsForSubscription = this.QuerySessionsForSubscription.bind(this);
-    this.QuerySessionsForAllocation = this.QuerySessionsForAllocation.bind(this);
     this.QuerySession = this.QuerySession.bind(this);
     this.QueryParams = this.QueryParams.bind(this);
   }
@@ -1087,6 +1087,12 @@ export class QueryServiceClientImpl implements QueryService {
     return promise.then((data) => QuerySessionsForAccountResponse.decode(_m0.Reader.create(data)));
   }
 
+  QuerySessionsForAllocation(request: QuerySessionsForAllocationRequest): Promise<QuerySessionsForAllocationResponse> {
+    const data = QuerySessionsForAllocationRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "QuerySessionsForAllocation", data);
+    return promise.then((data) => QuerySessionsForAllocationResponse.decode(_m0.Reader.create(data)));
+  }
+
   QuerySessionsForNode(request: QuerySessionsForNodeRequest): Promise<QuerySessionsForNodeResponse> {
     const data = QuerySessionsForNodeRequest.encode(request).finish();
     const promise = this.rpc.request(this.service, "QuerySessionsForNode", data);
@@ -1099,12 +1105,6 @@ export class QueryServiceClientImpl implements QueryService {
     const data = QuerySessionsForSubscriptionRequest.encode(request).finish();
     const promise = this.rpc.request(this.service, "QuerySessionsForSubscription", data);
     return promise.then((data) => QuerySessionsForSubscriptionResponse.decode(_m0.Reader.create(data)));
-  }
-
-  QuerySessionsForAllocation(request: QuerySessionsForAllocationRequest): Promise<QuerySessionsForAllocationResponse> {
-    const data = QuerySessionsForAllocationRequest.encode(request).finish();
-    const promise = this.rpc.request(this.service, "QuerySessionsForAllocation", data);
-    return promise.then((data) => QuerySessionsForAllocationResponse.decode(_m0.Reader.create(data)));
   }
 
   QuerySession(request: QuerySessionRequest): Promise<QuerySessionResponse> {

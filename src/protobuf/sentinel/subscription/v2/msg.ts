@@ -4,16 +4,6 @@ import _m0 from "protobufjs/minimal";
 
 export const protobufPackage = "sentinel.subscription.v2";
 
-/** MsgCancelRequest defines the SDK message for cancelling a subscription */
-export interface MsgCancelRequest {
-  from: string;
-  id: Long;
-}
-
-/**
- * MsgAllocateRequest defines the SDK message for allocating the bytes of a
- * subscription for an address
- */
 export interface MsgAllocateRequest {
   from: string;
   id: Long;
@@ -21,87 +11,16 @@ export interface MsgAllocateRequest {
   bytes: string;
 }
 
-/** MsgCancelResponse defines the response of message MsgCancelRequest */
-export interface MsgCancelResponse {
+export interface MsgCancelRequest {
+  from: string;
+  id: Long;
 }
 
-/** MsgAllocateResponse defines the response of message MsgAllocateRequest */
 export interface MsgAllocateResponse {
 }
 
-function createBaseMsgCancelRequest(): MsgCancelRequest {
-  return { from: "", id: Long.UZERO };
+export interface MsgCancelResponse {
 }
-
-export const MsgCancelRequest = {
-  encode(message: MsgCancelRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.from !== "") {
-      writer.uint32(10).string(message.from);
-    }
-    if (!message.id.isZero()) {
-      writer.uint32(16).uint64(message.id);
-    }
-    return writer;
-  },
-
-  decode(input: _m0.Reader | Uint8Array, length?: number): MsgCancelRequest {
-    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseMsgCancelRequest();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1:
-          if (tag !== 10) {
-            break;
-          }
-
-          message.from = reader.string();
-          continue;
-        case 2:
-          if (tag !== 16) {
-            break;
-          }
-
-          message.id = reader.uint64() as Long;
-          continue;
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skipType(tag & 7);
-    }
-    return message;
-  },
-
-  fromJSON(object: any): MsgCancelRequest {
-    return {
-      from: isSet(object.from) ? globalThis.String(object.from) : "",
-      id: isSet(object.id) ? Long.fromValue(object.id) : Long.UZERO,
-    };
-  },
-
-  toJSON(message: MsgCancelRequest): unknown {
-    const obj: any = {};
-    if (message.from !== "") {
-      obj.from = message.from;
-    }
-    if (!message.id.isZero()) {
-      obj.id = (message.id || Long.UZERO).toString();
-    }
-    return obj;
-  },
-
-  create(base?: DeepPartial<MsgCancelRequest>): MsgCancelRequest {
-    return MsgCancelRequest.fromPartial(base ?? {});
-  },
-  fromPartial(object: DeepPartial<MsgCancelRequest>): MsgCancelRequest {
-    const message = createBaseMsgCancelRequest();
-    message.from = object.from ?? "";
-    message.id = (object.id !== undefined && object.id !== null) ? Long.fromValue(object.id) : Long.UZERO;
-    return message;
-  },
-};
 
 function createBaseMsgAllocateRequest(): MsgAllocateRequest {
   return { from: "", id: Long.UZERO, address: "", bytes: "" };
@@ -207,22 +126,42 @@ export const MsgAllocateRequest = {
   },
 };
 
-function createBaseMsgCancelResponse(): MsgCancelResponse {
-  return {};
+function createBaseMsgCancelRequest(): MsgCancelRequest {
+  return { from: "", id: Long.UZERO };
 }
 
-export const MsgCancelResponse = {
-  encode(_: MsgCancelResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+export const MsgCancelRequest = {
+  encode(message: MsgCancelRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.from !== "") {
+      writer.uint32(10).string(message.from);
+    }
+    if (!message.id.isZero()) {
+      writer.uint32(16).uint64(message.id);
+    }
     return writer;
   },
 
-  decode(input: _m0.Reader | Uint8Array, length?: number): MsgCancelResponse {
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgCancelRequest {
     const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseMsgCancelResponse();
+    const message = createBaseMsgCancelRequest();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.from = reader.string();
+          continue;
+        case 2:
+          if (tag !== 16) {
+            break;
+          }
+
+          message.id = reader.uint64() as Long;
+          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -232,20 +171,31 @@ export const MsgCancelResponse = {
     return message;
   },
 
-  fromJSON(_: any): MsgCancelResponse {
-    return {};
+  fromJSON(object: any): MsgCancelRequest {
+    return {
+      from: isSet(object.from) ? globalThis.String(object.from) : "",
+      id: isSet(object.id) ? Long.fromValue(object.id) : Long.UZERO,
+    };
   },
 
-  toJSON(_: MsgCancelResponse): unknown {
+  toJSON(message: MsgCancelRequest): unknown {
     const obj: any = {};
+    if (message.from !== "") {
+      obj.from = message.from;
+    }
+    if (!message.id.isZero()) {
+      obj.id = (message.id || Long.UZERO).toString();
+    }
     return obj;
   },
 
-  create(base?: DeepPartial<MsgCancelResponse>): MsgCancelResponse {
-    return MsgCancelResponse.fromPartial(base ?? {});
+  create(base?: DeepPartial<MsgCancelRequest>): MsgCancelRequest {
+    return MsgCancelRequest.fromPartial(base ?? {});
   },
-  fromPartial(_: DeepPartial<MsgCancelResponse>): MsgCancelResponse {
-    const message = createBaseMsgCancelResponse();
+  fromPartial(object: DeepPartial<MsgCancelRequest>): MsgCancelRequest {
+    const message = createBaseMsgCancelRequest();
+    message.from = object.from ?? "";
+    message.id = (object.id !== undefined && object.id !== null) ? Long.fromValue(object.id) : Long.UZERO;
     return message;
   },
 };
@@ -293,9 +243,52 @@ export const MsgAllocateResponse = {
   },
 };
 
+function createBaseMsgCancelResponse(): MsgCancelResponse {
+  return {};
+}
+
+export const MsgCancelResponse = {
+  encode(_: MsgCancelResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgCancelResponse {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMsgCancelResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(_: any): MsgCancelResponse {
+    return {};
+  },
+
+  toJSON(_: MsgCancelResponse): unknown {
+    const obj: any = {};
+    return obj;
+  },
+
+  create(base?: DeepPartial<MsgCancelResponse>): MsgCancelResponse {
+    return MsgCancelResponse.fromPartial(base ?? {});
+  },
+  fromPartial(_: DeepPartial<MsgCancelResponse>): MsgCancelResponse {
+    const message = createBaseMsgCancelResponse();
+    return message;
+  },
+};
+
 export interface MsgService {
-  MsgCancel(request: MsgCancelRequest): Promise<MsgCancelResponse>;
   MsgAllocate(request: MsgAllocateRequest): Promise<MsgAllocateResponse>;
+  MsgCancel(request: MsgCancelRequest): Promise<MsgCancelResponse>;
 }
 
 export const MsgServiceServiceName = "sentinel.subscription.v2.MsgService";
@@ -305,19 +298,19 @@ export class MsgServiceClientImpl implements MsgService {
   constructor(rpc: Rpc, opts?: { service?: string }) {
     this.service = opts?.service || MsgServiceServiceName;
     this.rpc = rpc;
-    this.MsgCancel = this.MsgCancel.bind(this);
     this.MsgAllocate = this.MsgAllocate.bind(this);
+    this.MsgCancel = this.MsgCancel.bind(this);
   }
-  MsgCancel(request: MsgCancelRequest): Promise<MsgCancelResponse> {
-    const data = MsgCancelRequest.encode(request).finish();
-    const promise = this.rpc.request(this.service, "MsgCancel", data);
-    return promise.then((data) => MsgCancelResponse.decode(_m0.Reader.create(data)));
-  }
-
   MsgAllocate(request: MsgAllocateRequest): Promise<MsgAllocateResponse> {
     const data = MsgAllocateRequest.encode(request).finish();
     const promise = this.rpc.request(this.service, "MsgAllocate", data);
     return promise.then((data) => MsgAllocateResponse.decode(_m0.Reader.create(data)));
+  }
+
+  MsgCancel(request: MsgCancelRequest): Promise<MsgCancelResponse> {
+    const data = MsgCancelRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "MsgCancel", data);
+    return promise.then((data) => MsgCancelResponse.decode(_m0.Reader.create(data)));
   }
 }
 

@@ -10,12 +10,6 @@ export interface EventCreate {
   id: Long;
 }
 
-export interface EventUpdateStatus {
-  status: Status;
-  address: string;
-  id: Long;
-}
-
 export interface EventLinkNode {
   address: string;
   nodeAddress: string;
@@ -25,6 +19,12 @@ export interface EventLinkNode {
 export interface EventUnlinkNode {
   address: string;
   nodeAddress: string;
+  id: Long;
+}
+
+export interface EventUpdateStatus {
+  status: Status;
+  address: string;
   id: Long;
 }
 
@@ -103,95 +103,6 @@ export const EventCreate = {
   },
   fromPartial(object: DeepPartial<EventCreate>): EventCreate {
     const message = createBaseEventCreate();
-    message.address = object.address ?? "";
-    message.id = (object.id !== undefined && object.id !== null) ? Long.fromValue(object.id) : Long.UZERO;
-    return message;
-  },
-};
-
-function createBaseEventUpdateStatus(): EventUpdateStatus {
-  return { status: 0, address: "", id: Long.UZERO };
-}
-
-export const EventUpdateStatus = {
-  encode(message: EventUpdateStatus, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.status !== 0) {
-      writer.uint32(8).int32(message.status);
-    }
-    if (message.address !== "") {
-      writer.uint32(18).string(message.address);
-    }
-    if (!message.id.isZero()) {
-      writer.uint32(24).uint64(message.id);
-    }
-    return writer;
-  },
-
-  decode(input: _m0.Reader | Uint8Array, length?: number): EventUpdateStatus {
-    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseEventUpdateStatus();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1:
-          if (tag !== 8) {
-            break;
-          }
-
-          message.status = reader.int32() as any;
-          continue;
-        case 2:
-          if (tag !== 18) {
-            break;
-          }
-
-          message.address = reader.string();
-          continue;
-        case 3:
-          if (tag !== 24) {
-            break;
-          }
-
-          message.id = reader.uint64() as Long;
-          continue;
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skipType(tag & 7);
-    }
-    return message;
-  },
-
-  fromJSON(object: any): EventUpdateStatus {
-    return {
-      status: isSet(object.status) ? statusFromJSON(object.status) : 0,
-      address: isSet(object.address) ? globalThis.String(object.address) : "",
-      id: isSet(object.id) ? Long.fromValue(object.id) : Long.UZERO,
-    };
-  },
-
-  toJSON(message: EventUpdateStatus): unknown {
-    const obj: any = {};
-    if (message.status !== 0) {
-      obj.status = statusToJSON(message.status);
-    }
-    if (message.address !== "") {
-      obj.address = message.address;
-    }
-    if (!message.id.isZero()) {
-      obj.id = (message.id || Long.UZERO).toString();
-    }
-    return obj;
-  },
-
-  create(base?: DeepPartial<EventUpdateStatus>): EventUpdateStatus {
-    return EventUpdateStatus.fromPartial(base ?? {});
-  },
-  fromPartial(object: DeepPartial<EventUpdateStatus>): EventUpdateStatus {
-    const message = createBaseEventUpdateStatus();
-    message.status = object.status ?? 0;
     message.address = object.address ?? "";
     message.id = (object.id !== undefined && object.id !== null) ? Long.fromValue(object.id) : Long.UZERO;
     return message;
@@ -371,6 +282,95 @@ export const EventUnlinkNode = {
     const message = createBaseEventUnlinkNode();
     message.address = object.address ?? "";
     message.nodeAddress = object.nodeAddress ?? "";
+    message.id = (object.id !== undefined && object.id !== null) ? Long.fromValue(object.id) : Long.UZERO;
+    return message;
+  },
+};
+
+function createBaseEventUpdateStatus(): EventUpdateStatus {
+  return { status: 0, address: "", id: Long.UZERO };
+}
+
+export const EventUpdateStatus = {
+  encode(message: EventUpdateStatus, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.status !== 0) {
+      writer.uint32(8).int32(message.status);
+    }
+    if (message.address !== "") {
+      writer.uint32(18).string(message.address);
+    }
+    if (!message.id.isZero()) {
+      writer.uint32(24).uint64(message.id);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): EventUpdateStatus {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseEventUpdateStatus();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 8) {
+            break;
+          }
+
+          message.status = reader.int32() as any;
+          continue;
+        case 2:
+          if (tag !== 18) {
+            break;
+          }
+
+          message.address = reader.string();
+          continue;
+        case 3:
+          if (tag !== 24) {
+            break;
+          }
+
+          message.id = reader.uint64() as Long;
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): EventUpdateStatus {
+    return {
+      status: isSet(object.status) ? statusFromJSON(object.status) : 0,
+      address: isSet(object.address) ? globalThis.String(object.address) : "",
+      id: isSet(object.id) ? Long.fromValue(object.id) : Long.UZERO,
+    };
+  },
+
+  toJSON(message: EventUpdateStatus): unknown {
+    const obj: any = {};
+    if (message.status !== 0) {
+      obj.status = statusToJSON(message.status);
+    }
+    if (message.address !== "") {
+      obj.address = message.address;
+    }
+    if (!message.id.isZero()) {
+      obj.id = (message.id || Long.UZERO).toString();
+    }
+    return obj;
+  },
+
+  create(base?: DeepPartial<EventUpdateStatus>): EventUpdateStatus {
+    return EventUpdateStatus.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<EventUpdateStatus>): EventUpdateStatus {
+    const message = createBaseEventUpdateStatus();
+    message.status = object.status ?? 0;
+    message.address = object.address ?? "";
     message.id = (object.id !== undefined && object.id !== null) ? Long.fromValue(object.id) : Long.UZERO;
     return message;
   },

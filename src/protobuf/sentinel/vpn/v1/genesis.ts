@@ -1,54 +1,60 @@
 /* eslint-disable */
 import Long from "long";
 import _m0 from "protobufjs/minimal";
-import { Deposit } from "../../deposit/v1/deposit";
-import { GenesisState as GenesisState1 } from "../../node/v2/genesis";
-import { GenesisPlan } from "../../plan/v2/genesis";
-import { GenesisState as GenesisState2 } from "../../provider/v2/genesis";
-import { GenesisState as GenesisState3 } from "../../session/v2/genesis";
-import { GenesisState as GenesisState4 } from "../../subscription/v2/genesis";
+import { GenesisState as GenesisState1 } from "../../deposit/v1/genesis";
+import { GenesisState as GenesisState2 } from "../../lease/v1/genesis";
+import { GenesisState as GenesisState3 } from "../../node/v3/genesis";
+import { GenesisState as GenesisState4 } from "../../plan/v3/genesis";
+import { GenesisState as GenesisState5 } from "../../provider/v2/genesis";
+import { GenesisState as GenesisState6 } from "../../session/v3/genesis";
+import { GenesisState as GenesisState7 } from "../../subscription/v3/genesis";
 
 export const protobufPackage = "sentinel.vpn.v1";
 
 export interface GenesisState {
-  deposits: Deposit[];
-  nodes?: GenesisState1 | undefined;
-  plans: GenesisPlan[];
-  providers?: GenesisState2 | undefined;
-  sessions?: GenesisState3 | undefined;
-  subscriptions?: GenesisState4 | undefined;
+  deposit?: GenesisState1 | undefined;
+  lease?: GenesisState2 | undefined;
+  node?: GenesisState3 | undefined;
+  plan?: GenesisState4 | undefined;
+  provider?: GenesisState5 | undefined;
+  session?: GenesisState6 | undefined;
+  subscription?: GenesisState7 | undefined;
 }
 
 function createBaseGenesisState(): GenesisState {
   return {
-    deposits: [],
-    nodes: undefined,
-    plans: [],
-    providers: undefined,
-    sessions: undefined,
-    subscriptions: undefined,
+    deposit: undefined,
+    lease: undefined,
+    node: undefined,
+    plan: undefined,
+    provider: undefined,
+    session: undefined,
+    subscription: undefined,
   };
 }
 
 export const GenesisState = {
   encode(message: GenesisState, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    for (const v of message.deposits) {
-      Deposit.encode(v!, writer.uint32(10).fork()).ldelim();
+    if (message.deposit !== undefined) {
+      GenesisState1.encode(message.deposit, writer.uint32(10).fork()).ldelim();
     }
-    if (message.nodes !== undefined) {
-      GenesisState1.encode(message.nodes, writer.uint32(18).fork()).ldelim();
+    if (message.lease !== undefined) {
+      GenesisState2.encode(message.lease, writer.uint32(18).fork()).ldelim();
     }
-    for (const v of message.plans) {
-      GenesisPlan.encode(v!, writer.uint32(26).fork()).ldelim();
+    if (message.node !== undefined) {
+      GenesisState3.encode(message.node, writer.uint32(26).fork()).ldelim();
     }
-    if (message.providers !== undefined) {
-      GenesisState2.encode(message.providers, writer.uint32(34).fork()).ldelim();
+    if (message.plan !== undefined) {
+      GenesisState4.encode(message.plan, writer.uint32(34).fork()).ldelim();
     }
-    if (message.sessions !== undefined) {
-      GenesisState3.encode(message.sessions, writer.uint32(42).fork()).ldelim();
+    if (message.provider !== undefined) {
+      GenesisState5.encode(message.provider, writer.uint32(42).fork()).ldelim();
     }
-    if (message.subscriptions !== undefined) {
-      GenesisState4.encode(message.subscriptions, writer.uint32(50).fork()).ldelim();
+    if (message.session !== undefined) {
+      GenesisState6.encode(message.session, writer.uint32(50).fork()).ldelim();
+    }
+    if (message.subscription !== undefined) {
+      GenesisState7.encode(message.subscription, writer.uint32(58).fork()).ldelim();
     }
     return writer;
   },
@@ -65,42 +71,49 @@ export const GenesisState = {
             break;
           }
 
-          message.deposits.push(Deposit.decode(reader, reader.uint32()));
+          message.deposit = GenesisState1.decode(reader, reader.uint32());
           continue;
         case 2:
           if (tag !== 18) {
             break;
           }
 
-          message.nodes = GenesisState1.decode(reader, reader.uint32());
+          message.lease = GenesisState2.decode(reader, reader.uint32());
           continue;
         case 3:
           if (tag !== 26) {
             break;
           }
 
-          message.plans.push(GenesisPlan.decode(reader, reader.uint32()));
+          message.node = GenesisState3.decode(reader, reader.uint32());
           continue;
         case 4:
           if (tag !== 34) {
             break;
           }
 
-          message.providers = GenesisState2.decode(reader, reader.uint32());
+          message.plan = GenesisState4.decode(reader, reader.uint32());
           continue;
         case 5:
           if (tag !== 42) {
             break;
           }
 
-          message.sessions = GenesisState3.decode(reader, reader.uint32());
+          message.provider = GenesisState5.decode(reader, reader.uint32());
           continue;
         case 6:
           if (tag !== 50) {
             break;
           }
 
-          message.subscriptions = GenesisState4.decode(reader, reader.uint32());
+          message.session = GenesisState6.decode(reader, reader.uint32());
+          continue;
+        case 7:
+          if (tag !== 58) {
+            break;
+          }
+
+          message.subscription = GenesisState7.decode(reader, reader.uint32());
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
@@ -113,34 +126,38 @@ export const GenesisState = {
 
   fromJSON(object: any): GenesisState {
     return {
-      deposits: globalThis.Array.isArray(object?.deposits) ? object.deposits.map((e: any) => Deposit.fromJSON(e)) : [],
-      nodes: isSet(object.nodes) ? GenesisState1.fromJSON(object.nodes) : undefined,
-      plans: globalThis.Array.isArray(object?.plans) ? object.plans.map((e: any) => GenesisPlan.fromJSON(e)) : [],
-      providers: isSet(object.providers) ? GenesisState2.fromJSON(object.providers) : undefined,
-      sessions: isSet(object.sessions) ? GenesisState3.fromJSON(object.sessions) : undefined,
-      subscriptions: isSet(object.subscriptions) ? GenesisState4.fromJSON(object.subscriptions) : undefined,
+      deposit: isSet(object.deposit) ? GenesisState1.fromJSON(object.deposit) : undefined,
+      lease: isSet(object.lease) ? GenesisState2.fromJSON(object.lease) : undefined,
+      node: isSet(object.node) ? GenesisState3.fromJSON(object.node) : undefined,
+      plan: isSet(object.plan) ? GenesisState4.fromJSON(object.plan) : undefined,
+      provider: isSet(object.provider) ? GenesisState5.fromJSON(object.provider) : undefined,
+      session: isSet(object.session) ? GenesisState6.fromJSON(object.session) : undefined,
+      subscription: isSet(object.subscription) ? GenesisState7.fromJSON(object.subscription) : undefined,
     };
   },
 
   toJSON(message: GenesisState): unknown {
     const obj: any = {};
-    if (message.deposits?.length) {
-      obj.deposits = message.deposits.map((e) => Deposit.toJSON(e));
+    if (message.deposit !== undefined) {
+      obj.deposit = GenesisState1.toJSON(message.deposit);
     }
-    if (message.nodes !== undefined) {
-      obj.nodes = GenesisState1.toJSON(message.nodes);
+    if (message.lease !== undefined) {
+      obj.lease = GenesisState2.toJSON(message.lease);
     }
-    if (message.plans?.length) {
-      obj.plans = message.plans.map((e) => GenesisPlan.toJSON(e));
+    if (message.node !== undefined) {
+      obj.node = GenesisState3.toJSON(message.node);
     }
-    if (message.providers !== undefined) {
-      obj.providers = GenesisState2.toJSON(message.providers);
+    if (message.plan !== undefined) {
+      obj.plan = GenesisState4.toJSON(message.plan);
     }
-    if (message.sessions !== undefined) {
-      obj.sessions = GenesisState3.toJSON(message.sessions);
+    if (message.provider !== undefined) {
+      obj.provider = GenesisState5.toJSON(message.provider);
     }
-    if (message.subscriptions !== undefined) {
-      obj.subscriptions = GenesisState4.toJSON(message.subscriptions);
+    if (message.session !== undefined) {
+      obj.session = GenesisState6.toJSON(message.session);
+    }
+    if (message.subscription !== undefined) {
+      obj.subscription = GenesisState7.toJSON(message.subscription);
     }
     return obj;
   },
@@ -150,19 +167,26 @@ export const GenesisState = {
   },
   fromPartial(object: DeepPartial<GenesisState>): GenesisState {
     const message = createBaseGenesisState();
-    message.deposits = object.deposits?.map((e) => Deposit.fromPartial(e)) || [];
-    message.nodes = (object.nodes !== undefined && object.nodes !== null)
-      ? GenesisState1.fromPartial(object.nodes)
+    message.deposit = (object.deposit !== undefined && object.deposit !== null)
+      ? GenesisState1.fromPartial(object.deposit)
       : undefined;
-    message.plans = object.plans?.map((e) => GenesisPlan.fromPartial(e)) || [];
-    message.providers = (object.providers !== undefined && object.providers !== null)
-      ? GenesisState2.fromPartial(object.providers)
+    message.lease = (object.lease !== undefined && object.lease !== null)
+      ? GenesisState2.fromPartial(object.lease)
       : undefined;
-    message.sessions = (object.sessions !== undefined && object.sessions !== null)
-      ? GenesisState3.fromPartial(object.sessions)
+    message.node = (object.node !== undefined && object.node !== null)
+      ? GenesisState3.fromPartial(object.node)
       : undefined;
-    message.subscriptions = (object.subscriptions !== undefined && object.subscriptions !== null)
-      ? GenesisState4.fromPartial(object.subscriptions)
+    message.plan = (object.plan !== undefined && object.plan !== null)
+      ? GenesisState4.fromPartial(object.plan)
+      : undefined;
+    message.provider = (object.provider !== undefined && object.provider !== null)
+      ? GenesisState5.fromPartial(object.provider)
+      : undefined;
+    message.session = (object.session !== undefined && object.session !== null)
+      ? GenesisState6.fromPartial(object.session)
+      : undefined;
+    message.subscription = (object.subscription !== undefined && object.subscription !== null)
+      ? GenesisState7.fromPartial(object.subscription)
       : undefined;
     return message;
   },

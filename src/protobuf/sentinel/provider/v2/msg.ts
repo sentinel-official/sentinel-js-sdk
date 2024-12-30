@@ -5,7 +5,6 @@ import { Status, statusFromJSON, statusToJSON } from "../../types/v1/status";
 
 export const protobufPackage = "sentinel.provider.v2";
 
-/** MsgRegisterRequest defines the SDK message for registering a provider */
 export interface MsgRegisterRequest {
   from: string;
   name: string;
@@ -14,7 +13,6 @@ export interface MsgRegisterRequest {
   description: string;
 }
 
-/** MsgUpdateRequest defines the SDK message for updating a provider */
 export interface MsgUpdateRequest {
   from: string;
   name: string;
@@ -24,11 +22,9 @@ export interface MsgUpdateRequest {
   status: Status;
 }
 
-/** MsgRegisterResponse defines the response of message MsgRegisterRequest */
 export interface MsgRegisterResponse {
 }
 
-/** MsgUpdateResponse defines the response of message MsgUpdateRequest */
 export interface MsgUpdateResponse {
 }
 

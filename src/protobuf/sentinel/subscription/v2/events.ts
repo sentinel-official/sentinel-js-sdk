@@ -5,13 +5,6 @@ import { Status, statusFromJSON, statusToJSON } from "../../types/v1/status";
 
 export const protobufPackage = "sentinel.subscription.v2";
 
-export interface EventUpdateStatus {
-  status: Status;
-  address: string;
-  id: Long;
-  planId: Long;
-}
-
 export interface EventAllocate {
   address: string;
   grantedBytes: string;
@@ -56,111 +49,12 @@ export interface EventRefund {
   id: Long;
 }
 
-function createBaseEventUpdateStatus(): EventUpdateStatus {
-  return { status: 0, address: "", id: Long.UZERO, planId: Long.UZERO };
+export interface EventUpdateStatus {
+  status: Status;
+  address: string;
+  id: Long;
+  planId: Long;
 }
-
-export const EventUpdateStatus = {
-  encode(message: EventUpdateStatus, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.status !== 0) {
-      writer.uint32(8).int32(message.status);
-    }
-    if (message.address !== "") {
-      writer.uint32(18).string(message.address);
-    }
-    if (!message.id.isZero()) {
-      writer.uint32(24).uint64(message.id);
-    }
-    if (!message.planId.isZero()) {
-      writer.uint32(32).uint64(message.planId);
-    }
-    return writer;
-  },
-
-  decode(input: _m0.Reader | Uint8Array, length?: number): EventUpdateStatus {
-    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseEventUpdateStatus();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1:
-          if (tag !== 8) {
-            break;
-          }
-
-          message.status = reader.int32() as any;
-          continue;
-        case 2:
-          if (tag !== 18) {
-            break;
-          }
-
-          message.address = reader.string();
-          continue;
-        case 3:
-          if (tag !== 24) {
-            break;
-          }
-
-          message.id = reader.uint64() as Long;
-          continue;
-        case 4:
-          if (tag !== 32) {
-            break;
-          }
-
-          message.planId = reader.uint64() as Long;
-          continue;
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skipType(tag & 7);
-    }
-    return message;
-  },
-
-  fromJSON(object: any): EventUpdateStatus {
-    return {
-      status: isSet(object.status) ? statusFromJSON(object.status) : 0,
-      address: isSet(object.address) ? globalThis.String(object.address) : "",
-      id: isSet(object.id) ? Long.fromValue(object.id) : Long.UZERO,
-      planId: isSet(object.planId) ? Long.fromValue(object.planId) : Long.UZERO,
-    };
-  },
-
-  toJSON(message: EventUpdateStatus): unknown {
-    const obj: any = {};
-    if (message.status !== 0) {
-      obj.status = statusToJSON(message.status);
-    }
-    if (message.address !== "") {
-      obj.address = message.address;
-    }
-    if (!message.id.isZero()) {
-      obj.id = (message.id || Long.UZERO).toString();
-    }
-    if (!message.planId.isZero()) {
-      obj.planId = (message.planId || Long.UZERO).toString();
-    }
-    return obj;
-  },
-
-  create(base?: DeepPartial<EventUpdateStatus>): EventUpdateStatus {
-    return EventUpdateStatus.fromPartial(base ?? {});
-  },
-  fromPartial(object: DeepPartial<EventUpdateStatus>): EventUpdateStatus {
-    const message = createBaseEventUpdateStatus();
-    message.status = object.status ?? 0;
-    message.address = object.address ?? "";
-    message.id = (object.id !== undefined && object.id !== null) ? Long.fromValue(object.id) : Long.UZERO;
-    message.planId = (object.planId !== undefined && object.planId !== null)
-      ? Long.fromValue(object.planId)
-      : Long.UZERO;
-    return message;
-  },
-};
 
 function createBaseEventAllocate(): EventAllocate {
   return { address: "", grantedBytes: "", utilisedBytes: "", id: Long.UZERO };
@@ -823,6 +717,112 @@ export const EventRefund = {
     message.address = object.address ?? "";
     message.amount = object.amount ?? "";
     message.id = (object.id !== undefined && object.id !== null) ? Long.fromValue(object.id) : Long.UZERO;
+    return message;
+  },
+};
+
+function createBaseEventUpdateStatus(): EventUpdateStatus {
+  return { status: 0, address: "", id: Long.UZERO, planId: Long.UZERO };
+}
+
+export const EventUpdateStatus = {
+  encode(message: EventUpdateStatus, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.status !== 0) {
+      writer.uint32(8).int32(message.status);
+    }
+    if (message.address !== "") {
+      writer.uint32(18).string(message.address);
+    }
+    if (!message.id.isZero()) {
+      writer.uint32(24).uint64(message.id);
+    }
+    if (!message.planId.isZero()) {
+      writer.uint32(32).uint64(message.planId);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): EventUpdateStatus {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseEventUpdateStatus();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 8) {
+            break;
+          }
+
+          message.status = reader.int32() as any;
+          continue;
+        case 2:
+          if (tag !== 18) {
+            break;
+          }
+
+          message.address = reader.string();
+          continue;
+        case 3:
+          if (tag !== 24) {
+            break;
+          }
+
+          message.id = reader.uint64() as Long;
+          continue;
+        case 4:
+          if (tag !== 32) {
+            break;
+          }
+
+          message.planId = reader.uint64() as Long;
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): EventUpdateStatus {
+    return {
+      status: isSet(object.status) ? statusFromJSON(object.status) : 0,
+      address: isSet(object.address) ? globalThis.String(object.address) : "",
+      id: isSet(object.id) ? Long.fromValue(object.id) : Long.UZERO,
+      planId: isSet(object.planId) ? Long.fromValue(object.planId) : Long.UZERO,
+    };
+  },
+
+  toJSON(message: EventUpdateStatus): unknown {
+    const obj: any = {};
+    if (message.status !== 0) {
+      obj.status = statusToJSON(message.status);
+    }
+    if (message.address !== "") {
+      obj.address = message.address;
+    }
+    if (!message.id.isZero()) {
+      obj.id = (message.id || Long.UZERO).toString();
+    }
+    if (!message.planId.isZero()) {
+      obj.planId = (message.planId || Long.UZERO).toString();
+    }
+    return obj;
+  },
+
+  create(base?: DeepPartial<EventUpdateStatus>): EventUpdateStatus {
+    return EventUpdateStatus.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<EventUpdateStatus>): EventUpdateStatus {
+    const message = createBaseEventUpdateStatus();
+    message.status = object.status ?? 0;
+    message.address = object.address ?? "";
+    message.id = (object.id !== undefined && object.id !== null) ? Long.fromValue(object.id) : Long.UZERO;
+    message.planId = (object.planId !== undefined && object.planId !== null)
+      ? Long.fromValue(object.planId)
+      : Long.UZERO;
     return message;
   },
 };

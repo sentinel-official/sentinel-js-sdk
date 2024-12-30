@@ -4,10 +4,6 @@ import _m0 from "protobufjs/minimal";
 
 export const protobufPackage = "sentinel.swap.v1";
 
-/**
- * MsgSwapRequest defines the SDK message for swapping an ERC-20 token to the
- * native coin
- */
 export interface MsgSwapRequest {
   from: string;
   txHash: Uint8Array;
@@ -15,7 +11,6 @@ export interface MsgSwapRequest {
   amount: string;
 }
 
-/** MsgSwapResponse defines the response of message MsgSwapRequest */
 export interface MsgSwapResponse {
 }
 

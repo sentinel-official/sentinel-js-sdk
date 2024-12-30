@@ -7,7 +7,6 @@ import { Status, statusFromJSON, statusToJSON } from "../../types/v1/status";
 
 export const protobufPackage = "sentinel.plan.v2";
 
-/** MsgCreateRequest defines the SDK message for creating a subscription plan */
 export interface MsgCreateRequest {
   from: string;
   duration?: Duration | undefined;
@@ -15,66 +14,42 @@ export interface MsgCreateRequest {
   prices: Coin[];
 }
 
-/**
- * MsgUpdateStatusRequest defines the SDK message for modifying the status of a
- * subscription plan
- */
-export interface MsgUpdateStatusRequest {
-  from: string;
-  id: Long;
-  status: Status;
-}
-
-/**
- * MsgLinkNodeRequest defines the SDK message for adding a node to a
- * subscription plan
- */
 export interface MsgLinkNodeRequest {
   from: string;
   id: Long;
   nodeAddress: string;
 }
 
-/**
- * MsgUnlinkNodeRequest defines the SDK message for removing a node from a
- * subscription plan
- */
 export interface MsgUnlinkNodeRequest {
   from: string;
   id: Long;
   nodeAddress: string;
 }
 
-/**
- * MsgSubscribeRequest defines the SDK message for subscribing to a subscription
- * plan
- */
+export interface MsgUpdateStatusRequest {
+  from: string;
+  id: Long;
+  status: Status;
+}
+
 export interface MsgSubscribeRequest {
   from: string;
   id: Long;
   denom: string;
 }
 
-/** MsgCreateResponse defines the response of message MsgCreateRequest */
 export interface MsgCreateResponse {
 }
 
-/**
- * MsgUpdateStatusResponse defines the response of message
- * MsgUpdateStatusRequest
- */
-export interface MsgUpdateStatusResponse {
-}
-
-/** MsgLinkNodeResponse defines the response of message MsgLinkNodeRequest */
 export interface MsgLinkNodeResponse {
 }
 
-/** MsgUnlinkNodeResponse defines the response of message MsgUnlinkNodeRequest */
 export interface MsgUnlinkNodeResponse {
 }
 
-/** MsgSubscribeResponse defines the response of message MsgSubscribeRequest */
+export interface MsgUpdateStatusResponse {
+}
+
 export interface MsgSubscribeResponse {
 }
 
@@ -182,95 +157,6 @@ export const MsgCreateRequest = {
       ? Long.fromValue(object.gigabytes)
       : Long.ZERO;
     message.prices = object.prices?.map((e) => Coin.fromPartial(e)) || [];
-    return message;
-  },
-};
-
-function createBaseMsgUpdateStatusRequest(): MsgUpdateStatusRequest {
-  return { from: "", id: Long.UZERO, status: 0 };
-}
-
-export const MsgUpdateStatusRequest = {
-  encode(message: MsgUpdateStatusRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.from !== "") {
-      writer.uint32(10).string(message.from);
-    }
-    if (!message.id.isZero()) {
-      writer.uint32(16).uint64(message.id);
-    }
-    if (message.status !== 0) {
-      writer.uint32(24).int32(message.status);
-    }
-    return writer;
-  },
-
-  decode(input: _m0.Reader | Uint8Array, length?: number): MsgUpdateStatusRequest {
-    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseMsgUpdateStatusRequest();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1:
-          if (tag !== 10) {
-            break;
-          }
-
-          message.from = reader.string();
-          continue;
-        case 2:
-          if (tag !== 16) {
-            break;
-          }
-
-          message.id = reader.uint64() as Long;
-          continue;
-        case 3:
-          if (tag !== 24) {
-            break;
-          }
-
-          message.status = reader.int32() as any;
-          continue;
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skipType(tag & 7);
-    }
-    return message;
-  },
-
-  fromJSON(object: any): MsgUpdateStatusRequest {
-    return {
-      from: isSet(object.from) ? globalThis.String(object.from) : "",
-      id: isSet(object.id) ? Long.fromValue(object.id) : Long.UZERO,
-      status: isSet(object.status) ? statusFromJSON(object.status) : 0,
-    };
-  },
-
-  toJSON(message: MsgUpdateStatusRequest): unknown {
-    const obj: any = {};
-    if (message.from !== "") {
-      obj.from = message.from;
-    }
-    if (!message.id.isZero()) {
-      obj.id = (message.id || Long.UZERO).toString();
-    }
-    if (message.status !== 0) {
-      obj.status = statusToJSON(message.status);
-    }
-    return obj;
-  },
-
-  create(base?: DeepPartial<MsgUpdateStatusRequest>): MsgUpdateStatusRequest {
-    return MsgUpdateStatusRequest.fromPartial(base ?? {});
-  },
-  fromPartial(object: DeepPartial<MsgUpdateStatusRequest>): MsgUpdateStatusRequest {
-    const message = createBaseMsgUpdateStatusRequest();
-    message.from = object.from ?? "";
-    message.id = (object.id !== undefined && object.id !== null) ? Long.fromValue(object.id) : Long.UZERO;
-    message.status = object.status ?? 0;
     return message;
   },
 };
@@ -453,6 +339,95 @@ export const MsgUnlinkNodeRequest = {
   },
 };
 
+function createBaseMsgUpdateStatusRequest(): MsgUpdateStatusRequest {
+  return { from: "", id: Long.UZERO, status: 0 };
+}
+
+export const MsgUpdateStatusRequest = {
+  encode(message: MsgUpdateStatusRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.from !== "") {
+      writer.uint32(10).string(message.from);
+    }
+    if (!message.id.isZero()) {
+      writer.uint32(16).uint64(message.id);
+    }
+    if (message.status !== 0) {
+      writer.uint32(24).int32(message.status);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgUpdateStatusRequest {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMsgUpdateStatusRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.from = reader.string();
+          continue;
+        case 2:
+          if (tag !== 16) {
+            break;
+          }
+
+          message.id = reader.uint64() as Long;
+          continue;
+        case 3:
+          if (tag !== 24) {
+            break;
+          }
+
+          message.status = reader.int32() as any;
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): MsgUpdateStatusRequest {
+    return {
+      from: isSet(object.from) ? globalThis.String(object.from) : "",
+      id: isSet(object.id) ? Long.fromValue(object.id) : Long.UZERO,
+      status: isSet(object.status) ? statusFromJSON(object.status) : 0,
+    };
+  },
+
+  toJSON(message: MsgUpdateStatusRequest): unknown {
+    const obj: any = {};
+    if (message.from !== "") {
+      obj.from = message.from;
+    }
+    if (!message.id.isZero()) {
+      obj.id = (message.id || Long.UZERO).toString();
+    }
+    if (message.status !== 0) {
+      obj.status = statusToJSON(message.status);
+    }
+    return obj;
+  },
+
+  create(base?: DeepPartial<MsgUpdateStatusRequest>): MsgUpdateStatusRequest {
+    return MsgUpdateStatusRequest.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<MsgUpdateStatusRequest>): MsgUpdateStatusRequest {
+    const message = createBaseMsgUpdateStatusRequest();
+    message.from = object.from ?? "";
+    message.id = (object.id !== undefined && object.id !== null) ? Long.fromValue(object.id) : Long.UZERO;
+    message.status = object.status ?? 0;
+    return message;
+  },
+};
+
 function createBaseMsgSubscribeRequest(): MsgSubscribeRequest {
   return { from: "", id: Long.UZERO, denom: "" };
 }
@@ -585,49 +560,6 @@ export const MsgCreateResponse = {
   },
 };
 
-function createBaseMsgUpdateStatusResponse(): MsgUpdateStatusResponse {
-  return {};
-}
-
-export const MsgUpdateStatusResponse = {
-  encode(_: MsgUpdateStatusResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    return writer;
-  },
-
-  decode(input: _m0.Reader | Uint8Array, length?: number): MsgUpdateStatusResponse {
-    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseMsgUpdateStatusResponse();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skipType(tag & 7);
-    }
-    return message;
-  },
-
-  fromJSON(_: any): MsgUpdateStatusResponse {
-    return {};
-  },
-
-  toJSON(_: MsgUpdateStatusResponse): unknown {
-    const obj: any = {};
-    return obj;
-  },
-
-  create(base?: DeepPartial<MsgUpdateStatusResponse>): MsgUpdateStatusResponse {
-    return MsgUpdateStatusResponse.fromPartial(base ?? {});
-  },
-  fromPartial(_: DeepPartial<MsgUpdateStatusResponse>): MsgUpdateStatusResponse {
-    const message = createBaseMsgUpdateStatusResponse();
-    return message;
-  },
-};
-
 function createBaseMsgLinkNodeResponse(): MsgLinkNodeResponse {
   return {};
 }
@@ -714,6 +646,49 @@ export const MsgUnlinkNodeResponse = {
   },
 };
 
+function createBaseMsgUpdateStatusResponse(): MsgUpdateStatusResponse {
+  return {};
+}
+
+export const MsgUpdateStatusResponse = {
+  encode(_: MsgUpdateStatusResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgUpdateStatusResponse {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMsgUpdateStatusResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(_: any): MsgUpdateStatusResponse {
+    return {};
+  },
+
+  toJSON(_: MsgUpdateStatusResponse): unknown {
+    const obj: any = {};
+    return obj;
+  },
+
+  create(base?: DeepPartial<MsgUpdateStatusResponse>): MsgUpdateStatusResponse {
+    return MsgUpdateStatusResponse.fromPartial(base ?? {});
+  },
+  fromPartial(_: DeepPartial<MsgUpdateStatusResponse>): MsgUpdateStatusResponse {
+    const message = createBaseMsgUpdateStatusResponse();
+    return message;
+  },
+};
+
 function createBaseMsgSubscribeResponse(): MsgSubscribeResponse {
   return {};
 }
@@ -759,9 +734,9 @@ export const MsgSubscribeResponse = {
 
 export interface MsgService {
   MsgCreate(request: MsgCreateRequest): Promise<MsgCreateResponse>;
-  MsgUpdateStatus(request: MsgUpdateStatusRequest): Promise<MsgUpdateStatusResponse>;
   MsgLinkNode(request: MsgLinkNodeRequest): Promise<MsgLinkNodeResponse>;
   MsgUnlinkNode(request: MsgUnlinkNodeRequest): Promise<MsgUnlinkNodeResponse>;
+  MsgUpdateStatus(request: MsgUpdateStatusRequest): Promise<MsgUpdateStatusResponse>;
   MsgSubscribe(request: MsgSubscribeRequest): Promise<MsgSubscribeResponse>;
 }
 
@@ -773,21 +748,15 @@ export class MsgServiceClientImpl implements MsgService {
     this.service = opts?.service || MsgServiceServiceName;
     this.rpc = rpc;
     this.MsgCreate = this.MsgCreate.bind(this);
-    this.MsgUpdateStatus = this.MsgUpdateStatus.bind(this);
     this.MsgLinkNode = this.MsgLinkNode.bind(this);
     this.MsgUnlinkNode = this.MsgUnlinkNode.bind(this);
+    this.MsgUpdateStatus = this.MsgUpdateStatus.bind(this);
     this.MsgSubscribe = this.MsgSubscribe.bind(this);
   }
   MsgCreate(request: MsgCreateRequest): Promise<MsgCreateResponse> {
     const data = MsgCreateRequest.encode(request).finish();
     const promise = this.rpc.request(this.service, "MsgCreate", data);
     return promise.then((data) => MsgCreateResponse.decode(_m0.Reader.create(data)));
-  }
-
-  MsgUpdateStatus(request: MsgUpdateStatusRequest): Promise<MsgUpdateStatusResponse> {
-    const data = MsgUpdateStatusRequest.encode(request).finish();
-    const promise = this.rpc.request(this.service, "MsgUpdateStatus", data);
-    return promise.then((data) => MsgUpdateStatusResponse.decode(_m0.Reader.create(data)));
   }
 
   MsgLinkNode(request: MsgLinkNodeRequest): Promise<MsgLinkNodeResponse> {
@@ -800,6 +769,12 @@ export class MsgServiceClientImpl implements MsgService {
     const data = MsgUnlinkNodeRequest.encode(request).finish();
     const promise = this.rpc.request(this.service, "MsgUnlinkNode", data);
     return promise.then((data) => MsgUnlinkNodeResponse.decode(_m0.Reader.create(data)));
+  }
+
+  MsgUpdateStatus(request: MsgUpdateStatusRequest): Promise<MsgUpdateStatusResponse> {
+    const data = MsgUpdateStatusRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "MsgUpdateStatus", data);
+    return promise.then((data) => MsgUpdateStatusResponse.decode(_m0.Reader.create(data)));
   }
 
   MsgSubscribe(request: MsgSubscribeRequest): Promise<MsgSubscribeResponse> {

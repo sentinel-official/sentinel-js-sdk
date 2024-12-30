@@ -6,7 +6,6 @@ import { Status, statusFromJSON, statusToJSON } from "../../types/v1/status";
 
 export const protobufPackage = "sentinel.node.v2";
 
-/** MsgRegisterRequest defines the SDK message for registering a node */
 export interface MsgRegisterRequest {
   from: string;
   gigabytePrices: Coin[];
@@ -14,7 +13,6 @@ export interface MsgRegisterRequest {
   remoteUrl: string;
 }
 
-/** MsgUpdateDetailsRequest defines the SDK message for updating the node details */
 export interface MsgUpdateDetailsRequest {
   from: string;
   gigabytePrices: Coin[];
@@ -22,13 +20,11 @@ export interface MsgUpdateDetailsRequest {
   remoteUrl: string;
 }
 
-/** MsgUpdateStatusRequest defines the SDK message for updating the node status */
 export interface MsgUpdateStatusRequest {
   from: string;
   status: Status;
 }
 
-/** MsgSubscribeRequest defines the SDK message for subscribe to a node */
 export interface MsgSubscribeRequest {
   from: string;
   nodeAddress: string;
@@ -37,25 +33,15 @@ export interface MsgSubscribeRequest {
   denom: string;
 }
 
-/** MsgRegisterResponse defines the response of message MsgRegisterRequest */
 export interface MsgRegisterResponse {
 }
 
-/**
- * MsgUpdateDetailsResponse defines the response of message
- * MsgUpdateDetailsRequest
- */
 export interface MsgUpdateDetailsResponse {
 }
 
-/**
- * MsgUpdateStatusResponse defines the response of message
- * MsgUpdateStatusRequest
- */
 export interface MsgUpdateStatusResponse {
 }
 
-/** MsgSubscribeResponse defines the response of message MsgSubscribeRequest */
 export interface MsgSubscribeResponse {
 }
 
