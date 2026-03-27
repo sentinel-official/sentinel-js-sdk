@@ -65,7 +65,8 @@ export class SigningSentinelClient extends SigningStargateClient {
             register: this.nodeRegister.bind(this),
             updateDetails: this.nodeUpdateDetails.bind(this),
             updateStatus: this.nodeUpdateStatus.bind(this),
-            subscribe: this.nodeSubscribe.bind(this)
+            startSession: this.nodeStartSession.bind(this),
+            updateParams: this.nodeUpdateParams.bind(this)
         },
         plan: {
             create: this.planCreate.bind(this),
