@@ -97,7 +97,10 @@ export async function nodeInfo(remoteUrl: string): Promise<NodeInfo> {
         rejectUnauthorized: false
     });
 
-    const response = await axios.get(remoteUrl.replace(/\/$/g, '').trim(), { httpsAgent })
+    const inputUrl = remoteUrl.replace(/\/$/g, '').trim()
+    const httpsUrl = inputUrl.startsWith("http") ? inputUrl : `https://${inputUrl}`
+
+    const response = await axios.get(httpsUrl, { httpsAgent })
     return (response.data as NodeResponse).result as NodeInfo
 }
 
