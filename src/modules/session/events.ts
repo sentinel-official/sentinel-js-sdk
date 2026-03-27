@@ -1,6 +1,5 @@
 import {
-    EventPay,
-    EventRefund,
+    EventEnd,
     EventUpdateDetails,
     EventUpdateStatus,
 } from "../../protobuf/sentinel/session/v3/events"
@@ -10,46 +9,26 @@ import { protobufPackage } from "./consts"
 import { parseAttributes } from "../../utils"
 import { Event } from "@cosmjs/stargate"
 
-const EventPayType = `${protobufPackage}.EventPay`
-const EventRefundType = `${protobufPackage}.EventRefund`
+const EventEndType = `${protobufPackage}.EventEnd`
 const EventUpdateDetailsType = `${protobufPackage}.EventUpdateDetails`
 const EventUpdateStatusType = `${protobufPackage}.EventUpdateStatus`
 
-export interface SessionEventPay extends Event {
-    readonly type: typeof EventPayType,
-    readonly value: EventPay
+export interface SessionEventEnd extends Event {
+    readonly type: typeof EventEndType,
+    readonly value: EventEnd
 }
 
-export function isSessionEventPay(object: Event): object is SessionEventPay {
-    return (object as SessionEventPay).type === EventPayType
+export function isSessionEventEnd(object: Event): object is SessionEventEnd {
+    return (object as SessionEventEnd).type === EventEndType
 }
 
-export const SessionEventPay = {
-    type: EventPayType,
-    parse(event: Event): SessionEventPay {
+export const SessionEventEnd = {
+    type: EventEndType,
+    parse(event: Event): SessionEventEnd {
         return {
             type: this.type,
-            value: EventPay.fromJSON(parseAttributes(event.attributes))
-        } as SessionEventPay
-    }
-}
-
-export interface SessionEventRefund extends Event {
-    readonly type: typeof EventRefundType,
-    readonly value: EventRefund
-}
-
-export function isSessionEventRefund(object: Event): object is SessionEventRefund {
-    return (object as SessionEventRefund).type === EventRefundType
-}
-
-export const SessionEventRefund = {
-    type: EventRefundType,
-    parse(event: Event): SessionEventRefund {
-        return {
-            type: this.type,
-            value: EventRefund.fromJSON(parseAttributes(event.attributes))
-        } as SessionEventRefund
+            value: EventEnd.fromJSON(parseAttributes(event.attributes))
+        } as SessionEventEnd
     }
 }
 

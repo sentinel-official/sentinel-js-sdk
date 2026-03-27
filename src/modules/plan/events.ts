@@ -2,7 +2,8 @@ import {
     EventCreate,
     EventLinkNode,
     EventUnlinkNode,
-    EventUpdate,
+    EventUpdateStatus,
+    EventUpdateDetails
 } from "../../protobuf/sentinel/plan/v3/events"
 
 import { protobufPackage } from "./consts"
@@ -13,7 +14,8 @@ import { Event } from "@cosmjs/stargate"
 const EventCreateType = `${protobufPackage}.EventCreate`;
 const EventLinkNodeType = `${protobufPackage}.EventLinkNode`;
 const EventUnlinkNodeType = `${protobufPackage}.EventUnlinkNode`;
-const EventUpdateType = `${protobufPackage}.EventUpdate`;
+const EventUpdateStatusType = `${protobufPackage}.EventUpdateStatus`;
+const EventUpdateDetailsType = `${protobufPackage}.EventUpdateDetails`;
 
 export interface PlanEventCreate extends Event {
     readonly type: typeof EventCreateType,
@@ -72,21 +74,40 @@ export const PlanEventUnlinkNode = {
     }
 }
 
-export interface PlanEventUpdate extends Event {
-    readonly type: typeof EventUpdateType,
-    readonly value: EventUpdate
+export interface PlanEventUpdateStatus extends Event {
+    readonly type: typeof EventUpdateStatusType,
+    readonly value: EventUpdateStatus
 }
 
-export function isPlanEventUpdate(object: Event): object is PlanEventUpdate {
-    return (object as PlanEventUpdate).type === EventUpdateType
+export function isPlanEventUpdateStatus(object: Event): object is PlanEventUpdateStatus {
+    return (object as PlanEventUpdateStatus).type === EventUpdateStatusType
 }
 
-export const PlanEventUpdate = {
-    type: EventUpdateType,
-    parse(event: Event): PlanEventUpdate {
+export const PlanEventUpdateStatus = {
+    type: EventUpdateStatusType,
+    parse(event: Event): PlanEventUpdateStatus {
         return {
             type: this.type,
-            value: EventUpdate.fromJSON(parseAttributes(event.attributes))
-        } as PlanEventUpdate
+            value: EventUpdateStatus.fromJSON(parseAttributes(event.attributes))
+        } as PlanEventUpdateStatus
+    }
+}
+
+export interface PlanEventUpdateDetails extends Event {
+    readonly type: typeof EventUpdateDetailsType,
+    readonly value: EventUpdateDetails
+}
+
+export function isPlanEventUpdateDetails(object: Event): object is PlanEventUpdateDetails {
+    return (object as PlanEventUpdateDetails).type === EventUpdateDetailsType
+}
+
+export const PlanEventUpdateDetails = {
+    type: EventUpdateDetailsType,
+    parse(event: Event): PlanEventUpdateDetails {
+        return {
+            type: this.type,
+            value: EventUpdateDetails.fromJSON(parseAttributes(event.attributes))
+        } as PlanEventUpdateDetails
     }
 }

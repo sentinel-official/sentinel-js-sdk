@@ -43,7 +43,7 @@ interface NodeStartSession {
     nodeAddress: string;
     gigabytes?: Long;
     hours?: Long;
-    denom?: string;
+    maxPrice?: Price;
 }
 
 interface NodeUpdateParams {
@@ -76,9 +76,9 @@ export function nodeUpdateParams(args: NodeUpdateParams): MsgUpdateParamsEncodeO
 export function nodeStartSession({
     from,
     nodeAddress,
+    maxPrice,
     gigabytes = Long.ZERO,
     hours = Long.ZERO,
-    denom = 'udvpn'
 }: NodeStartSession): MsgStartSessionEncodeObject {
     return {
         typeUrl: MsgStartSessionTypeUrl,
@@ -87,7 +87,7 @@ export function nodeStartSession({
             nodeAddress,
             gigabytes,
             hours,
-            denom
+            maxPrice
         }
     } as MsgStartSessionEncodeObject;
 }

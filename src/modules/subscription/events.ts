@@ -4,7 +4,8 @@ import {
     EventCreateSession,
     EventPay,
     EventRenew,
-    EventUpdate,
+    EventUpdateDetails,
+    EventUpdateStatus
 } from "../../protobuf/sentinel/subscription/v3/events"
 
 import { protobufPackage } from "./consts"
@@ -17,7 +18,8 @@ const EventCreateType = `${protobufPackage}.EventCreate`
 const EventCreateSessionType = `${protobufPackage}.EventCreateSession`
 const EventPayType = `${protobufPackage}.EventPay`
 const EventRenewType = `${protobufPackage}.EventRenew`
-const EventUpdateType = `${protobufPackage}.EventUpdate`
+const EventUpdateDetailsType = `${protobufPackage}.EventUpdateDetails`
+const EventUpdateStatusType = `${protobufPackage}.EventUpdateStatus`
 
 export interface SubscriptionEventAllocate extends Event {
     readonly type: typeof EventAllocateType,
@@ -114,21 +116,40 @@ export const SubscriptionEventRenew = {
     }
 }
 
-export interface SubscriptionEventUpdate extends Event {
-    readonly type: typeof EventUpdateType,
-    readonly value: EventUpdate
+export interface SubscriptionEventUpdateDetails extends Event {
+    readonly type: typeof EventUpdateDetailsType,
+    readonly value: EventUpdateDetails
 }
 
-export function isSubscriptionEventUpdate(object: Event): object is SubscriptionEventUpdate {
-    return (object as SubscriptionEventUpdate).type === EventUpdateType
+export function isSubscriptionEventUpdateDetails(object: Event): object is SubscriptionEventUpdateDetails {
+    return (object as SubscriptionEventUpdateDetails).type === EventUpdateDetailsType
 }
 
-export const SubscriptionEventUpdate = {
-    type: EventUpdateType,
-    parse(event: Event): SubscriptionEventUpdate {
+export const SubscriptionEventUpdateDetails = {
+    type: EventUpdateDetailsType,
+    parse(event: Event): SubscriptionEventUpdateDetails {
         return {
             type: this.type,
-            value: EventUpdate.fromJSON(parseAttributes(event.attributes))
-        } as SubscriptionEventUpdate
+            value: EventUpdateDetails.fromJSON(parseAttributes(event.attributes))
+        } as SubscriptionEventUpdateDetails
+    }
+}
+
+export interface SubscriptionEventUpdateStatus extends Event {
+    readonly type: typeof EventUpdateStatusType,
+    readonly value: EventUpdateStatus
+}
+
+export function isSubscriptionEventUpdateStatus(object: Event): object is SubscriptionEventUpdateStatus {
+    return (object as SubscriptionEventUpdateStatus).type === EventUpdateStatusType
+}
+
+export const SubscriptionEventUpdateStatus = {
+    type: EventUpdateStatusType,
+    parse(event: Event): SubscriptionEventUpdateStatus {
+        return {
+            type: this.type,
+            value: EventUpdateStatus.fromJSON(parseAttributes(event.attributes))
+        } as SubscriptionEventUpdateStatus
     }
 }
