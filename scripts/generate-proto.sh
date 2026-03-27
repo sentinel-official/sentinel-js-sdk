@@ -36,11 +36,12 @@ mkdir -p $TMP_FOLDER
 # Remove folder
 
 # Sentinel hub
-echo -e "\n${YELLOW}Cloning sentinel-official/hub@v12.0.0-rc8 /proto/sentinel${ENDCOLOR}"
-git clone -n --depth=1 --branch v12.0.0-rc8 https://github.com/sentinel-official/hub.git sentinel && \
-  git -C sentinel sparse-checkout set --no-cone proto/sentinel && \
+echo -e "\n${YELLOW}Cloning sentinel-official/hub@v12.0.2 /proto/sentinel and third_party/osmosis/proto${ENDCOLOR}"
+git clone -n --depth=1 --branch v12.0.2 https://github.com/sentinel-official/hub.git sentinel && \
+  git -C sentinel sparse-checkout set --no-cone proto/sentinel third_party/osmosis/proto && \
   git -C sentinel checkout && \
   mv sentinel/proto/sentinel $TMP_FOLDER && \
+  mv sentinel/third_party/osmosis/proto $TMP_FOLDER/osmosis && \
   rm -rf sentinel/
 
 # 3th parties
@@ -81,6 +82,7 @@ protoc \
   --plugin=$TS_PROTOPATH \
   --ts_proto_out=$TS_OUTPUT \
   --proto_path=$TMP_FOLDER \
+  --proto_path=$TMP_FOLDER/osmosis \
   --ts_proto_opt="esModuleInterop=true,forceLong=long,useOptionals=messages,useExactTypes=false" \
   $(find $TMP_FOLDER/sentinel -iname "*.proto")
 
