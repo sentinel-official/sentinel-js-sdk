@@ -42,12 +42,12 @@ import {
 } from './modules/provider'
 
 import {
-    TxSessionStart,
-    TxSessionUpdateDetails,
-    TxSessionEnd,
-    sessionStart,
-    sessionUpdateDetails,
-    sessionEnd,
+    TxSessionCancel,
+    TxSessionUpdate,
+    TxSessionUpdateParams,
+    sessionCancel,
+    sessionUpdate,
+    sessionUpdateParams,
 } from './modules/session'
 
 import {
@@ -86,9 +86,9 @@ export class SigningSentinelClient extends SigningStargateClient {
             updateParams: this.providerUpdateParams.bind(this),
         },
         session: {
-            start: this.sessionStart.bind(this),
-            updateDetails: this.sessionUpdateDetails.bind(this),
-            end: this.sessionEnd.bind(this),
+            cancel: this.sessionCancel.bind(this),
+            update: this.sessionUpdate.bind(this),
+            updateParams: this.sessionUpdateParams.bind(this),
         },
         subscription: {
             cancel: this.subscriptionCancel.bind(this),
@@ -197,21 +197,21 @@ export class SigningSentinelClient extends SigningStargateClient {
         return this.signAndBroadcast(args.from, [msg], fee || "auto", memo)
     }
 
-    public async sessionStart(args: TxSessionStart): Promise<DeliverTxResponse> {
+    public async sessionCancel(args: TxSessionCancel): Promise<DeliverTxResponse> {
         const {fee, memo, ...params} = args
-        const msg = sessionStart(params)
+        const msg = sessionCancel(params)
         return this.signAndBroadcast(args.from, [msg], fee || "auto", memo)
     }
 
-    public async sessionUpdateDetails(args: TxSessionUpdateDetails): Promise<DeliverTxResponse> {
+    public async sessionUpdate(args: TxSessionUpdate): Promise<DeliverTxResponse> {
         const {fee, memo, ...params} = args
-        const msg = sessionUpdateDetails(params)
+        const msg = sessionUpdate(params)
         return this.signAndBroadcast(args.from, [msg], fee || "auto", memo)
     }
 
-    public async sessionEnd(args: TxSessionEnd): Promise<DeliverTxResponse> {
+    public async sessionUpdateParams(args: TxSessionUpdateParams): Promise<DeliverTxResponse> {
         const {fee, memo, ...params} = args
-        const msg = sessionEnd(params)
+        const msg = sessionUpdateParams(params)
         return this.signAndBroadcast(args.from, [msg], fee || "auto", memo)
     }
 

@@ -1,34 +1,55 @@
 import {
-    EventStart,
+    EventPay,
+    EventRefund,
     EventUpdateDetails,
     EventUpdateStatus,
-} from "../../protobuf/sentinel/session/v2/events"
+} from "../../protobuf/sentinel/session/v3/events"
 
 import { protobufPackage } from "./consts"
 
 import { parseAttributes } from "../../utils"
 import { Event } from "@cosmjs/stargate"
 
-const EventStartType = `${protobufPackage}.EventStart`
+const EventPayType = `${protobufPackage}.EventPay`
+const EventRefundType = `${protobufPackage}.EventRefund`
 const EventUpdateDetailsType = `${protobufPackage}.EventUpdateDetails`
 const EventUpdateStatusType = `${protobufPackage}.EventUpdateStatus`
 
-export interface SessionEventStart extends Event {
-    readonly type: typeof EventStartType,
-    readonly value: EventStart
+export interface SessionEventPay extends Event {
+    readonly type: typeof EventPayType,
+    readonly value: EventPay
 }
 
-export function isSessionEventStart(object: Event): object is SessionEventStart {
-    return (object as SessionEventStart).type === EventStartType
+export function isSessionEventPay(object: Event): object is SessionEventPay {
+    return (object as SessionEventPay).type === EventPayType
 }
 
-export const SessionEventStart = {
-    type: EventStartType,
-    parse(event: Event): SessionEventStart {
+export const SessionEventPay = {
+    type: EventPayType,
+    parse(event: Event): SessionEventPay {
         return {
             type: this.type,
-            value: EventStart.fromJSON(parseAttributes(event.attributes))
-        } as SessionEventStart
+            value: EventPay.fromJSON(parseAttributes(event.attributes))
+        } as SessionEventPay
+    }
+}
+
+export interface SessionEventRefund extends Event {
+    readonly type: typeof EventRefundType,
+    readonly value: EventRefund
+}
+
+export function isSessionEventRefund(object: Event): object is SessionEventRefund {
+    return (object as SessionEventRefund).type === EventRefundType
+}
+
+export const SessionEventRefund = {
+    type: EventRefundType,
+    parse(event: Event): SessionEventRefund {
+        return {
+            type: this.type,
+            value: EventRefund.fromJSON(parseAttributes(event.attributes))
+        } as SessionEventRefund
     }
 }
 
