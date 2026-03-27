@@ -2,11 +2,13 @@ import {
     QueryNodesRequest,
     QueryNodesForPlanRequest,
     QueryNodeRequest,
-    QueryParamsRequest,
     QueryNodesResponse,
     QueryNodesForPlanResponse,
+    // QueryNodeResponse, // return directly Node
+    QueryParamsRequest,
+    // QueryParamsResponse, // return directly Params
     QueryServiceClientImpl
-} from "../../protobuf/sentinel/node/v2/querier";
+} from "../../protobuf/sentinel/node/v3/querier";
 
 import {
     createProtobufRpcClient,
@@ -18,8 +20,8 @@ import Long  from "long";
 import { PageRequest } from "../../protobuf/cosmos/base/query/v1beta1/pagination";
 import { Status } from "../../protobuf/sentinel/types/v1/status";
 
-import { Params } from "../../protobuf/sentinel/node/v2/params";
-import { Node } from "../../protobuf/sentinel/node/v2/node";
+import { Params } from "../../protobuf/sentinel/node/v3/params";
+import { Node } from "../../protobuf/sentinel/node/v3/node";
 
 export interface NodeExtension {
     readonly node: {

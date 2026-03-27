@@ -1,32 +1,35 @@
 import {
-    MsgRegisterEncodeObject,
-    MsgUpdateDetailsEncodeObject,
-    MsgUpdateStatusEncodeObject,
-    MsgSubscribeEncodeObject
+    MsgRegisterNodeEncodeObject,
+    MsgUpdateNodeDetailsEncodeObject,
+    MsgUpdateNodeStatusEncodeObject,
+    MsgStartSessionEncodeObject,
+    MsgUpdateParamsEncodeObject,
 } from './encodeobjects';
 
 import {
-    MsgRegisterTypeUrl,
-    MsgUpdateDetailsTypeUrl,
-    MsgUpdateStatusTypeUrl,
-    MsgSubscribeTypeUrl
+    MsgRegisterNodeTypeUrl,
+    MsgUpdateNodeDetailsTypeUrl,
+    MsgUpdateNodeStatusTypeUrl,
+    MsgStartSessionTypeUrl,
+    MsgUpdateParamsTypeUrl,
 } from './consts';
 
-import { TxParams } from '../../types';
+import { TxParams, Price, Status } from '../../types';
 import Long from 'long';
-import { Coin, Status } from '../../types';
+
+import { Params as NodeParams } from '../../protobuf/sentinel/node/v3/params';
 
 interface NodeRegister {
     from: string;
-    gigabytePrices: Coin[];
-    hourlyPrices: Coin[];
+    gigabytePrices: Price[];
+    hourlyPrices: Price[];
     remoteUrl: string;
 }
 
 interface NodeUpdateDetails {
     from: string;
-    gigabytePrices: Coin[];
-    hourlyPrices: Coin[];
+    gigabytePrices: Price[];
+    hourlyPrices: Price[];
     remoteUrl: string;
 }
 
@@ -35,7 +38,7 @@ interface NodeUpdateStatus {
     status: Status;
 }
 
-interface NodeSubscribe {
+interface NodeStartSession {
     from: string;
     nodeAddress: string;
     gigabytes?: Long;
@@ -43,32 +46,42 @@ interface NodeSubscribe {
     denom?: string;
 }
 
+interface NodeUpdateParams {
+    from: string;
+    params?: NodeParams;
+}
+
 export interface TxNodeRegister extends NodeRegister, TxParams {}
 export interface TxNodeUpdateDetails extends NodeUpdateDetails, TxParams {}
 export interface TxNodeUpdateStatus extends NodeUpdateStatus, TxParams {}
-export interface TxNodeSubscribe extends NodeSubscribe, TxParams {}
+export interface TxNodeStartSession extends NodeStartSession, TxParams {}
+export interface TxNodeUpdateParams extends NodeUpdateParams, TxParams {}
 
-export function nodeRegister(args: NodeRegister): MsgRegisterEncodeObject {
-    return { typeUrl: MsgRegisterTypeUrl, value: args } as MsgRegisterEncodeObject;
+export function nodeRegister(args: NodeRegister): MsgRegisterNodeEncodeObject {
+    return { typeUrl: MsgRegisterNodeTypeUrl, value: args } as MsgRegisterNodeEncodeObject;
 }
 
-export function nodeUpdateDetails(args: NodeUpdateDetails): MsgUpdateDetailsEncodeObject {
-    return { typeUrl: MsgUpdateDetailsTypeUrl, value: args } as MsgUpdateDetailsEncodeObject;
+export function nodeUpdateDetails(args: NodeUpdateDetails): MsgUpdateNodeDetailsEncodeObject {
+    return { typeUrl: MsgUpdateNodeDetailsTypeUrl, value: args } as MsgUpdateNodeDetailsEncodeObject;
 }
 
-export function nodeUpdateStatus(args: NodeUpdateStatus): MsgUpdateStatusEncodeObject {
-    return { typeUrl: MsgUpdateStatusTypeUrl, value: args } as MsgUpdateStatusEncodeObject;
+export function nodeUpdateStatus(args: NodeUpdateStatus): MsgUpdateNodeStatusEncodeObject {
+    return { typeUrl: MsgUpdateNodeStatusTypeUrl, value: args } as MsgUpdateNodeStatusEncodeObject;
 }
 
-export function nodeSubscribe({
+export function nodeUpdateParams(args: NodeUpdateParams): MsgUpdateParamsEncodeObject {
+    return { typeUrl: MsgUpdateParamsTypeUrl, value: args } as MsgUpdateParamsEncodeObject;
+}
+
+export function nodeStartSession({
     from,
     nodeAddress,
     gigabytes = Long.ZERO,
     hours = Long.ZERO,
     denom = 'udvpn'
-}: NodeSubscribe): MsgSubscribeEncodeObject {
+}: NodeStartSession): MsgStartSessionEncodeObject {
     return {
-        typeUrl: MsgSubscribeTypeUrl,
+        typeUrl: MsgStartSessionTypeUrl,
         value: {
             from,
             nodeAddress,
@@ -76,5 +89,5 @@ export function nodeSubscribe({
             hours,
             denom
         }
-    } as MsgSubscribeEncodeObject;
+    } as MsgStartSessionEncodeObject;
 }

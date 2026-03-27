@@ -1,4 +1,6 @@
 export { Bandwidth } from "./protobuf/sentinel/types/v1/bandwidth";
+export { Price } from "./protobuf/sentinel/types/v1/price";
+export { RenewalPricePolicy } from "./protobuf/sentinel/types/v1/renewal";
 export { Status } from "./protobuf/sentinel/types/v1/status";
 
 export { Coin } from "./protobuf/cosmos/base/v1beta1/coin";

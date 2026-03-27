@@ -8,11 +8,13 @@ import {
     TxNodeRegister,
     TxNodeUpdateDetails,
     TxNodeUpdateStatus,
-    TxNodeSubscribe,
+    TxNodeStartSession,
+    TxNodeUpdateParams,
     nodeRegister,
     nodeUpdateDetails,
     nodeUpdateStatus,
-    nodeSubscribe,
+    nodeStartSession,
+    nodeUpdateParams
 } from './modules/node'
 
 import {
@@ -122,9 +124,15 @@ export class SigningSentinelClient extends SigningStargateClient {
         return this.signAndBroadcast(args.from, [msg], fee || "auto", memo)
     }
 
-    public async nodeSubscribe(args: TxNodeSubscribe): Promise<DeliverTxResponse> {
+    public async nodeStartSession(args: TxNodeStartSession): Promise<DeliverTxResponse> {
         const {fee, memo, ...params} = args
-        const msg = nodeSubscribe(params)
+        const msg = nodeStartSession(params)
+        return this.signAndBroadcast(args.from, [msg], fee || "auto", memo)
+    }
+
+    public async nodeUpdateParams(args: TxNodeUpdateParams): Promise<DeliverTxResponse> {
+        const {fee, memo, ...params} = args
+        const msg = nodeUpdateParams(params)
         return this.signAndBroadcast(args.from, [msg], fee || "auto", memo)
     }
 

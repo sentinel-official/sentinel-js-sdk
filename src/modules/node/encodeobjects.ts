@@ -1,51 +1,56 @@
 import { EncodeObject } from "@cosmjs/proto-signing";
 
 import {
-    MsgRegisterRequest,
-    MsgUpdateDetailsRequest,
-    MsgUpdateStatusRequest,
-    MsgSubscribeRequest,
-} from '../../protobuf/sentinel/node/v2/msg'
+    MsgRegisterNodeRequest,
+    MsgUpdateNodeDetailsRequest,
+    MsgUpdateNodeStatusRequest,
+    MsgStartSessionRequest,
+    MsgUpdateParamsRequest,
+} from '../../protobuf/sentinel/node/v3/msg'
 
 import {
-    MsgRegisterTypeUrl,
-    MsgUpdateDetailsTypeUrl,
-    MsgUpdateStatusTypeUrl,
-    MsgSubscribeTypeUrl
+    MsgRegisterNodeTypeUrl,
+    MsgUpdateNodeDetailsTypeUrl,
+    MsgUpdateNodeStatusTypeUrl,
+    MsgStartSessionTypeUrl,
+    MsgUpdateParamsTypeUrl,
 } from './consts'
 
-export interface MsgRegisterEncodeObject extends EncodeObject {
-    readonly typeUrl: typeof MsgRegisterTypeUrl,
-    readonly value: Partial<MsgRegisterRequest>
+
+export interface MsgRegisterNodeEncodeObject extends EncodeObject {
+    readonly typeUrl: typeof MsgRegisterNodeTypeUrl,
+    readonly value: Partial<MsgRegisterNodeRequest>
+}
+export interface MsgUpdateNodeDetailsEncodeObject extends EncodeObject {
+    readonly typeUrl: typeof MsgUpdateNodeDetailsTypeUrl,
+    readonly value: Partial<MsgUpdateNodeDetailsRequest>
+}
+export interface MsgUpdateNodeStatusEncodeObject extends EncodeObject {
+    readonly typeUrl: typeof MsgUpdateNodeStatusTypeUrl,
+    readonly value: Partial<MsgUpdateNodeStatusRequest>
+}
+export interface MsgStartSessionEncodeObject extends EncodeObject {
+    readonly typeUrl: typeof MsgStartSessionTypeUrl,
+    readonly value: Partial<MsgStartSessionRequest>
+}
+export interface MsgUpdateParamsEncodeObject extends EncodeObject {
+    readonly typeUrl: typeof MsgUpdateParamsTypeUrl,
+    readonly value: Partial<MsgUpdateParamsRequest>
 }
 
-export interface MsgUpdateDetailsEncodeObject extends EncodeObject {
-    readonly typeUrl: typeof MsgUpdateDetailsTypeUrl,
-    readonly value: Partial<MsgUpdateDetailsRequest>
-}
 
-export interface MsgUpdateStatusEncodeObject extends EncodeObject {
-    readonly typeUrl: typeof MsgUpdateStatusTypeUrl,
-    readonly value: Partial<MsgUpdateStatusRequest>
+export function isMsgRegisterNodeEncodeObject(object: EncodeObject): object is MsgRegisterNodeEncodeObject{
+    return (object as MsgRegisterNodeEncodeObject).typeUrl === MsgRegisterNodeTypeUrl
 }
-
-export interface MsgSubscribeEncodeObject extends EncodeObject {
-    readonly typeUrl: typeof MsgSubscribeTypeUrl,
-    readonly value: Partial<MsgSubscribeRequest>
+export function isMsgUpdateNodeDetailsEncodeObject(object: EncodeObject): object is MsgUpdateNodeDetailsEncodeObject{
+    return (object as MsgUpdateNodeDetailsEncodeObject).typeUrl === MsgUpdateNodeDetailsTypeUrl
 }
-
-export function isMsgRegisterEncodeObject(object: EncodeObject): object is MsgRegisterEncodeObject {
-    return (object as MsgRegisterEncodeObject).typeUrl === MsgRegisterTypeUrl
+export function isMsgUpdateNodeStatusEncodeObject(object: EncodeObject): object is MsgUpdateNodeStatusEncodeObject{
+    return (object as MsgUpdateNodeStatusEncodeObject).typeUrl === MsgUpdateNodeStatusTypeUrl
 }
-
-export function isMsgUpdateDetailsEncodeObject(object: EncodeObject): object is MsgUpdateDetailsEncodeObject {
-    return (object as MsgUpdateDetailsEncodeObject).typeUrl === MsgUpdateDetailsTypeUrl
+export function isMsgStartSessionEncodeObject(object: EncodeObject): object is MsgStartSessionEncodeObject{
+    return (object as MsgStartSessionEncodeObject).typeUrl === MsgStartSessionTypeUrl
 }
-
-export function isMsgUpdateStatusEncodeObject(object: EncodeObject): object is MsgUpdateStatusEncodeObject {
-    return (object as MsgUpdateStatusEncodeObject).typeUrl === MsgUpdateStatusTypeUrl
-}
-
-export function isMsgSubscribeEncodeObject(object: EncodeObject): object is MsgSubscribeEncodeObject {
-    return (object as MsgSubscribeEncodeObject).typeUrl === MsgSubscribeTypeUrl
+export function isMsgUpdateParamsEncodeObject(object: EncodeObject): object is MsgUpdateParamsEncodeObject{
+    return (object as MsgUpdateParamsEncodeObject).typeUrl === MsgUpdateParamsTypeUrl
 }
