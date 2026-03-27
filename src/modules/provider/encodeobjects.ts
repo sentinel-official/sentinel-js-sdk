@@ -1,29 +1,46 @@
 import { EncodeObject } from "@cosmjs/proto-signing";
 
 import {
-    MsgRegisterRequest,
-    MsgUpdateRequest,
-} from '../../protobuf/sentinel/provider/v2/msg'
+    MsgRegisterProviderRequest,
+    MsgUpdateProviderDetailsRequest,
+    MsgUpdateProviderStatusRequest,
+    MsgUpdateParamsRequest
+} from '../../protobuf/sentinel/provider/v3/msg'
 
 import {
-    MsgRegisterTypeUrl,
-    MsgUpdateTypeUrl,
+    MsgRegisterProviderTypeUrl,
+    MsgUpdateProviderDetailsTypeUrl,
+    MsgUpdateProviderStatusTypeUrl,
+    MsgUpdateParamsTypeUrl,
 } from './consts'
 
-export interface MsgRegisterEncodeObject extends EncodeObject {
-    readonly typeUrl: typeof MsgRegisterTypeUrl,
-    readonly value: Partial<MsgRegisterRequest>
+
+export interface MsgRegisterProviderEncodeObject extends EncodeObject {
+    readonly typeUrl: typeof MsgRegisterProviderTypeUrl,
+    readonly value: Partial<MsgRegisterProviderRequest>
+}
+export interface MsgUpdateProviderDetailsEncodeObject extends EncodeObject {
+    readonly typeUrl: typeof MsgUpdateProviderDetailsTypeUrl,
+    readonly value: Partial<MsgUpdateProviderDetailsRequest>
+}
+export interface MsgUpdateProviderStatusEncodeObject extends EncodeObject {
+    readonly typeUrl: typeof MsgUpdateProviderStatusTypeUrl,
+    readonly value: Partial<MsgUpdateProviderStatusRequest>
+}
+export interface MsgUpdateParamsEncodeObject extends EncodeObject {
+    readonly typeUrl: typeof MsgUpdateParamsTypeUrl,
+    readonly value: Partial<MsgUpdateParamsRequest>
 }
 
-export interface MsgUpdateEncodeObject extends EncodeObject {
-    readonly typeUrl: typeof MsgUpdateTypeUrl,
-    readonly value: Partial<MsgUpdateRequest>
+export function isMsgRegisterProviderEncodeObject(object: EncodeObject): object is MsgRegisterProviderEncodeObject {
+    return (object as MsgRegisterProviderEncodeObject).typeUrl === MsgRegisterProviderTypeUrl
 }
-
-export function isMsgRegisterEncodeObject(object: EncodeObject): object is MsgRegisterEncodeObject {
-    return (object as MsgRegisterEncodeObject).typeUrl === MsgRegisterTypeUrl
+export function isMsgUpdateProviderDetailsEncodeObject(object: EncodeObject): object is MsgUpdateProviderDetailsEncodeObject {
+    return (object as MsgUpdateProviderDetailsEncodeObject).typeUrl === MsgUpdateProviderDetailsTypeUrl
 }
-
-export function isMsgUpdateEncodeObject(object: EncodeObject): object is MsgUpdateEncodeObject {
-    return (object as MsgUpdateEncodeObject).typeUrl === MsgUpdateTypeUrl
+export function isMsgUpdateProviderStatusEncodeObject(object: EncodeObject): object is MsgUpdateProviderStatusEncodeObject {
+    return (object as MsgUpdateProviderStatusEncodeObject).typeUrl === MsgUpdateProviderStatusTypeUrl
+}
+export function isMsgUpdateParamsEncodeObject(object: EncodeObject): object is MsgUpdateParamsEncodeObject {
+    return (object as MsgUpdateParamsEncodeObject).typeUrl === MsgUpdateParamsTypeUrl
 }

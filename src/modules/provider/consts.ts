@@ -1,4 +1,6 @@
-export const protobufPackage = "sentinel.provider.v2";
+export const protobufPackage = "sentinel.provider.v3";
 
-export const MsgRegisterTypeUrl = `/${protobufPackage}.MsgRegisterRequest`
-export const MsgUpdateTypeUrl = `/${protobufPackage}.MsgUpdateRequest`
+export const MsgRegisterProviderTypeUrl = `/${protobufPackage}.MsgRegisterProviderRequest`
+export const MsgUpdateProviderDetailsTypeUrl = `/${protobufPackage}.MsgUpdateProviderDetailsRequest`
+export const MsgUpdateProviderStatusTypeUrl = `/${protobufPackage}.MsgUpdateProviderStatusRequest`
+export const MsgUpdateParamsTypeUrl = `/${protobufPackage}.MsgUpdateParamsReques`

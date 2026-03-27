@@ -31,10 +31,14 @@ import {
 } from './modules/plan'
 
 import {
-    TxProvideRegister,
-    TxProviderUpdate,
+    TxProviderRegister,
+    TxProviderUpdateDetails,
+    TxProviderUpdateStatus,
+    TxProviderUpdateParams,
     providerRegister,
-    providerUpdate
+    providerUpdateDetails,
+    providerUpdateStatus,
+    providerUpdateParams,
 } from './modules/provider'
 
 import {
@@ -77,7 +81,9 @@ export class SigningSentinelClient extends SigningStargateClient {
         },
         provider: {
             register: this.providerRegister.bind(this),
-            update: this.providerUpdate.bind(this),
+            updateDetails: this.providerUpdateDetails.bind(this),
+            updateStatus: this.providerUpdateStatus.bind(this),
+            updateParams: this.providerUpdateParams.bind(this),
         },
         session: {
             start: this.sessionStart.bind(this),
@@ -167,15 +173,27 @@ export class SigningSentinelClient extends SigningStargateClient {
         return this.signAndBroadcast(args.from, [msg], fee || "auto", memo)
     }
 
-    public async providerRegister(args: TxProvideRegister): Promise<DeliverTxResponse> {
+    public async providerRegister(args: TxProviderRegister): Promise<DeliverTxResponse> {
         const {fee, memo, ...params} = args
         const msg = providerRegister(params)
         return this.signAndBroadcast(args.from, [msg], fee || "auto", memo)
     }
 
-    public async providerUpdate(args: TxProviderUpdate): Promise<DeliverTxResponse> {
+    public async providerUpdateDetails(args: TxProviderUpdateDetails): Promise<DeliverTxResponse> {
         const {fee, memo, ...params} = args
-        const msg = providerUpdate(params)
+        const msg = providerUpdateDetails(params)
+        return this.signAndBroadcast(args.from, [msg], fee || "auto", memo)
+    }
+
+    public async providerUpdateStatus(args: TxProviderUpdateStatus): Promise<DeliverTxResponse> {
+        const {fee, memo, ...params} = args
+        const msg = providerUpdateStatus(params)
+        return this.signAndBroadcast(args.from, [msg], fee || "auto", memo)
+    }
+
+    public async providerUpdateParams(args: TxProviderUpdateParams): Promise<DeliverTxResponse> {
+        const {fee, memo, ...params} = args
+        const msg = providerUpdateParams(params)
         return this.signAndBroadcast(args.from, [msg], fee || "auto", memo)
     }
 
