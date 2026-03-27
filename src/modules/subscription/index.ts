@@ -5,7 +5,7 @@ export * from "./events";
 export * from "./registry";
 export * from "./transactions"
 
-export { Subscription } from "../../protobuf/sentinel/subscription/v1/subscription";
+export { Subscription } from "../../protobuf/sentinel/subscription/v3/subscription";
 
 export { Quota } from "../../protobuf/sentinel/subscription/v1/quota"
 

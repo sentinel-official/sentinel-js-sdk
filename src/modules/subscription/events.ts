@@ -1,44 +1,23 @@
 import {
-    EventUpdateStatus,
     EventAllocate,
-    EventCreatePayout,
-    EventPayForPayout,
-    EventPayForPlan,
-    EventPayForSession,
-    EventRefund
-} from "../../protobuf/sentinel/subscription/v2/events"
+    EventCreate,
+    EventCreateSession,
+    EventPay,
+    EventRenew,
+    EventUpdate,
+} from "../../protobuf/sentinel/subscription/v3/events"
 
 import { protobufPackage } from "./consts"
 
 import { parseAttributes } from "../../utils"
 import { Event } from "@cosmjs/stargate"
 
-const EventUpdateStatusType = `${protobufPackage}.EventUpdateStatus`
 const EventAllocateType = `${protobufPackage}.EventAllocate`
-const EventCreatePayoutType = `${protobufPackage}.EventCreatePayout`
-const EventPayForPayoutType = `${protobufPackage}.EventPayForPayout`
-const EventPayForPlanType = `${protobufPackage}.EventPayForPlan`
-const EventPayForSessionType = `${protobufPackage}.EventPayForSession`
-const EventRefundType = `${protobufPackage}.EventRefund`
-
-export interface SubscriptionEventUpdateStatus extends Event {
-    readonly type: typeof EventUpdateStatusType,
-    readonly value: EventUpdateStatus
-}
-
-export function isSubscriptionEventUpdateStatus(object: Event): object is SubscriptionEventUpdateStatus {
-    return (object as SubscriptionEventUpdateStatus).type === EventUpdateStatusType
-}
-
-export const SubscriptionEventUpdateStatus = {
-    type: EventUpdateStatusType,
-    parse(event: Event): SubscriptionEventUpdateStatus {
-        return {
-            type: this.type,
-            value: EventUpdateStatus.fromJSON(parseAttributes(event.attributes))
-        } as SubscriptionEventUpdateStatus
-    }
-}
+const EventCreateType = `${protobufPackage}.EventCreate`
+const EventCreateSessionType = `${protobufPackage}.EventCreateSession`
+const EventPayType = `${protobufPackage}.EventPay`
+const EventRenewType = `${protobufPackage}.EventRenew`
+const EventUpdateType = `${protobufPackage}.EventUpdate`
 
 export interface SubscriptionEventAllocate extends Event {
     readonly type: typeof EventAllocateType,
@@ -59,97 +38,97 @@ export const SubscriptionEventAllocate = {
     }
 }
 
-export interface SubscriptionEventCreatePayout extends Event {
-    readonly type: typeof EventCreatePayoutType,
-    readonly value: EventCreatePayout
+export interface SubscriptionEventCreate extends Event {
+    readonly type: typeof EventCreateType,
+    readonly value: EventCreate
 }
 
-export function isSubscriptionEventCreatePayout(object: Event): object is SubscriptionEventCreatePayout {
-    return (object as SubscriptionEventCreatePayout).type === EventCreatePayoutType
+export function isSubscriptionEventCreate(object: Event): object is SubscriptionEventCreate {
+    return (object as SubscriptionEventCreate).type === EventCreateType
 }
 
-export const SubscriptionEventCreatePayout = {
-    type: EventCreatePayoutType,
-    parse(event: Event): SubscriptionEventCreatePayout {
+export const SubscriptionEventCreate = {
+    type: EventCreateType,
+    parse(event: Event): SubscriptionEventCreate {
         return {
             type: this.type,
-            value: EventCreatePayout.fromJSON(parseAttributes(event.attributes))
-        } as SubscriptionEventCreatePayout
+            value: EventCreate.fromJSON(parseAttributes(event.attributes))
+        } as SubscriptionEventCreate
     }
 }
 
-export interface SubscriptionEventPayForPayout extends Event {
-    readonly type: typeof EventPayForPayoutType,
-    readonly value: EventPayForPayout
+export interface SubscriptionEventCreateSession extends Event {
+    readonly type: typeof EventCreateSessionType,
+    readonly value: EventCreateSession
 }
 
-export function isSubscriptionEventPayForPayout(object: Event): object is SubscriptionEventPayForPayout {
-    return (object as SubscriptionEventPayForPayout).type === EventPayForPayoutType
+export function isSubscriptionEventCreateSession(object: Event): object is SubscriptionEventCreateSession {
+    return (object as SubscriptionEventCreateSession).type === EventCreateSessionType
 }
 
-export const SubscriptionEventPayForPayout = {
-    type: EventPayForPayoutType,
-    parse(event: Event): SubscriptionEventPayForPayout {
+export const SubscriptionEventCreateSession = {
+    type: EventCreateSessionType,
+    parse(event: Event): SubscriptionEventCreateSession {
         return {
             type: this.type,
-            value: EventPayForPayout.fromJSON(parseAttributes(event.attributes))
-        } as SubscriptionEventPayForPayout
+            value: EventCreateSession.fromJSON(parseAttributes(event.attributes))
+        } as SubscriptionEventCreateSession
     }
 }
 
-export interface SubscriptionEventPayForPlan extends Event {
-    readonly type: typeof EventPayForPlanType,
-    readonly value: EventPayForPlan
+export interface SubscriptionEventPay extends Event {
+    readonly type: typeof EventPayType,
+    readonly value: EventPay
 }
 
-export function isSubscriptionEventPayForPlan(object: Event): object is SubscriptionEventPayForPlan {
-    return (object as SubscriptionEventPayForPlan).type === EventPayForPlanType
+export function isSubscriptionEventPay(object: Event): object is SubscriptionEventPay {
+    return (object as SubscriptionEventPay).type === EventPayType
 }
 
-export const SubscriptionEventPayForPlan = {
-    type: EventPayForPlanType,
-    parse(event: Event): SubscriptionEventPayForPlan {
+export const SubscriptionEventPay = {
+    type: EventPayType,
+    parse(event: Event): SubscriptionEventPay {
         return {
             type: this.type,
-            value: EventPayForPlan.fromJSON(parseAttributes(event.attributes))
-        } as SubscriptionEventPayForPlan
+            value: EventPay.fromJSON(parseAttributes(event.attributes))
+        } as SubscriptionEventPay
     }
 }
 
-export interface SubscriptionEventPayForSession extends Event {
-    readonly type: typeof EventPayForSessionType,
-    readonly value: EventPayForSession
+export interface SubscriptionEventRenew extends Event {
+    readonly type: typeof EventRenewType,
+    readonly value: EventRenew
 }
 
-export function isSubscriptionEventPayForSession(object: Event): object is SubscriptionEventPayForSession {
-    return (object as SubscriptionEventPayForSession).type === EventPayForSessionType
+export function isSubscriptionEventRenew(object: Event): object is SubscriptionEventRenew {
+    return (object as SubscriptionEventRenew).type === EventRenewType
 }
 
-export const SubscriptionEventPayForSession = {
-    type: EventPayForSessionType,
-    parse(event: Event): SubscriptionEventPayForSession {
+export const SubscriptionEventRenew = {
+    type: EventRenewType,
+    parse(event: Event): SubscriptionEventRenew {
         return {
             type: this.type,
-            value: EventPayForSession.fromJSON(parseAttributes(event.attributes))
-        } as SubscriptionEventPayForSession
+            value: EventRenew.fromJSON(parseAttributes(event.attributes))
+        } as SubscriptionEventRenew
     }
 }
 
-export interface SubscriptionEventRefund extends Event {
-    readonly type: typeof EventRefundType,
-    readonly value: EventRefund
+export interface SubscriptionEventUpdate extends Event {
+    readonly type: typeof EventUpdateType,
+    readonly value: EventUpdate
 }
 
-export function isSubscriptionEventRefund(object: Event): object is SubscriptionEventRefund {
-    return (object as SubscriptionEventRefund).type === EventRefundType
+export function isSubscriptionEventUpdate(object: Event): object is SubscriptionEventUpdate {
+    return (object as SubscriptionEventUpdate).type === EventUpdateType
 }
 
-export const SubscriptionEventRefund = {
-    type: EventRefundType,
-    parse(event: Event): SubscriptionEventRefund {
+export const SubscriptionEventUpdate = {
+    type: EventUpdateType,
+    parse(event: Event): SubscriptionEventUpdate {
         return {
             type: this.type,
-            value: EventRefund.fromJSON(parseAttributes(event.attributes))
-        } as SubscriptionEventRefund
+            value: EventUpdate.fromJSON(parseAttributes(event.attributes))
+        } as SubscriptionEventUpdate
     }
 }
