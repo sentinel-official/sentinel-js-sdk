@@ -2,7 +2,7 @@
 
 import {
     Node,
-    NodeStatus,
+    NodeInfo,
     SentinelClient,
     SessionEventStart,
     SigningSentinelClient,
@@ -17,7 +17,7 @@ import {
     TxSessionStart,
     sessionStart,
     searchEvent,
-    nodeStatus,
+    nodeInfo,
     NodeEventCreateSubscription,
     privKeyFromMnemonic,
     NodeVPNType
@@ -74,16 +74,16 @@ const main = async () => {
         gasPrice: gasPrice
     })
 
-    var selectedNodes: {"node": Node, "status": NodeStatus}[] = []
-    var v2Node: {"node": Node, "status": NodeStatus} | null = null;
-    var wgNode: {"node": Node, "status": NodeStatus} | null = null;
+    var selectedNodes: {"node": Node, "status": NodeInfo}[] = []
+    var v2Node: {"node": Node, "status": NodeInfo} | null = null;
+    var wgNode: {"node": Node, "status": NodeInfo} | null = null;
 
     const nodes = await queryNodes(500);
     if (nodes?.nodes){
         // Search for a v2ray node and a wireguard node please.
         for(var i=0; i<nodes.nodes.length; i++){
             try {
-                var status = await nodeStatus(nodes.nodes[i].remoteUrl)
+                var status = await nodeInfo(nodes.nodes[i].remoteUrl)
                 console.log(status)
                 if (status.type == NodeVPNType.WIREGUARD) wgNode = { node: nodes.nodes[i], status }
                 else if(status.type == NodeVPNType.V2RAY) v2Node = { node: nodes.nodes[i], status }
@@ -96,13 +96,13 @@ const main = async () => {
 
     /* var v2ChaiNode = await queryNode("sentnode1234")
     if(v2ChaiNode) {
-        var v2StatusNode = await nodeStatus(v2ChaiNode.remoteUrl)
+        var v2StatusNode = await nodeInfo(v2ChaiNode.remoteUrl)
         v2Node = { node: v2ChaiNode, status: v2StatusNode }
     }
 
     var wgChaiNode = await queryNode("sentnode1234")
     if(wgChaiNode) {
-        var wgStatusNode = await nodeStatus(wgChaiNode.remoteUrl)
+        var wgStatusNode = await nodeInfo(wgChaiNode.remoteUrl)
         wgNode = { node: wgChaiNode, status: wgStatusNode }
     } */
 

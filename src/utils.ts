@@ -9,7 +9,7 @@ import secp256k1 from "secp256k1";
 import axios from 'axios';
 import https from 'https'
 
-import { NodeResponse, NodeStatus, GeoIPLocation } from "./types";
+import { NodeResponse, NodeInfo, GeoIPLocation, HandshakeResponse } from "./types";
 
 /**
  * Convert an array of stargate/Attribute in to javascript object
@@ -87,37 +87,38 @@ export function signSessionId(privkey: Uint8Array, sessionId: Long | number): st
 }
 
 /**
- * [GET] request to /status endpoint of a remoteUrl with ssl verification disbled
+ * [GET] request to / endpoint of a remoteUrl with ssl verification disbled
  *
  * @param remoteUrl node endpoint
- * @returns NodeStatus information
+ * @returns NodeInfo information
  */
-export async function nodeStatus(remoteUrl: string): Promise<NodeStatus> {
+export async function nodeInfo(remoteUrl: string): Promise<NodeInfo> {
     const httpsAgent = new https.Agent({
         rejectUnauthorized: false
     });
 
-    const response = await axios.get(remoteUrl.replace(/\/$/g, '').trim() + "/status", { httpsAgent })
-    return (response.data as NodeResponse).result as NodeStatus
+    const response = await axios.get(remoteUrl.replace(/\/$/g, '').trim(), { httpsAgent })
+    return (response.data as NodeResponse).result as NodeInfo
 }
 
+
+// https://github.com/sentinel-official/sentinel-go-sdk/blob/development/node/handshake.go#L15-L20
 /**
- * [POST] request to a /accounts/${address}/sessions/${sessionId} with ssl verification disbled, in order to get a valid base64 vpn configuration
+ * [POST] request to a / with ssl verification disbled (...?)
  *
- * @param key publicKey for wg or uuid for v2ray
- * @param signature signature of Uint64ToBigEndian sessionId
- * @param address sent address of the session owner
- * @param sessionId session identifier
+ * @param data JSON encoded session data, must be present and non-empty.
+ * @param id unique identifier for the session, must be greater than zero.
+ * @param pub_key public key associated with the session, required and non-empty.
+ * @param signature digital signature in Base64 format, required and non-empty
  * @param remoteUrl node endpoint
- * @returns NodeResponse with vpn configuration or error code and message
+ * @returns HandshakeResponse
  */
-export async function postSession(key: string, signature: string, address: string, sessionId: Long | number, remoteUrl: string): Promise<NodeResponse> {
+export async function handshake(data: any, id: number, pub_key: string, signature: string, remoteUrl: string): Promise<HandshakeResponse> {
     const httpsAgent = new https.Agent({
         rejectUnauthorized: false,
     });
 
-    const data = {key, signature}
-    const url = remoteUrl.replace(/\/$/g, '').trim() + `/accounts/${address}/sessions/${sessionId}`
+    const url = remoteUrl.replace(/\/$/g, '').trim()
     const options = {
         url,
         method: 'POST',
@@ -126,15 +127,15 @@ export async function postSession(key: string, signature: string, address: strin
             'Accept': 'application/json',
             'Content-Type': 'application/json'
         },
-        data,
+        data: {data, id, pub_key, signature},
         httpsAgent
     }
     try {
         const response = await axios(options);
-        return response.data as NodeResponse
+        return response.data as HandshakeResponse
     } catch (error) {
-        if(axios.isAxiosError(error)) return error.response?.data as NodeResponse
-        else throw error
+        /* if(axios.isAxiosError(error)) return error.response?.data as HandshakeResponse
+        else */ throw error
     }
 }
 

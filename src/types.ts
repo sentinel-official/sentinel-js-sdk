@@ -15,8 +15,9 @@ export interface TxParams {
 
 export { Node } from "./modules/node";
 export enum NodeVPNType {
-    WIREGUARD = 1,
-    V2RAY = 2
+    WIREGUARD = "wireguard",
+    V2RAY = "v2ray",
+    OPENVPN = "openvpn"
 }
 
 export { Plan } from "./modules/plan";
@@ -31,33 +32,37 @@ export interface NodeResponseError {
     message: string
 }
 
-export interface NodeResponse {
+export interface NodeResponse {  // info (?)
     success: boolean,
-    result?: NodeStatus | string
+    result?: NodeInfo | string
     error?: NodeResponseError
 }
 
-export interface NodeStatus {
-    address: string,
-    bandwidth: {download: number, upload: number},
-    handshake: {enable: boolean, peers: number},
-    interval_set_sessions: number,
-    interval_update_sessions: number,
-    interval_update_status: number,
+export interface HandshakeResponse {
+    addrs: string[],
+    data: any
+}
+
+// https://github.com/sentinel-official/sentinel-go-sdk/blob/development/node/info.go#L14-L24
+export interface NodeInfo {
+    addr: string,
+    downlink: string,
+    handshake_dns: boolean,
     location: {
         city: string,
         country: string,
+        country_code: string,
         latitude: number,
         longitude: number
     },
     moniker: string,
-    operator: string,
     peers: number,
-    gigabyte_prices: string,
-    hourly_prices: string,
-    qos:{max_peers: number},
-    type: NodeVPNType
-    version: string
+    service_type: NodeVPNType,
+    uplink: string,
+    version: {
+        commit: string,
+        tag: string
+    }
 }
 
 export interface GeoIPLocation {
