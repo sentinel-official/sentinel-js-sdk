@@ -9,4 +9,4 @@ curl -L https://github.com/protocolbuffers/protobuf/releases/download/v25.9/prot
 unzip -o protoc.zip
 rm protoc.zip
 ln -s /usr/lib/protoc/bin/protoc /usr/local/bin/protoc
-npm install ts-proto@2.11.6 --save-dev
+npm install ts-proto@1.180.0 --save-dev
