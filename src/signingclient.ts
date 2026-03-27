@@ -22,12 +22,12 @@ import {
     TxPlanUpdateStatus,
     TxPlanLinkNode,
     TxPlanUnlinkNode,
-    TxPlanSubscribe,
+    TxPlanStartSession,
     planCreate,
     planUpdateStatus,
     planLinkNode,
     planUnlinkNode,
-    planSubscribe,
+    planStartSession,
 } from './modules/plan'
 
 import {
@@ -72,7 +72,7 @@ export class SigningSentinelClient extends SigningStargateClient {
             updateStatus: this.planUpdateStatus.bind(this),
             linkNode: this.planLinkNode.bind(this),
             unlinkNode: this.planUnlinkNode.bind(this),
-            subscribe: this.planSubscribe.bind(this),
+            startSession: this.planStartSession.bind(this),
         },
         provider: {
             register: this.providerRegister.bind(this),
@@ -160,9 +160,9 @@ export class SigningSentinelClient extends SigningStargateClient {
         return this.signAndBroadcast(args.from, [msg], fee || "auto", memo)
     }
 
-    public async planSubscribe(args: TxPlanSubscribe): Promise<DeliverTxResponse> {
+    public async planStartSession(args: TxPlanStartSession): Promise<DeliverTxResponse> {
         const {fee, memo, ...params} = args
-        const msg = planSubscribe(params)
+        const msg = planStartSession(params)
         return this.signAndBroadcast(args.from, [msg], fee || "auto", memo)
     }
 

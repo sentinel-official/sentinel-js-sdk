@@ -1,26 +1,26 @@
 import { GeneratedType } from "@cosmjs/proto-signing";
 
 import {
-    MsgCreateRequest,
-    MsgUpdateStatusRequest,
+    MsgCreatePlanRequest,
     MsgLinkNodeRequest,
     MsgUnlinkNodeRequest,
-    MsgSubscribeRequest
-} from '../../protobuf/sentinel/plan/v2/msg'
+    MsgUpdatePlanStatusRequest,
+    MsgStartSessionRequest,
+} from '../../protobuf/sentinel/plan/v3/msg'
 
 import {
-    MsgCreateTypeUrl,
-    MsgUpdateStatusTypeUrl,
+    MsgCreatePlanTypeUrl,
     MsgLinkNodeTypeUrl,
     MsgUnlinkNodeTypeUrl,
-    MsgSubscribeTypeUrl
+    MsgUpdatePlanStatusTypeUrl,
+    MsgStartSessionTypeUrl,
 } from './consts'
 
 export const registry: ReadonlyArray<[string, GeneratedType]> = [
-    [MsgCreateTypeUrl, MsgCreateRequest],
-    [MsgUpdateStatusTypeUrl, MsgUpdateStatusRequest],
+    [MsgCreatePlanTypeUrl, MsgCreatePlanRequest],
     [MsgLinkNodeTypeUrl, MsgLinkNodeRequest],
     [MsgUnlinkNodeTypeUrl, MsgUnlinkNodeRequest],
-    [MsgSubscribeTypeUrl, MsgSubscribeRequest]
+    [MsgUpdatePlanStatusTypeUrl, MsgUpdatePlanStatusRequest],
+    [MsgStartSessionTypeUrl, MsgStartSessionRequest]
 ];
 

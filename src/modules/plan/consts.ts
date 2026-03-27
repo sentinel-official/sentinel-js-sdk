@@ -1,7 +1,7 @@
-export const protobufPackage = "sentinel.plan.v2";
+export const protobufPackage = "sentinel.plan.v3";
 
-export const MsgCreateTypeUrl = `/${protobufPackage}.MsgCreateRequest`
-export const MsgUpdateStatusTypeUrl = `/${protobufPackage}.MsgUpdateStatusRequest`
-export const MsgLinkNodeTypeUrl = `/${protobufPackage}.MsgLinkNodeRequest`
-export const MsgUnlinkNodeTypeUrl = `/${protobufPackage}.MsgUnlinkNodeRequest`
-export const MsgSubscribeTypeUrl = `/${protobufPackage}.MsgSubscribeRequest`
+export const MsgCreatePlanTypeUrl = `/${protobufPackage}.MsgCreatePlanRequest`;
+export const MsgLinkNodeTypeUrl = `/${protobufPackage}.MsgLinkNodeRequest`;
+export const MsgUnlinkNodeTypeUrl = `/${protobufPackage}.MsgUnlinkNodeRequest`;
+export const MsgUpdatePlanStatusTypeUrl = `/${protobufPackage}.MsgUpdatePlanStatusRequest`;
+export const MsgStartSessionTypeUrl = `/${protobufPackage}.MsgStartSessionRequest`;
