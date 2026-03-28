@@ -1,4 +1,4 @@
-import { Tendermint34Client } from "@cosmjs/tendermint-rpc";
+import { connectComet, CometClient } from "@cosmjs/tendermint-rpc";
 import { DeliverTxResponse, SigningStargateClient, SigningStargateClientOptions } from "@cosmjs/stargate"
 import { buildSentinelQueryClient, SentinelQueryClient } from "./modules/queries"
 import { SentinelRegistry } from "./modules";
@@ -116,14 +116,14 @@ export class SigningSentinelClient extends SigningStargateClient {
         signer: OfflineSigner,
         options: SigningStargateClientOptions = {}
     ): Promise<SigningSentinelClient> {
-        const tmClient = await Tendermint34Client.connect(endpoint)
+        const tmClient = await connectComet(endpoint)
         return new SigningSentinelClient(tmClient, signer, {
             registry: createDefaultRegistry(),
             ...options
         })
     }
 
-    protected constructor(tmClient: Tendermint34Client | undefined, signer: OfflineSigner, options: SigningStargateClientOptions) {
+    protected constructor(tmClient: CometClient | undefined, signer: OfflineSigner, options: SigningStargateClientOptions) {
         super(tmClient, signer, options)
         if (tmClient) this.sentinelQuery = buildSentinelQueryClient(tmClient)
     }

@@ -1,5 +1,5 @@
 import { QueryClient } from '@cosmjs/stargate'
-import { Tendermint34Client } from "@cosmjs/tendermint-rpc";
+import { CometClient } from "@cosmjs/tendermint-rpc";
 import { setupNodeExtension, NodeExtension } from './node/query'
 import { setupPlanExtension, PlanExtension } from './plan/query'
 import { setupProviderExtension, ProviderExtension } from './provider/query'
@@ -13,7 +13,7 @@ export type SentinelQueryClient = QueryClient &
     SessionExtension &
     SubscriptionExtension
 
-export function buildSentinelQueryClient(tendermintClient: Tendermint34Client | undefined): SentinelQueryClient | undefined {
+export function buildSentinelQueryClient(tendermintClient: CometClient | undefined): SentinelQueryClient | undefined {
     return tendermintClient ? QueryClient.withExtensions(
         tendermintClient,
         setupNodeExtension,
