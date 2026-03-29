@@ -32,13 +32,13 @@ export interface NodeResponseError {
     message: string
 }
 
-export interface NodeResponse {  // info (?)
+export interface NodeResponse {
     success: boolean,
-    result?: NodeInfo | string
+    result?: NodeInfo | NodeHandshakeResult | string
     error?: NodeResponseError
 }
 
-export interface HandshakeResponse {
+export interface NodeHandshakeResult {
     addrs: string[],
     data: any
 }
