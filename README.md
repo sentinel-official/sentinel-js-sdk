@@ -80,65 +80,66 @@ For pagination please follow:
 After you have initialize a `SigningClient` you can prepare and broadcast a tx in multiple ways.
 1. Create a MsgEcodeObject and call `signAndBroadcast` from your client.
 ```javascript
-import { TxNodeSubscribe, nodeSubscribe } from "@sentinel-official/sentinel-js-sdk";
+import { TxNodeStartSession, nodeStartSession } from "@sentinel-official/sentinel-js-sdk";
 import Long from "long";
 
-const args: TxNodeSubscribe = {
+const udvpn = p2pNode.node.gigabytePrices.filter(x => x.denom === "udvpn")[0] as Price
+const args: TxNodeStartSession = {
     from: account.address,
-    nodeAddress: sentnode,
-    gigabytes: Long.fromNumber(gygabyte, true),
-    denom: "udvpn"
+    nodeAddress: p2pNode.node.address,
+    gigabytes: Long.fromString(gygabytes, true),
+    maxPrice: udvpn
 }
-const msg = nodeSubscribe(args)
+const msg = nodeStartSession(args)
 const tx = client.signAndBroadcast(account.address, [msg], "auto", "memo")
 ```
-2. Call directly `nodeSubscribe` from your client or from submodule (this will automatically signAndBroadcast the tx)
+2. Call directly `nodeStartSession` from your client or from submodule (this will automatically signAndBroadcast the tx)
 ```javascript
-import { TxNodeSubscribe } from "@sentinel-official/sentinel-js-sdk";
+import { TxNodeStartSession } from "@sentinel-official/sentinel-js-sdk";
 import Long from "long";
 
-const args: TxNodeSubscribe = {
+const args: TxNodeStartSession = {
     from: account.address,
     nodeAddress: sentnode,
     gigabytes: Long.fromNumber(gygabyte, true),
-    denom: "udvpn",
     fee: "auto",
     memo: "hello from js-sdk"
+    maxPrice: ....
 }
 // call directly
-const tx1 = client.nodeSubscribe(args)
+const tx1 = client.nodeStartSession(args)
 // use submodule
-const tx2 = client.node.subscribe(args)
+const tx2 = client.node.startSession(args)
 ```
 
 It is up to you if you want to `await` the tx or use a callback
 ```javascript
-const tx1 = await client.nodeSubscribe(args)
-client.nodeSubscribe(args).then(tx => { do stuff... })
+const tx1 = await client.nodeStartSession(args)
+client.nodeStartSession(args).then(tx => { do stuff... })
 ```
 
 ## events parsing
-`client.signAndBroadcast` or implicit call trought, for example, `client.nodeSubscribe` or `client.node.subscribe` return a [DeliverTxResponse](https://cosmos.github.io/cosmjs/latest/stargate/interfaces/DeliverTxResponse.html). You can search for a determinate event using the method `searchEvent`. For example if you are looking for `sentinel.node.v2.EventCreateSubscription`, you can do the following:
+`client.signAndBroadcast` or implicit call trought, for example, `client.nodeStartSession` or `client.node.subscribe` return a [DeliverTxResponse](https://cosmos.github.io/cosmjs/latest/stargate/interfaces/DeliverTxResponse.html). You can search for a determinate event using the method `searchEvent`. For example if you are looking for `sentinel.node.v3.EventCreateSession`, you can do the following:
 ```javascript
 import { searchEvent } from "@sentinel-official/sentinel-js-sdk";
-const eventCreateSubscription = searchEvent(sentinel.node.v2.EventCreateSubscription, tx.events);
+const eventCreateSubscription = searchEvent(sentinel.node.v3.EventCreateSession, tx.events);
 ```
 or better
 ```javascript
 import { searchEvent } from "@sentinel-official/sentinel-js-sdk";
-import { NodeEventCreateSubscription } from "@sentinel-official/sentinel-js-sdk";
-const eventCreateSubscription = searchEvent(NodeEventCreateSubscription.type, tx.events);
+import { NodeEventCreateSession } from "@sentinel-official/sentinel-js-sdk";
+const eventCreateSubscription = searchEvent(NodeEventCreateSession.type, tx.events);
 ```
 
 The single event can also be parsed via the appropriate interface, following the example:
 ```javascript
 import { searchEvent } from "@sentinel-official/sentinel-js-sdk";
-import { NodeEventCreateSubscription, isNodeEventCreateSubscription } from "@sentinel-official/sentinel-js-sdk";
+import { NodeEventCreateSession, isNodeEventCreateSession } from "@sentinel-official/sentinel-js-sdk";
 
-const eventCreateSubscription = searchEvent(NodeEventCreateSubscription.type, tx.events);
-if(eventCreateSubscription && isNodeEventCreateSubscription(eventCreateSubscription)) {
-    const eventParsed = NodeEventCreateSubscription.parse(eventCreateSubscription)
-    console.log(`Your subscription id is: ${eventParsed.value.id}`)
+const eventCreateSubscription = searchEvent(NodeEventCreateSession.type, tx.events);
+if(eventCreateSubscription && isNodeEventCreateSession(eventCreateSubscription)) {
+    const eventParsed = NodeEventCreateSession.parse(eventCreateSubscription)
+    console.log(`Your subscription id is: ${eventParsed.value.sessionId}`)
 } else console.log("eventCreateSubscription, not found")
 ```
 
