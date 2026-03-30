@@ -4,6 +4,7 @@ import {
     SentinelClient,
     SigningSentinelClient,
     V2Ray,
+    V2RayHandshakeData,
     Wireguard,
     WireGuardHandshakeData,
     searchEvent,
@@ -48,7 +49,7 @@ const main = async () => {
     const [account] = await wallet.getAccounts();
     console.log(`Wallet: ${account.address}`)
 
-    const privkey = await privKeyFromMnemonic({mnemonic: wallet.mnemonic})
+    const privkey = await privKeyFromMnemonic({ mnemonic: wallet.mnemonic })
     // console.log(privkey)
 
     const customDenom = "udvpn"
@@ -59,10 +60,10 @@ const main = async () => {
         gasPrice: gasPrice
     })
 
-    var p2pNode: {node: null | Node, status: null | NodeInfo} = { node: null, status: null };
+    var p2pNode: { node: null | Node, status: null | NodeInfo } = { node: null, status: null };
 
     var p2pChainNode = await queryNode(sentNodeAddr)
-    if(p2pChainNode) {
+    if (p2pChainNode) {
         console.log("p2p node from chain:", p2pChainNode)
         let p2pStatusNode = await nodeInfo(p2pChainNode.remoteAddrs[0])
         console.log("p2p node status (fetched):", p2pStatusNode)
@@ -87,14 +88,14 @@ const main = async () => {
     var subscribeTx = await client.signAndBroadcast(account.address, [nodeStartSession(sessionStartArgs)], "auto", "sentinel-js-sdk")
     assertIsDeliverTxSuccess(subscribeTx)
     var eventNodesCreateSession = searchEvent(NodeEventCreateSession.type, subscribeTx.events);
-    if(eventNodesCreateSession) {
+    if (eventNodesCreateSession) {
         var eventNodesCreateSessionParsed = NodeEventCreateSession.parse(eventNodesCreateSession)
         console.log("Event parsed", eventNodesCreateSessionParsed)
 
         const sessionId = eventNodesCreateSessionParsed.value.sessionId
         console.log("sessionId", sessionId)
 
-        if (p2pNode.status.service_type === NodeVPNType.WIREGUARD){
+        if (p2pNode.status.service_type === NodeVPNType.WIREGUARD) {
             const wg = new Wireguard()
             const result = await handshake(
                 sessionId,
@@ -102,14 +103,38 @@ const main = async () => {
                 privkey,
                 p2pNode.node.remoteAddrs[0],
             );
-            console.log("result from handshake", result)
+            console.log("wg result from handshake", result)
             const handshakeData: WireGuardHandshakeData = JSON.parse(
                 Buffer.from(result.data, 'base64').toString('utf8')
             );
             await wg.parseConfig(handshakeData, result.addrs);
             await wg.printQRCode();
-        } else if (p2pNode.status.service_type === NodeVPNType.V2RAY){
+        } else if (p2pNode.status.service_type === NodeVPNType.V2RAY) {
+            const v2ray = new V2Ray()
+            const result = await handshake(
+                sessionId,
+                { uuid: v2ray.getKey() },
+                privkey,
+                p2pNode.node.remoteAddrs[0],
+            );
+            console.log("v2ray result from handshake", result)
+            const handshakeData: V2RayHandshakeData = JSON.parse(
+                Buffer.from(result.data, 'base64').toString('utf8')
+            );
+            await v2ray.parseConfig(handshakeData, result.addrs)
+            const v2Pid = v2ray.connect()
 
+            const rl2 = readline.createInterface({ input: process.stdin, output: process.stdout });
+            console.log(`V2Ray client was started. Pid: ${v2Pid}.`)
+            console.log("You can test the following protocols: ")
+            v2ray.config.inbounds.forEach((inbound: any) => {
+                console.log(`- ${inbound.protocol} on ${inbound.listen}:${inbound.port}`)
+            })
+
+            await rl2.question('Once you have finished press enter, the session will be ended');
+            rl2.close();
+
+            v2ray.disconnect()
         }
 
 
