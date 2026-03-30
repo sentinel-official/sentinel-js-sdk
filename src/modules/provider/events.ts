@@ -1,50 +1,71 @@
 import {
-    EventRegister,
-    EventUpdate,
-} from "../../protobuf/sentinel/provider/v2/events"
+    EventCreate,
+    EventUpdateDetails,
+    EventUpdateStatus,
+} from "../../protobuf/sentinel/provider/v3/events"
 
 import { protobufPackage } from "./consts"
 
 import { parseAttributes } from "../../utils"
 import { Event } from "@cosmjs/stargate"
 
-const EventRegisterType = `${protobufPackage}.EventRegister`
-const EventUpdateType = `${protobufPackage}.EventUpdate`
+const EventCreateType = `${protobufPackage}.EventCreate`
+const EventUpdateDetailsType = `${protobufPackage}.EventUpdateDetails`
+const EventUpdateStatusType = `${protobufPackage}.EventUpdateStatus`
 
-export interface ProviderEventRegister extends Event {
-    readonly type: typeof EventRegisterType,
-    readonly value: EventRegister
+export interface ProviderEventCreate extends Event {
+    readonly type: typeof EventCreateType,
+    readonly value: EventCreate
 }
 
-export function isProviderEventRegister(object: Event): object is ProviderEventRegister {
-    return (object as ProviderEventRegister).type === EventRegisterType
+export function isProviderEventCreate(object: Event): object is ProviderEventCreate {
+    return (object as ProviderEventCreate).type === EventCreateType
 }
 
-export const ProviderEventRegister = {
-    type: EventRegisterType,
-    parse(event: Event): ProviderEventRegister {
+export const ProviderEventCreate = {
+    type: EventCreateType,
+    parse(event: Event): ProviderEventCreate {
         return {
             type: this.type,
-            value: EventRegister.fromJSON(parseAttributes(event.attributes))
-        } as ProviderEventRegister
+            value: EventCreate.fromJSON(parseAttributes(event.attributes))
+        } as ProviderEventCreate
     }
 }
 
-export interface ProviderEventUpdate extends Event {
-    readonly type: typeof EventUpdateType,
-    readonly value: EventUpdate
+export interface ProviderEventUpdateDetails extends Event {
+    readonly type: typeof EventUpdateDetailsType,
+    readonly value: EventUpdateDetails
 }
 
-export function isProviderEventUpdate(object: Event): object is ProviderEventUpdate {
-    return (object as ProviderEventUpdate).type === EventUpdateType
+export function isProviderEventUpdateDetails(object: Event): object is ProviderEventUpdateDetails {
+    return (object as ProviderEventUpdateDetails).type === EventUpdateDetailsType
 }
 
-export const ProviderEventUpdate = {
-    type: EventUpdateType,
-    parse(event: Event): ProviderEventUpdate {
+export const ProviderEventUpdateDetails = {
+    type: EventUpdateDetailsType,
+    parse(event: Event): ProviderEventUpdateDetails {
         return {
             type: this.type,
-            value: EventUpdate.fromJSON(parseAttributes(event.attributes))
-        } as ProviderEventUpdate
+            value: EventUpdateDetails.fromJSON(parseAttributes(event.attributes))
+        } as ProviderEventUpdateDetails
+    }
+}
+
+export interface ProviderEventUpdateStatus extends Event {
+    readonly type: typeof EventUpdateStatusType,
+    readonly value: EventUpdateStatus
+}
+
+export function isProviderEventUpdateStatus(object: Event): object is ProviderEventUpdateStatus {
+    return (object as ProviderEventUpdateStatus).type === EventUpdateStatusType
+}
+
+export const ProviderEventUpdateStatus = {
+    type: EventUpdateStatusType,
+    parse(event: Event): ProviderEventUpdateStatus {
+        return {
+            type: this.type,
+            value: EventUpdateStatus.fromJSON(parseAttributes(event.attributes))
+        } as ProviderEventUpdateStatus
     }
 }

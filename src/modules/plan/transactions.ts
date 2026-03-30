@@ -1,35 +1,29 @@
 import {
-    MsgCreateEncodeObject,
-    MsgUpdateStatusEncodeObject,
+    MsgCreatePlanEncodeObject,
     MsgLinkNodeEncodeObject,
     MsgUnlinkNodeEncodeObject,
-    MsgSubscribeEncodeObject,
+    MsgUpdatePlanStatusEncodeObject,
+    MsgStartSessionEncodeObject,
 } from "./encodeobjects";
 
 import {
-    MsgCreateTypeUrl,
-    MsgUpdateStatusTypeUrl,
+    MsgCreatePlanTypeUrl,
     MsgLinkNodeTypeUrl,
     MsgUnlinkNodeTypeUrl,
-    MsgSubscribeTypeUrl
+    MsgUpdatePlanStatusTypeUrl,
+    MsgStartSessionTypeUrl,
 } from "./consts";
 
-import { TxParams } from '../../types';
+import { RenewalPricePolicy, TxParams } from '../../types';
 import Long from 'long';
-import { Coin, Status } from '../../types';
-import { Duration } from "../../protobuf/google/protobuf/duration";
+import { Price, Status } from '../../types';
 
 interface PlanCreate {
-    from: string
-    duration: Duration | undefined,
-    gigabytes: Long,
-    prices: Coin[],
-}
-
-interface PlanUpdateStatus {
-    from: string
-    id: Long,
-    status: Status,
+    from: string;
+    gigabytes: Long;
+    hours: Long;
+    prices: Price[];
+    private: boolean;
 }
 
 interface PlanLinkNode {
@@ -44,25 +38,33 @@ interface PlanUnlinkNode {
     nodeAddress: string,
 }
 
-interface PlanSubscribe {
+interface PlanUpdateStatus {
+    from: string
+    id: Long,
+    status: Status,
+}
+
+interface PlanStartSession {
     from: string
     id: Long,
     denom: string,
+    renewalPricePolicy: RenewalPricePolicy;
+    nodeAddress: string;
 }
 
 export interface TxPlanCreate extends PlanCreate, TxParams {}
-export interface TxPlanUpdateStatus extends PlanUpdateStatus, TxParams {}
 export interface TxPlanLinkNode extends PlanLinkNode, TxParams {}
 export interface TxPlanUnlinkNode extends PlanUnlinkNode, TxParams {}
-export interface TxPlanSubscribe extends PlanSubscribe, TxParams {}
+export interface TxPlanUpdateStatus extends PlanUpdateStatus, TxParams {}
+export interface TxPlanStartSession extends PlanStartSession, TxParams {}
 
 
-export function planCreate(args: PlanCreate): MsgCreateEncodeObject {
-    return { typeUrl: MsgCreateTypeUrl, value: args } as MsgCreateEncodeObject
+export function planCreate(args: PlanCreate): MsgCreatePlanEncodeObject {
+    return { typeUrl: MsgCreatePlanTypeUrl, value: args } as MsgCreatePlanEncodeObject
 }
 
-export function planUpdateStatus(args: PlanUpdateStatus): MsgUpdateStatusEncodeObject {
-    return { typeUrl: MsgUpdateStatusTypeUrl, value: args } as MsgUpdateStatusEncodeObject
+export function planUpdateStatus(args: PlanUpdateStatus): MsgUpdatePlanStatusEncodeObject {
+    return { typeUrl: MsgUpdatePlanStatusTypeUrl, value: args } as MsgUpdatePlanStatusEncodeObject
 }
 
 export function planLinkNode(args: PlanLinkNode): MsgLinkNodeEncodeObject {
@@ -73,6 +75,6 @@ export function planUnlinkNode(args: PlanUnlinkNode): MsgUnlinkNodeEncodeObject 
     return { typeUrl: MsgUnlinkNodeTypeUrl, value: args } as MsgUnlinkNodeEncodeObject
 }
 
-export function planSubscribe(args: PlanSubscribe): MsgSubscribeEncodeObject {
-    return { typeUrl: MsgSubscribeTypeUrl, value: args } as MsgSubscribeEncodeObject
+export function planStartSession(args: PlanStartSession): MsgStartSessionEncodeObject {
+    return { typeUrl: MsgStartSessionTypeUrl, value: args } as MsgStartSessionEncodeObject
 }

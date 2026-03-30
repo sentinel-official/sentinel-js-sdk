@@ -1,21 +1,21 @@
 import {
     EventCreate,
-    EventUpdateStatus,
     EventLinkNode,
     EventUnlinkNode,
-    EventCreateSubscription
-} from "../../protobuf/sentinel/plan/v2/events"
+    EventUpdateStatus,
+    EventUpdateDetails
+} from "../../protobuf/sentinel/plan/v3/events"
 
 import { protobufPackage } from "./consts"
 
 import { parseAttributes } from "../../utils"
 import { Event } from "@cosmjs/stargate"
 
-const EventCreateType = `${protobufPackage}.EventCreate`
-const EventUpdateStatusType = `${protobufPackage}.EventUpdateStatus`
-const EventLinkNodeType = `${protobufPackage}.EventLinkNode`
-const EventUnlinkNodeType = `${protobufPackage}.EventUnlinkNode`
-const EventCreateSubscriptionType = `${protobufPackage}.EventCreateSubscription`
+const EventCreateType = `${protobufPackage}.EventCreate`;
+const EventLinkNodeType = `${protobufPackage}.EventLinkNode`;
+const EventUnlinkNodeType = `${protobufPackage}.EventUnlinkNode`;
+const EventUpdateStatusType = `${protobufPackage}.EventUpdateStatus`;
+const EventUpdateDetailsType = `${protobufPackage}.EventUpdateDetails`;
 
 export interface PlanEventCreate extends Event {
     readonly type: typeof EventCreateType,
@@ -33,25 +33,6 @@ export const PlanEventCreate = {
             type: this.type,
             value: EventCreate.fromJSON(parseAttributes(event.attributes))
         } as PlanEventCreate
-    }
-}
-
-export interface PlanEventUpdateStatus extends Event {
-    readonly type: typeof EventUpdateStatusType,
-    readonly value: EventUpdateStatus
-}
-
-export function isPlanEventUpdateStatus(object: Event): object is PlanEventUpdateStatus {
-    return (object as PlanEventUpdateStatus).type === EventUpdateStatusType
-}
-
-export const PlanEventUpdateStatus = {
-    type: EventUpdateStatusType,
-    parse(event: Event): PlanEventUpdateStatus {
-        return {
-            type: this.type,
-            value: EventUpdateStatus.fromJSON(parseAttributes(event.attributes))
-        } as PlanEventUpdateStatus
     }
 }
 
@@ -93,21 +74,40 @@ export const PlanEventUnlinkNode = {
     }
 }
 
-export interface PlanEventCreateSubscription extends Event {
-    readonly type: typeof EventCreateSubscriptionType,
-    readonly value: EventCreateSubscription
+export interface PlanEventUpdateStatus extends Event {
+    readonly type: typeof EventUpdateStatusType,
+    readonly value: EventUpdateStatus
 }
 
-export function isPlanEventCreateSubscription(object: Event): object is PlanEventCreateSubscription {
-    return (object as PlanEventCreateSubscription).type === EventCreateSubscriptionType
+export function isPlanEventUpdateStatus(object: Event): object is PlanEventUpdateStatus {
+    return (object as PlanEventUpdateStatus).type === EventUpdateStatusType
 }
 
-export const PlanEventCreateSubscription = {
-    type: EventCreateSubscriptionType,
-    parse(event: Event): PlanEventCreateSubscription {
+export const PlanEventUpdateStatus = {
+    type: EventUpdateStatusType,
+    parse(event: Event): PlanEventUpdateStatus {
         return {
             type: this.type,
-            value: EventCreateSubscription.fromJSON(parseAttributes(event.attributes))
-        } as PlanEventCreateSubscription
+            value: EventUpdateStatus.fromJSON(parseAttributes(event.attributes))
+        } as PlanEventUpdateStatus
+    }
+}
+
+export interface PlanEventUpdateDetails extends Event {
+    readonly type: typeof EventUpdateDetailsType,
+    readonly value: EventUpdateDetails
+}
+
+export function isPlanEventUpdateDetails(object: Event): object is PlanEventUpdateDetails {
+    return (object as PlanEventUpdateDetails).type === EventUpdateDetailsType
+}
+
+export const PlanEventUpdateDetails = {
+    type: EventUpdateDetailsType,
+    parse(event: Event): PlanEventUpdateDetails {
+        return {
+            type: this.type,
+            value: EventUpdateDetails.fromJSON(parseAttributes(event.attributes))
+        } as PlanEventUpdateDetails
     }
 }

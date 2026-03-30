@@ -1,41 +1,37 @@
 import { EncodeObject } from "@cosmjs/proto-signing";
 
 import {
-    MsgStartRequest,
-    MsgUpdateDetailsRequest,
-    MsgEndRequest,
-} from '../../protobuf/sentinel/session/v2/msg'
+    MsgCancelSessionRequest,
+    MsgUpdateSessionRequest,
+    MsgUpdateParamsRequest,
+} from '../../protobuf/sentinel/session/v3/msg'
 
 import {
-    MsgStartTypeUrl,
-    MsgUpdateDetailsTypeUrl,
-    MsgEndTypeUrl,
+    MsgCancelSessionTypeUrl,
+    MsgUpdateSessionTypeUrl,
+    MsgUpdateParamsTypeUrl,
 } from './consts'
 
-
-export interface MsgStartEncodeObject extends EncodeObject {
-    readonly typeUrl: typeof MsgStartTypeUrl,
-    readonly value: Partial<MsgStartRequest>
+export interface MsgCancelSessionEncodeObject extends EncodeObject {
+    readonly typeUrl: typeof MsgCancelSessionTypeUrl,
+    readonly value: Partial<MsgCancelSessionRequest>
+}
+export interface MsgUpdateSessionEncodeObject extends EncodeObject {
+    readonly typeUrl: typeof MsgUpdateSessionTypeUrl,
+    readonly value: Partial<MsgUpdateSessionRequest>
+}
+export interface MsgUpdateParamsEncodeObject extends EncodeObject {
+    readonly typeUrl: typeof MsgUpdateParamsTypeUrl,
+    readonly value: Partial<MsgUpdateParamsRequest>
 }
 
-export interface MsgUpdateDetailsEncodeObject extends EncodeObject {
-    readonly typeUrl: typeof MsgUpdateDetailsTypeUrl,
-    readonly value: Partial<MsgUpdateDetailsRequest>
-}
 
-export interface MsgEndEncodeObject extends EncodeObject {
-    readonly typeUrl: typeof MsgEndTypeUrl,
-    readonly value: Partial<MsgEndRequest>
+export function isMsgCancelSessionEncodeObject(object: EncodeObject): object is MsgCancelSessionEncodeObject {
+    return (object as MsgCancelSessionEncodeObject).typeUrl === MsgCancelSessionTypeUrl
 }
-
-export function isMsgStartEncodeObject(object: EncodeObject): object is MsgStartEncodeObject {
-    return (object as MsgStartEncodeObject).typeUrl === MsgStartTypeUrl
+export function isMsgUpdateSessionEncodeObject(object: EncodeObject): object is MsgUpdateSessionEncodeObject {
+    return (object as MsgUpdateSessionEncodeObject).typeUrl === MsgUpdateSessionTypeUrl
 }
-
-export function isMsgUpdateDetailsEncodeObject(object: EncodeObject): object is MsgUpdateDetailsEncodeObject {
-    return (object as MsgUpdateDetailsEncodeObject).typeUrl === MsgUpdateDetailsTypeUrl
-}
-
-export function isMsgEndEncodeObject(object: EncodeObject): object is MsgEndEncodeObject {
-    return (object as MsgEndEncodeObject).typeUrl === MsgEndTypeUrl
+export function isMsgUpdateParamsEncodeObject(object: EncodeObject): object is MsgUpdateParamsEncodeObject {
+    return (object as MsgUpdateParamsEncodeObject).typeUrl === MsgUpdateParamsTypeUrl
 }

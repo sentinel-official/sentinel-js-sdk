@@ -1,50 +1,50 @@
 import {
-    MsgStartEncodeObject,
-    MsgUpdateDetailsEncodeObject,
-    MsgEndEncodeObject,
+    MsgCancelSessionEncodeObject,
+    MsgUpdateSessionEncodeObject,
+    MsgUpdateParamsEncodeObject,
 } from "./encodeobjects";
 
 import {
-    MsgStartTypeUrl,
-    MsgUpdateDetailsTypeUrl,
-    MsgEndTypeUrl,
+    MsgCancelSessionTypeUrl,
+    MsgUpdateSessionTypeUrl,
+    MsgUpdateParamsTypeUrl,
 } from "./consts";
 
 import { TxParams } from '../../types';
 import Long from 'long';
-import { Proof } from "../../protobuf/sentinel/session/v2/proof";
+import { Duration } from "../../protobuf/google/protobuf/duration";
+import { Params as SessionParams } from '../../protobuf/sentinel/session/v2/params';
 
-interface SessionStart {
+
+interface SessionCancel {
     from: string
     id: Long,
-    address: string,
 }
 
-interface SessionUpdateDetails {
-    from: string
-    proof: Proof | undefined,
-    signature: Uint8Array,
+interface SessionUpdate {
+    from: string;
+    id: Long;
+    downloadBytes: string;
+    uploadBytes: string;
+    duration?: Duration | undefined;
+    signature: Uint8Array;
 }
 
-interface SessionEnd {
-    from: string
-    id: Long,
-    rating: Long,
+interface SessionUpdateParams {
+  from: string;
+  params?: SessionParams | undefined;
 }
 
-export interface TxSessionStart extends SessionStart, TxParams {}
-export interface TxSessionUpdateDetails extends SessionUpdateDetails, TxParams {}
-export interface TxSessionEnd extends SessionEnd, TxParams {}
+export interface TxSessionCancel extends SessionCancel, TxParams {}
+export interface TxSessionUpdate extends SessionUpdate, TxParams {}
+export interface TxSessionUpdateParams extends SessionUpdateParams, TxParams {}
 
-
-export function sessionStart(args: SessionStart): MsgStartEncodeObject{
-    return { typeUrl: MsgStartTypeUrl, value: args } as MsgStartEncodeObject
+export function sessionCancel(args: SessionCancel): MsgCancelSessionEncodeObject {
+    return { typeUrl: MsgCancelSessionTypeUrl, value: args} as MsgCancelSessionEncodeObject
 }
-
-export function sessionUpdateDetails(args: SessionUpdateDetails): MsgUpdateDetailsEncodeObject {
-    return { typeUrl: MsgUpdateDetailsTypeUrl, value: args } as MsgUpdateDetailsEncodeObject
+export function sessionUpdate(args: SessionUpdate): MsgUpdateSessionEncodeObject {
+    return { typeUrl: MsgUpdateSessionTypeUrl, value: args} as MsgUpdateSessionEncodeObject
 }
-
-export function sessionEnd(args: SessionEnd): MsgEndEncodeObject {
-    return { typeUrl: MsgEndTypeUrl, value: args } as MsgEndEncodeObject
+export function sessionUpdateParams(args: SessionUpdateParams): MsgUpdateParamsEncodeObject {
+    return { typeUrl: MsgUpdateParamsTypeUrl, value: args} as MsgUpdateParamsEncodeObject
 }

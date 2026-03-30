@@ -1,4 +1,4 @@
-import { Tendermint34Client } from "@cosmjs/tendermint-rpc";
+import { connectComet, CometClient } from "@cosmjs/tendermint-rpc";
 import { DeliverTxResponse, SigningStargateClient, SigningStargateClientOptions } from "@cosmjs/stargate"
 import { buildSentinelQueryClient, SentinelQueryClient } from "./modules/queries"
 import { SentinelRegistry } from "./modules";
@@ -8,11 +8,13 @@ import {
     TxNodeRegister,
     TxNodeUpdateDetails,
     TxNodeUpdateStatus,
-    TxNodeSubscribe,
+    TxNodeStartSession,
+    TxNodeUpdateParams,
     nodeRegister,
     nodeUpdateDetails,
     nodeUpdateStatus,
-    nodeSubscribe,
+    nodeStartSession,
+    nodeUpdateParams
 } from './modules/node'
 
 import {
@@ -20,35 +22,49 @@ import {
     TxPlanUpdateStatus,
     TxPlanLinkNode,
     TxPlanUnlinkNode,
-    TxPlanSubscribe,
+    TxPlanStartSession,
     planCreate,
     planUpdateStatus,
     planLinkNode,
     planUnlinkNode,
-    planSubscribe,
+    planStartSession,
 } from './modules/plan'
 
 import {
-    TxProvideRegister,
-    TxProviderUpdate,
+    TxProviderRegister,
+    TxProviderUpdateDetails,
+    TxProviderUpdateStatus,
+    TxProviderUpdateParams,
     providerRegister,
-    providerUpdate
+    providerUpdateDetails,
+    providerUpdateStatus,
+    providerUpdateParams,
 } from './modules/provider'
 
 import {
-    TxSessionStart,
-    TxSessionUpdateDetails,
-    TxSessionEnd,
-    sessionStart,
-    sessionUpdateDetails,
-    sessionEnd,
+    TxSessionCancel,
+    TxSessionUpdate,
+    TxSessionUpdateParams,
+    sessionCancel,
+    sessionUpdate,
+    sessionUpdateParams,
 } from './modules/session'
 
 import {
     TxSubscriptionCancel,
-    TxSubscriptionAllocate,
+    TxSubscriptionRenew,
+    TxSubscriptionShare,
+    TxSubscriptionStart,
+    TxSubscriptionUpdate,
+    TxSubscriptionStartSession,
+    TxSubscriptionUpdateParams,
     subscriptionCancel,
-    subscriptionAllocate
+    subscriptionRenew,
+    subscriptionShare,
+    subscriptionStart,
+    subscriptionUpdate,
+    subscriptionStartSession,
+    subscriptionUpdateParams,
 } from './modules/subscription'
 
 function createDefaultRegistry(): Registry {
@@ -63,27 +79,35 @@ export class SigningSentinelClient extends SigningStargateClient {
             register: this.nodeRegister.bind(this),
             updateDetails: this.nodeUpdateDetails.bind(this),
             updateStatus: this.nodeUpdateStatus.bind(this),
-            subscribe: this.nodeSubscribe.bind(this)
+            startSession: this.nodeStartSession.bind(this),
+            updateParams: this.nodeUpdateParams.bind(this)
         },
         plan: {
             create: this.planCreate.bind(this),
             updateStatus: this.planUpdateStatus.bind(this),
             linkNode: this.planLinkNode.bind(this),
             unlinkNode: this.planUnlinkNode.bind(this),
-            subscribe: this.planSubscribe.bind(this),
+            startSession: this.planStartSession.bind(this),
         },
         provider: {
             register: this.providerRegister.bind(this),
-            update: this.providerUpdate.bind(this),
+            updateDetails: this.providerUpdateDetails.bind(this),
+            updateStatus: this.providerUpdateStatus.bind(this),
+            updateParams: this.providerUpdateParams.bind(this),
         },
         session: {
-            start: this.sessionStart.bind(this),
-            updateDetails: this.sessionUpdateDetails.bind(this),
-            end: this.sessionEnd.bind(this),
+            cancel: this.sessionCancel.bind(this),
+            update: this.sessionUpdate.bind(this),
+            updateParams: this.sessionUpdateParams.bind(this),
         },
         subscription: {
             cancel: this.subscriptionCancel.bind(this),
-            allocate: this.subscriptionAllocate.bind(this)
+            renew: this.subscriptionRenew.bind(this),
+            share: this.subscriptionShare.bind(this),
+            start: this.subscriptionStart.bind(this),
+            update: this.subscriptionUpdate.bind(this),
+            startSession: this.subscriptionStartSession.bind(this),
+            updateParams: this.subscriptionUpdateParams.bind(this),
         }
     }
 
@@ -92,14 +116,14 @@ export class SigningSentinelClient extends SigningStargateClient {
         signer: OfflineSigner,
         options: SigningStargateClientOptions = {}
     ): Promise<SigningSentinelClient> {
-        const tmClient = await Tendermint34Client.connect(endpoint)
+        const tmClient = await connectComet(endpoint)
         return new SigningSentinelClient(tmClient, signer, {
             registry: createDefaultRegistry(),
             ...options
         })
     }
 
-    protected constructor(tmClient: Tendermint34Client | undefined, signer: OfflineSigner, options: SigningStargateClientOptions) {
+    protected constructor(tmClient: CometClient | undefined, signer: OfflineSigner, options: SigningStargateClientOptions) {
         super(tmClient, signer, options)
         if (tmClient) this.sentinelQuery = buildSentinelQueryClient(tmClient)
     }
@@ -122,9 +146,15 @@ export class SigningSentinelClient extends SigningStargateClient {
         return this.signAndBroadcast(args.from, [msg], fee || "auto", memo)
     }
 
-    public async nodeSubscribe(args: TxNodeSubscribe): Promise<DeliverTxResponse> {
+    public async nodeStartSession(args: TxNodeStartSession): Promise<DeliverTxResponse> {
         const {fee, memo, ...params} = args
-        const msg = nodeSubscribe(params)
+        const msg = nodeStartSession(params)
+        return this.signAndBroadcast(args.from, [msg], fee || "auto", memo)
+    }
+
+    public async nodeUpdateParams(args: TxNodeUpdateParams): Promise<DeliverTxResponse> {
+        const {fee, memo, ...params} = args
+        const msg = nodeUpdateParams(params)
         return this.signAndBroadcast(args.from, [msg], fee || "auto", memo)
     }
 
@@ -152,39 +182,51 @@ export class SigningSentinelClient extends SigningStargateClient {
         return this.signAndBroadcast(args.from, [msg], fee || "auto", memo)
     }
 
-    public async planSubscribe(args: TxPlanSubscribe): Promise<DeliverTxResponse> {
+    public async planStartSession(args: TxPlanStartSession): Promise<DeliverTxResponse> {
         const {fee, memo, ...params} = args
-        const msg = planSubscribe(params)
+        const msg = planStartSession(params)
         return this.signAndBroadcast(args.from, [msg], fee || "auto", memo)
     }
 
-    public async providerRegister(args: TxProvideRegister): Promise<DeliverTxResponse> {
+    public async providerRegister(args: TxProviderRegister): Promise<DeliverTxResponse> {
         const {fee, memo, ...params} = args
         const msg = providerRegister(params)
         return this.signAndBroadcast(args.from, [msg], fee || "auto", memo)
     }
 
-    public async providerUpdate(args: TxProviderUpdate): Promise<DeliverTxResponse> {
+    public async providerUpdateDetails(args: TxProviderUpdateDetails): Promise<DeliverTxResponse> {
         const {fee, memo, ...params} = args
-        const msg = providerUpdate(params)
+        const msg = providerUpdateDetails(params)
         return this.signAndBroadcast(args.from, [msg], fee || "auto", memo)
     }
 
-    public async sessionStart(args: TxSessionStart): Promise<DeliverTxResponse> {
+    public async providerUpdateStatus(args: TxProviderUpdateStatus): Promise<DeliverTxResponse> {
         const {fee, memo, ...params} = args
-        const msg = sessionStart(params)
+        const msg = providerUpdateStatus(params)
         return this.signAndBroadcast(args.from, [msg], fee || "auto", memo)
     }
 
-    public async sessionUpdateDetails(args: TxSessionUpdateDetails): Promise<DeliverTxResponse> {
+    public async providerUpdateParams(args: TxProviderUpdateParams): Promise<DeliverTxResponse> {
         const {fee, memo, ...params} = args
-        const msg = sessionUpdateDetails(params)
+        const msg = providerUpdateParams(params)
         return this.signAndBroadcast(args.from, [msg], fee || "auto", memo)
     }
 
-    public async sessionEnd(args: TxSessionEnd): Promise<DeliverTxResponse> {
+    public async sessionCancel(args: TxSessionCancel): Promise<DeliverTxResponse> {
         const {fee, memo, ...params} = args
-        const msg = sessionEnd(params)
+        const msg = sessionCancel(params)
+        return this.signAndBroadcast(args.from, [msg], fee || "auto", memo)
+    }
+
+    public async sessionUpdate(args: TxSessionUpdate): Promise<DeliverTxResponse> {
+        const {fee, memo, ...params} = args
+        const msg = sessionUpdate(params)
+        return this.signAndBroadcast(args.from, [msg], fee || "auto", memo)
+    }
+
+    public async sessionUpdateParams(args: TxSessionUpdateParams): Promise<DeliverTxResponse> {
+        const {fee, memo, ...params} = args
+        const msg = sessionUpdateParams(params)
         return this.signAndBroadcast(args.from, [msg], fee || "auto", memo)
     }
 
@@ -193,12 +235,37 @@ export class SigningSentinelClient extends SigningStargateClient {
         const msg = subscriptionCancel(params)
         return this.signAndBroadcast(args.from, [msg], fee || "auto", memo)
     }
-
-    public async subscriptionAllocate(args: TxSubscriptionAllocate): Promise<DeliverTxResponse> {
+    public async subscriptionRenew(args: TxSubscriptionRenew): Promise<DeliverTxResponse> {
         const {fee, memo, ...params} = args
-        const msg = subscriptionAllocate(params)
+        const msg = subscriptionRenew(params)
         return this.signAndBroadcast(args.from, [msg], fee || "auto", memo)
     }
+    public async subscriptionShare(args: TxSubscriptionShare): Promise<DeliverTxResponse> {
+        const {fee, memo, ...params} = args
+        const msg = subscriptionShare(params)
+        return this.signAndBroadcast(args.from, [msg], fee || "auto", memo)
+    }
+    public async subscriptionStart(args: TxSubscriptionStart): Promise<DeliverTxResponse> {
+        const {fee, memo, ...params} = args
+        const msg = subscriptionStart(params)
+        return this.signAndBroadcast(args.from, [msg], fee || "auto", memo)
+    }
+    public async subscriptionUpdate(args: TxSubscriptionUpdate): Promise<DeliverTxResponse> {
+        const {fee, memo, ...params} = args
+        const msg = subscriptionUpdate(params)
+        return this.signAndBroadcast(args.from, [msg], fee || "auto", memo)
+    }
+    public async subscriptionStartSession(args: TxSubscriptionStartSession): Promise<DeliverTxResponse> {
+        const {fee, memo, ...params} = args
+        const msg = subscriptionStartSession(params)
+        return this.signAndBroadcast(args.from, [msg], fee || "auto", memo)
+    }
+    public async subscriptionUpdateParams(args: TxSubscriptionUpdateParams): Promise<DeliverTxResponse> {
+        const {fee, memo, ...params} = args
+        const msg = subscriptionUpdateParams(params)
+        return this.signAndBroadcast(args.from, [msg], fee || "auto", memo)
+    }
+
 
 }
 

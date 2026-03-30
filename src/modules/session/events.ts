@@ -1,34 +1,34 @@
 import {
-    EventStart,
+    EventEnd,
     EventUpdateDetails,
     EventUpdateStatus,
-} from "../../protobuf/sentinel/session/v2/events"
+} from "../../protobuf/sentinel/session/v3/events"
 
 import { protobufPackage } from "./consts"
 
 import { parseAttributes } from "../../utils"
 import { Event } from "@cosmjs/stargate"
 
-const EventStartType = `${protobufPackage}.EventStart`
+const EventEndType = `${protobufPackage}.EventEnd`
 const EventUpdateDetailsType = `${protobufPackage}.EventUpdateDetails`
 const EventUpdateStatusType = `${protobufPackage}.EventUpdateStatus`
 
-export interface SessionEventStart extends Event {
-    readonly type: typeof EventStartType,
-    readonly value: EventStart
+export interface SessionEventEnd extends Event {
+    readonly type: typeof EventEndType,
+    readonly value: EventEnd
 }
 
-export function isSessionEventStart(object: Event): object is SessionEventStart {
-    return (object as SessionEventStart).type === EventStartType
+export function isSessionEventEnd(object: Event): object is SessionEventEnd {
+    return (object as SessionEventEnd).type === EventEndType
 }
 
-export const SessionEventStart = {
-    type: EventStartType,
-    parse(event: Event): SessionEventStart {
+export const SessionEventEnd = {
+    type: EventEndType,
+    parse(event: Event): SessionEventEnd {
         return {
             type: this.type,
-            value: EventStart.fromJSON(parseAttributes(event.attributes))
-        } as SessionEventStart
+            value: EventEnd.fromJSON(parseAttributes(event.attributes))
+        } as SessionEventEnd
     }
 }
 

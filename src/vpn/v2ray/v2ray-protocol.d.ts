@@ -15,8 +15,8 @@ declare namespace V2RayProtocol {
 
     interface DokodemoDoor {
         address?: string;
-        port: number;
-        network: "tcp" | "udp" | "tcp,udp";
+        port?: number;
+        network?: "tcp" | "udp" | "tcp,udp";
         timeout?: number;
         // timeout is not present on ConfigurationObject but it exist in the example
         followRedirect?: boolean;
@@ -212,6 +212,7 @@ declare namespace V2RayProtocol {
         | "mtproto"
         | "shadowsocks"
         | "socks"
+        | "vless"
         | "vmess";
 }
 

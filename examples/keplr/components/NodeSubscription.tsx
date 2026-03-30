@@ -1,9 +1,10 @@
 import { Component } from "react"
 
-import { SentinelClient, SigningSentinelClient } from "@sentinel-official/sentinel-js-sdk";
+import { Price, SentinelClient, SigningSentinelClient } from "@sentinel-official/sentinel-js-sdk";
 import { Status, PageRequest, Node } from "@sentinel-official/sentinel-js-sdk";
 import { searchEvent } from "@sentinel-official/sentinel-js-sdk";
-import { NodeEventCreateSubscription, isNodeEventCreateSubscription } from "@sentinel-official/sentinel-js-sdk";
+import { handshake, NodeVPNType, Wireguard, nodeInfo, WireGuardHandshakeData} from "@sentinel-official/sentinel-js-sdk";
+import { NodeEventCreateSession, isNodeEventCreateSession } from "@sentinel-official/sentinel-js-sdk";
 
 import { GasPrice, Coin } from "@cosmjs/stargate";
 
@@ -41,7 +42,7 @@ export class NodeSubscription extends Component<NodeSubscriptionProps, NodeSubsc
     queryNodes = async() => {
         const client = await SentinelClient.connect(this.props.rpcUrl)
         const response = await client.sentinelQuery?.node.nodes(Status.STATUS_ACTIVE, PageRequest.fromPartial({
-            limit: 500,
+            limit: 50,
             countTotal: true
         }))
         if(response !== undefined){
@@ -52,6 +53,13 @@ export class NodeSubscription extends Component<NodeSubscriptionProps, NodeSubsc
 
     onSubscribeClicked = async(node: any) => {
         const dvpnNode = Node.fromPartial(node)
+
+        /* const p2pStatusNode = await nodeInfo(dvpnNode.remoteAddrs[0])
+        if(p2pStatusNode.service_type !== NodeVPNType.WIREGUARD){
+            alert("Please choose a wireguard node!")
+            return;
+        } */
+
         const { keplr } = window
         if (!keplr) {
             alert("You need to install or unlock Keplr")
@@ -68,20 +76,38 @@ export class NodeSubscription extends Component<NodeSubscriptionProps, NodeSubsc
         )
         // Get the address and balance of your user
         const account: AccountData = (await offlineSigner.getAccounts())[0]
-        const subscribeResult = await signingClient.nodeSubscribe({
+
+        const udvpn = dvpnNode.gigabytePrices.filter(x => x.denom === "udvpn")[0] as Price
+        const subscribeResult = await signingClient.nodeStartSession({
             from: account.address,
             nodeAddress: dvpnNode.address,
-            gigabytes: new Long(1)
+            gigabytes: new Long(1),
+            maxPrice: udvpn
         })
         // Print the result to the console
         console.log(subscribeResult)
 
-        const eventCreateSubscription = searchEvent(NodeEventCreateSubscription.type, subscribeResult.events);
+        const eventCreateSubscription = searchEvent(NodeEventCreateSession.type, subscribeResult.events);
         if(eventCreateSubscription) {
-            console.log("isSubscriptionEventAllocate", isNodeEventCreateSubscription(eventCreateSubscription))
-            const eventParsed = NodeEventCreateSubscription.parse(eventCreateSubscription)
+            console.log("isSubscriptionEventAllocate", isNodeEventCreateSession(eventCreateSubscription))
+            const eventParsed = NodeEventCreateSession.parse(eventCreateSubscription)
             console.log(eventParsed)
-            alert(`Your subscription id is: ${eventParsed.value.id}`)
+            const sessionId = eventParsed.value.sessionId
+            alert(`Your subscription id is: ${sessionId}`)
+
+            /* const wg = new Wireguard()
+            const result = await handshake(
+                sessionId,
+                { public_key: wg.publicKey },
+                privkey,
+                dvpnNode.remoteAddrs[0],
+            );
+            console.log("wg result from handshake", result)
+            const handshakeData: WireGuardHandshakeData = JSON.parse(
+                Buffer.from(result.data, 'base64').toString('utf8')
+            );
+            await wg.parseConfig(handshakeData, result.addrs); */
+
         } else alert("eventCreateSubscription, not found")
     }
 
@@ -90,8 +116,8 @@ export class NodeSubscription extends Component<NodeSubscriptionProps, NodeSubsc
             {this.state.nodes.map((node, index) => (
                 <div key={index} className={styles.card}>
                     <p>Address: {Node.fromPartial(node).address}</p>
-                    <p>Remote URL: {Node.fromPartial(node).remoteUrl}</p>
-                    <p>Gigabyte price: {Node.fromPartial(node).gigabytePrices.filter((x: Coin) => x.denom === "udvpn").map((x: Coin) => `${x.amount} ${x.denom}`)}</p>
+                    <p>Remote URL: {Node.fromPartial(node).remoteAddrs}</p>
+                    <p>Gigabyte price: {Node.fromPartial(node).gigabytePrices.filter((x: Price) => x.denom === "udvpn").map((x: Price) => `base: ${x.baseValue}, quote: ${x.quoteValue}, denom: ${x.denom}`)}</p>
 
                     <button onClick={() => this.onSubscribeClicked(node)}>Subscribe 1gb</button>
                 </div>

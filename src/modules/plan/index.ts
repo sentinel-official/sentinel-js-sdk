@@ -5,4 +5,4 @@ export * from "./events";
 export * from "./registry";
 export * from "./transactions"
 
-export { Plan } from "../../protobuf/sentinel/plan/v2/plan";
+export { Plan } from "../../protobuf/sentinel/plan/v3/plan";

@@ -1,5 +1,5 @@
-export const protobufPackage = "sentinel.session.v2";
+export const protobufPackage = "sentinel.session.v3";
 
-export const MsgStartTypeUrl = `/${protobufPackage}.MsgStartRequest`
-export const MsgUpdateDetailsTypeUrl = `/${protobufPackage}.MsgUpdateDetailsRequest`
-export const MsgEndTypeUrl = `/${protobufPackage}.MsgEndRequest`
+export const MsgCancelSessionTypeUrl = `/${protobufPackage}.MsgCancelSessionRequest`
+export const MsgUpdateSessionTypeUrl = `/${protobufPackage}.MsgUpdateSessionRequest`
+export const MsgUpdateParamsTypeUrl = `/${protobufPackage}.MsgUpdateParamsRequest`

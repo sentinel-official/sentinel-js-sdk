@@ -1,36 +1,78 @@
 import {
-    EventRegister,
+    EventCreate,
+    EventPay,
+    EventRefund,
     EventUpdateDetails,
     EventUpdateStatus,
-    EventCreateSubscription
-} from "../../protobuf/sentinel/node/v2/events"
+    EventCreateSession,
+} from "../../protobuf/sentinel/node/v3/events"
 
 import { protobufPackage } from "./consts"
 
 import { parseAttributes } from "../../utils"
 import { Event } from "@cosmjs/stargate"
 
-const EventRegisterType = `${protobufPackage}.EventRegister`
-const EventUpdateDetailsType = `${protobufPackage}.EventUpdateDetails`
-const EventUpdateStatusType = `${protobufPackage}.EventUpdateStatus`
-const EventCreateSubscriptionType = `${protobufPackage}.EventCreateSubscription`
+const EventCreateType = `${protobufPackage}.EventCreate`;
+const EventPayType = `${protobufPackage}.EventPay`;
+const EventRefundType = `${protobufPackage}.EventRefund`;
+const EventUpdateDetailsType = `${protobufPackage}.EventUpdateDetails`;
+const EventUpdateStatusType = `${protobufPackage}.EventUpdateStatus`;
+const EventCreateSessionType = `${protobufPackage}.EventCreateSession`;
 
-export interface NodeEventRegister extends Event {
-    readonly type: typeof EventRegisterType,
-    readonly value: EventRegister
+export interface NodeEventCreate extends Event {
+    readonly type: typeof EventCreateType,
+    readonly value: EventCreate
 }
 
-export function isNodeEventRegister(object: Event): object is NodeEventRegister {
-    return (object as NodeEventRegister).type === EventRegisterType
+export function isNodeEventCreate(object: Event): object is NodeEventCreate {
+    return (object as NodeEventCreate).type === EventCreateType
 }
 
-export const NodeEventRegister = {
-    type: EventRegisterType,
-    parse(event: Event): NodeEventRegister {
+export const NodeEventCreate = {
+    type: EventCreateType,
+    parse(event: Event): NodeEventCreate {
         return {
             type: this.type,
-            value: EventRegister.fromJSON(parseAttributes(event.attributes))
-        } as NodeEventRegister
+            value: EventCreate.fromJSON(parseAttributes(event.attributes))
+        } as NodeEventCreate
+    }
+}
+
+export interface NodeEventPay extends Event {
+    readonly type: typeof EventPayType,
+    readonly value: EventPay
+}
+
+export function isNodeEventPay(object: Event): object is NodeEventPay {
+    return (object as NodeEventPay).type === EventPayType
+}
+
+export const NodeEventPay = {
+    type: EventPayType,
+    parse(event: Event): NodeEventPay {
+        return {
+            type: this.type,
+            value: EventPay.fromJSON(parseAttributes(event.attributes))
+        } as NodeEventPay
+    }
+}
+
+export interface NodeEventRefund extends Event {
+    readonly type: typeof EventRefundType,
+    readonly value: EventRefund
+}
+
+export function isNodeEventRefund(object: Event): object is NodeEventRefund {
+    return (object as NodeEventRefund).type === EventRefundType
+}
+
+export const NodeEventRefund = {
+    type: EventRefundType,
+    parse(event: Event): NodeEventRefund {
+        return {
+            type: this.type,
+            value: EventRefund.fromJSON(parseAttributes(event.attributes))
+        } as NodeEventRefund
     }
 }
 
@@ -72,21 +114,21 @@ export const NodeEventUpdateStatus = {
     }
 }
 
-export interface NodeEventCreateSubscription extends Event {
-    readonly type: typeof EventCreateSubscriptionType,
-    readonly value: EventCreateSubscription
+export interface NodeEventCreateSession extends Event {
+    readonly type: typeof EventCreateSessionType,
+    readonly value: EventCreateSession
 }
 
-export function isNodeEventCreateSubscription(object: Event): object is NodeEventCreateSubscription {
-    return (object as NodeEventCreateSubscription).type === EventCreateSubscriptionType
+export function isNodeEventCreateSession(object: Event): object is NodeEventCreateSession {
+    return (object as NodeEventCreateSession).type === EventCreateSessionType
 }
 
-export const NodeEventCreateSubscription = {
-    type: EventCreateSubscriptionType,
-    parse(event: Event): NodeEventCreateSubscription {
+export const NodeEventCreateSession = {
+    type: EventCreateSessionType,
+    parse(event: Event): NodeEventCreateSession {
         return {
             type: this.type,
-            value: EventCreateSubscription.fromJSON(parseAttributes(event.attributes))
-        } as NodeEventCreateSubscription
+            value: EventCreateSession.fromJSON(parseAttributes(event.attributes))
+        } as NodeEventCreateSession
     }
 }

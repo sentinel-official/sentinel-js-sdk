@@ -70,6 +70,7 @@ declare namespace V2RayConf {
             // https://www.v2ray.com/en/configuration/routing.html#ruleobject
             tag: string;
             selector: string[];
+            strategy: {type: string};
         }
     }
     interface Routing {

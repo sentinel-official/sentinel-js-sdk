@@ -28,7 +28,7 @@ declare namespace V2RayTransport {
         // https://www.v2ray.com/en/configuration/transport/tcp.html
         // acceptProxyProtocol?: boolean;
         // header: Tcp.NoneHeader | Tcp.HttpHeader;
-        header: Record<string, Tcp.NoneHeader | Tcp.HttpHeader>;
+        header?: Record<string, Tcp.NoneHeader | Tcp.HttpHeader>;
     }
 
     namespace Kcp {
@@ -43,7 +43,7 @@ declare namespace V2RayTransport {
         congestion?: boolean;
         readBufferSize?: number;
         writeBufferSize?: number;
-        header: {
+        header?: {
             type: Kcp.Type;
         };
     }
@@ -52,18 +52,18 @@ declare namespace V2RayTransport {
         // https://www.v2ray.com/en/configuration/transport/websocket.html
         // acceptProxyProtocol?: boolean;
         path?: string;
-        headers: Record<string, string>;
+        headers?: Record<string, string>;
     }
 
     interface Http {
         // https://www.v2ray.com/en/configuration/transport/h2.html
-        host: string[];
+        host?: string[];
         path?: string;
     }
 
     interface DomainSocket {
         // https://www.v2ray.com/en/configuration/transport/domainsocket.html
-        path: string;
+        path?: string;
         // abstract?: boolean;
         // padding?: boolean;
     }
@@ -71,11 +71,14 @@ declare namespace V2RayTransport {
     interface Quic {
         // https://www.v2ray.com/en/configuration/transport/quic.html
         security: "none" | "aes-128-gcm" | "chacha20-poly1305";
-        key: string;
-        header: {
+        key?: string;
+        header?: {
             type: "none" | "srtp" | "utp" | "wechat-video" | "dtls" | "wireguard";
         };
     }
+
+    interface Grpc {}
+    interface Gun {}
 }
 
 interface V2RayTransport {
@@ -85,10 +88,12 @@ interface V2RayTransport {
     httpSettings?: V2RayTransport.Http;
     dsSettings?: V2RayTransport.DomainSocket;
     quicSettings?: V2RayTransport.Quic;
+    grpcSettings?: V2RayTransport.Grpc;
+    gunSettings?: V2RayTransport.Gun;
 }
 
 declare namespace StreamSettings {
-    type Network = "tcp" | "kcp" | "ws" | "http" | "domainsocket" | "quic";
+    type Network = | "tcp" | "kcp" | "ws" | "http" | "domainsocket" | "quic" | "gun" | "grpc";
     type Security = "none" | "tls";
     namespace TLS {
         namespace Certificate {
@@ -103,12 +108,12 @@ declare namespace StreamSettings {
         }
     }
     interface TLS {
-        serverName: string;
-        allowInsecure: boolean;
-        allowInsecureCiphers?: boolean;
+        serverName?: string;
+        allowInsecure?: boolean;
+        /* allowInsecureCiphers?: boolean;
         alpn?: string[];
         certificates: [];
-        disableSystemRoot: boolean;
+        disableSystemRoot: boolean; */
     }
     namespace Sockopt {
         type Tproxy = "redirect" | "tproxy" | "off";

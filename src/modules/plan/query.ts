@@ -5,7 +5,7 @@ import {
     QueryPlansResponse,
     QueryPlansForProviderResponse,
     QueryServiceClientImpl
-} from "../../protobuf/sentinel/plan/v2/querier";
+} from "../../protobuf/sentinel/plan/v3/querier";
 
 import {
     createProtobufRpcClient,
@@ -17,7 +17,7 @@ import Long  from "long";
 import { PageRequest } from "../../protobuf/cosmos/base/query/v1beta1/pagination";
 import { Status } from "../../protobuf/sentinel/types/v1/status";
 
-import { Plan } from "../../protobuf/sentinel/plan/v2/plan";
+import { Plan } from "../../protobuf/sentinel/plan/v3/plan";
 
 export interface PlanExtension {
     readonly plan: {
