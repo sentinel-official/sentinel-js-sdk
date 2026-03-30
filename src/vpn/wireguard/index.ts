@@ -13,7 +13,7 @@ interface WireGuardMetadata {
     public_key: string;
 }
 
-// from sentinel-official/sentinel-dvpnx handhskae
+// from sentinel-official/sentinel-dvpnx handshake
 export interface WireGuardHandshakeData {
     addrs: string[];             // client IP/CIDR assigned. ["10.153.98.8/32"]
     metadata: WireGuardMetadata[];  // endpoint node info (metadata: port, public_key)
