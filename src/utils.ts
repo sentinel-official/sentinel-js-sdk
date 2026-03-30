@@ -89,11 +89,7 @@ export async function privKeyFromMnemonic({ mnemonic, bip39Password, hdPath }: {
  * @returns GeoIPLocation with all geo-ip information like city country etc
  */
 export async function fetchLocation(address?: string): Promise<GeoIPLocation> {
-    const httpsAgent = new https.Agent({
-        rejectUnauthorized: false
-    });
-
-    const response = await axios.get("http://ip-api.com/json/" + (address || ''), { httpsAgent })
+    const response = await axios.get("http://ip-api.com/json/" + (address || ''))
     return response.data as GeoIPLocation
 }
 
