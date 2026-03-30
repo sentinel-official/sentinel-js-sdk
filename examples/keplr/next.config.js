@@ -5,7 +5,9 @@ const nextConfig = {
     config.resolve.fallback = { 
       fs: false,
       path: false,
-      net: false
+      net: false,
+      child_process: false,
+      "find-free-ports": false
     };
     return config;
   },
