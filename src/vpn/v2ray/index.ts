@@ -1,6 +1,8 @@
 import { randomUUID, randomBytes } from "crypto"
 import { spawn, ChildProcessWithoutNullStreams } from "child_process";
 import findFreePorts from "find-free-ports"
+import qrcode from 'qrcode';
+import { isIP } from "net";  // 0: not a ip > domain, 4: ipv4, 6: ivp6
 import * as path from 'path';
 import * as fs from 'fs';
 import * as os from 'os';
@@ -284,5 +286,134 @@ export class V2Ray {
     public disconnect(): boolean {
         if (this.child) return this.child.kill('SIGINT');
         return false;
+    }
+
+    /**
+    * Generates a VMess share link in the standard v2rayNG format.
+    * Format: `vmess://` + base64(JSON config)
+    * Compatible with: v2rayNG, NekoBox, Shadowrocket, Quantumult X.
+    *
+    * @param address  - Node IP or hostname
+    * @param port     - Node port
+    * @param network  - Transport network (grpc, tcp, ws, etc.)
+    * @param security - Transport security ("tls" or "none")
+    * @param name     - Optional display name shown in the app (default: "sentinel-js-sdk")
+    * @returns vmess:// share link string
+    */
+    public buildVMessLink(
+        address:  string,
+        port:     number,
+        network:  V2RayStreamSettings["network"],
+        security: V2RayStreamSettings["security"],
+        aid: string = "0",
+        name:     string = "sentinel-js-sdk",
+    ): string {
+        const config = {
+            v:    "2",
+            ps:   name,
+            add:  address,
+            port: String(port),
+            id:   this.uuid,
+            aid:  aid,
+            net:  network,
+            type: "none",
+            host: "",
+            path: "",
+            tls:  security === "tls" ? "tls" : "",
+            sni:  security === "tls" && isIP(address) === 0 ? address : "",
+            alpn: "",
+        };
+        const encoded = Buffer.from(JSON.stringify(config)).toString("base64");
+        return `vmess://${encoded}`;
+    }
+
+    /**
+    * Generates a VLess share link in the standard URI format.
+    * Format: `vless://{uuid}@{address}:{port}?{params}#{name}`
+    * Compatible with: v2rayNG, NekoBox, Shadowrocket.
+    *
+    * @param address  - Node IP or hostname
+    * @param port     - Node port
+    * @param network  - Transport network (grpc, tcp, ws, etc.)
+    * @param security - Transport security ("tls" or "none")
+    * @param name     - Optional display name shown in the app (default: "sentinel-js-sdk")
+    * @returns vless:// share link string
+    */
+    public buildVLessLink(
+        address:  string,
+        port:     number,
+        network:  V2RayStreamSettings["network"],
+        security: V2RayStreamSettings["security"],
+        name:     string = "sentinel-js-sdk",
+    ): string {
+        const secString = security ?? "none"
+        const params = new URLSearchParams({
+            encryption: "none",
+            security:   secString,
+            type:       network,
+        });
+        if (secString === "tls") {
+            if(isIP(address) === 0) params.append("sni", address);
+            params.append("allowInsecure", "1")
+        };
+        const tag = encodeURIComponent(name);
+        return `vless://${this.uuid}@${address}:${port}?${params.toString()}#${tag}`;
+    }
+
+    /**
+    * Generates share links for all outbounds in the current config.
+    * Returns one link per outbound, VMess or VLess depending on the protocol.
+    *
+    * @param name - Optional display name prefix (default: "sentinel-js-sdk")
+    * @returns Array of share link strings
+    */
+    public buildShareLinks(name: string = "sentinel-js-sdk"): string[] {
+        const links: string[] = [];
+        for (const outbound of this.config.outbounds) {
+            if (outbound.protocol !== "vmess" && outbound.protocol !== "vless") continue;
+
+            const settings = outbound.settings as { vnext: any[] } | undefined;
+            const vnext    = settings?.vnext?.[0];
+            const user     = vnext?.users?.[0];
+            const stream   = outbound.streamSettings;
+            if (!vnext || !user || !stream) continue;
+
+            const address = vnext.address;
+            const port = vnext.port;
+            const network  = stream.network ?? "tcp";
+            const security = stream.security ?? "none";
+
+            const remark = outbound.tag ?? name;
+            if (outbound.protocol === "vmess") {
+                const aid = (user.alterId || 0).toString();
+                links.push(this.buildVMessLink(address, port, network, security, aid, remark));
+            } else {
+                links.push(this.buildVLessLink(address, port, network, security, remark));
+            }
+        }
+        return links
+    }
+
+    /**
+    * Prints QR codes for all share links to the terminal.
+    * Each QR code can be scanned directly by v2rayNG or similar apps.
+    * Requires `qrcode` package: `npm install qrcode @types/qrcode`
+    *
+    * @param name - Optional display name for the links (default: "sentinel-js-sdk")
+    *
+    * @example
+    * await v2ray.printShareQRCodes();
+    * // Prints one QR code per outbound to stdout
+    */
+    public async printShareQRCodes(name: string = "sentinel-js-sdk"): Promise<void> {
+        const links = this.buildShareLinks(name);
+        for (const [index, link] of links.entries()) {
+            const protocol = link.startsWith("vmess://") ? "VMess" : "VLess";
+            const remark   = decodeURIComponent(link.match(/#(.*)$/)?.[1] ?? "");
+            console.log(`\n--- [${index + 1}/${links.length}] ${protocol} | ${remark} ---`);
+            const qr = await qrcode.toString(link, { type: "terminal", small: true });
+            console.log(qr);
+            console.log(`${link}\n`);
+        }
     }
 }
