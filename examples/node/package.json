@@ -9,10 +9,8 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@sentinel-official/sentinel-js-sdk": "^2.0.1",
     "@types/node": "^20.12.7",
     "ts-node": "^10.9.2"
-  },
-  "dependencies": {
-    "@sentinel-official/sentinel-js-sdk": "^1.0.0"
   }
 }
