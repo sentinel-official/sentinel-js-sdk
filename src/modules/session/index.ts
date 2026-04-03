@@ -5,4 +5,4 @@ export * from "./events";
 export * from "./registry";
 export * from "./transactions";
 
-export { BaseSession as Session } from "../../protobuf/sentinel/session/v3/session";
+export { BaseSession } from "../../protobuf/sentinel/session/v3/session";

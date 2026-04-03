@@ -6,3 +6,4 @@ export * from "./registry";
 export * from "./transactions"
 
 export { Node } from "../../protobuf/sentinel/node/v3/node";
+export { Session } from "../../protobuf/sentinel/node/v3/session";

@@ -1,6 +1,6 @@
 {
   "name": "@sentinel-official/sentinel-js-sdk",
-  "version": "2.0.2",
+  "version": "2.0.4",
   "description": "sentinel javascript sdk",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
