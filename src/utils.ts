@@ -66,7 +66,7 @@ export async function nodeInfo(remoteUrl: string): Promise<NodeInfo> {
     const inputUrl = remoteUrl.replace(/\/$/g, '').trim()
     const httpsUrl = inputUrl.startsWith("http") ? inputUrl : `https://${inputUrl}`
 
-    const response = await axios.get(httpsUrl, { httpsAgent })
+    const response = await axios.get(httpsUrl, { httpsAgent, timeout: 10000 })
     return (response.data as NodeResponse).result as NodeInfo
 }
 
@@ -89,7 +89,7 @@ export async function privKeyFromMnemonic({ mnemonic, bip39Password, hdPath }: {
  * @returns GeoIPLocation with all geo-ip information like city country etc
  */
 export async function fetchLocation(address?: string): Promise<GeoIPLocation> {
-    const response = await axios.get("http://ip-api.com/json/" + (address || ''))
+    const response = await axios.get("http://ip-api.com/json/" + (address || ''), { timeout: 10000 })
     return response.data as GeoIPLocation
 }
 
@@ -238,6 +238,7 @@ export async function handshake(
             'Content-Type': 'application/json',
         },
         httpsAgent: new https.Agent({ rejectUnauthorized: false }),
+        timeout: 60000,
     });
     // .result, supponsing success: True and error doesn't exist
     return response.data.result as NodeHandshakeResult;
