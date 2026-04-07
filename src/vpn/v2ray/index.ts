@@ -104,9 +104,11 @@ export class V2Ray {
     config: V2RayConf;
     uuid: string;
     child: null | ChildProcessWithoutNullStreams;
+    configPath: string | null;
 
     constructor() {
         this.child = null;
+        this.configPath = null;
         this.uuid = randomUUID();
         // https://github.com/sentinel-official/sentinel-go-sdk/blob/development/v2ray/client.json.tmpl
         this.config = {
@@ -252,6 +254,7 @@ export class V2Ray {
             output = path.join(tempDirectory, "v2ray_" + randomBytes(8).toString('hex') + ".json");
         }
         fs.writeFileSync(output, JSON.stringify(this.config, null, 4));
+        this.configPath = output;
         return output;
     }
 
@@ -284,8 +287,29 @@ export class V2Ray {
      * @returns `true` if the signal was sent successfully, `false` if no process is running.
      */
     public disconnect(): boolean {
-        if (this.child) return this.child.kill('SIGINT');
-        return false;
+        const killed = this.child ? this.child.kill('SIGINT') : false;
+        this.cleanup();
+        return killed;
+    }
+
+    /**
+     * Removes config files from disk.
+     *
+     * @param configFile - Optional path. Falls back to the last written config.
+     */
+    public cleanup(configFile?: string): void {
+        const target = configFile || this.configPath;
+        if (!target) return;
+        try {
+            fs.unlinkSync(target);
+            const dir = path.dirname(target);
+            if (dir.includes('sentinel-js-sdk')) {
+                fs.rmdirSync(dir);
+            }
+        } catch {
+            // Best-effort cleanup
+        }
+        if (target === this.configPath) this.configPath = null;
     }
 
     /**

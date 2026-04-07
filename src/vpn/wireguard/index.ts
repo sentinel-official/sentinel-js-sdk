@@ -52,10 +52,12 @@ export class Wireguard {
 
     publicKey: string
     privateKey: string
+    configPath: string | null
 
     constructor() {
         this.interface = null;
         this.peer = null;
+        this.configPath = null;
 
         const keys = this.genKeys();
         this.publicKey = keys.pub
@@ -163,6 +165,8 @@ export class Wireguard {
             if (this.peer.presharedKey) config += "PresharedKey = " + this.peer.presharedKey + "\n"
 
             fs.writeFileSync(output, config);
+            this.configPath = output;
+            try { fs.chmodSync(output, 0o600); } catch {}
             return output
         }
         return null
@@ -253,14 +257,47 @@ export class Wireguard {
      *
      * @param configFile - Path to the `.conf` file used when connecting.
      */
-    public disconnect(configFile: string) {
-        const child = spawn("wg-quick", ["down", configFile])
-        child.stdout.setEncoding('utf8');
-        child.stdout.on('data', function (data) { console.log('stdout: ' + data.trim()); });
+    public disconnect(configFile: string): Promise<void> {
+        return new Promise((resolve, reject) => {
+            const child = spawn("wg-quick", ["down", configFile]);
+            let stderr = '';
 
-        child.stderr.setEncoding('utf8');
-        child.stderr.on('data', function (data) { console.log('stderr: ' + data.trim()); });
-        child.on('close', (code) => console.log(`wg-quick down exited with code ${code}.`));
+            child.stdout.setEncoding('utf8');
+            child.stderr.setEncoding('utf8');
+            child.stderr.on('data', (data) => { stderr += data; });
+            child.on('error', (err) => reject(new Error(`Failed to start wg-quick: ${err.message}`)));
+            child.on('close', (code) => {
+                // Clean up config file (contains private key in plaintext)
+                this.cleanup(configFile);
+                if (code === 0) resolve();
+                else reject(new Error(`wg-quick down failed (exit code ${code}): ${stderr.trim()}`));
+            });
+        });
+    }
+
+    /**
+     * Removes config files from disk. Overwrites with zeros before deletion
+     * to scrub the private key from the filesystem.
+     *
+     * @param configFile - Path to the config file to clean up.
+     */
+    public cleanup(configFile?: string): void {
+        const target = configFile || this.configPath;
+        if (!target) return;
+        try {
+            // Overwrite with zeros to scrub private key before unlinking
+            const size = fs.statSync(target).size;
+            fs.writeFileSync(target, Buffer.alloc(size, 0));
+            fs.unlinkSync(target);
+            // Try to remove parent temp directory if empty
+            const dir = path.dirname(target);
+            if (dir.includes('sentinel-js-sdk')) {
+                fs.rmdirSync(dir);
+            }
+        } catch {
+            // Best-effort cleanup
+        }
+        if (target === this.configPath) this.configPath = null;
     }
 
     /**
