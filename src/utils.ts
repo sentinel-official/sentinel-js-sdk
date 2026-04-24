@@ -58,7 +58,7 @@ export function uintArrayTob64(value: number[]): string {
  * @param remoteUrl node endpoint
  * @returns NodeInfo information
  */
-export async function nodeInfo(remoteUrl: string): Promise<NodeInfo> {
+export async function nodeInfo(remoteUrl: string, timeout: number = 10000): Promise<NodeInfo> {
     const httpsAgent = new https.Agent({
         rejectUnauthorized: false
     });
@@ -66,7 +66,7 @@ export async function nodeInfo(remoteUrl: string): Promise<NodeInfo> {
     const inputUrl = remoteUrl.replace(/\/$/g, '').trim()
     const httpsUrl = inputUrl.startsWith("http") ? inputUrl : `https://${inputUrl}`
 
-    const response = await axios.get(httpsUrl, { httpsAgent, timeout: 10000 })
+    const response = await axios.get(httpsUrl, { httpsAgent, timeout: timeout })
     return (response.data as NodeResponse).result as NodeInfo
 }
 
@@ -88,8 +88,8 @@ export async function privKeyFromMnemonic({ mnemonic, bip39Password, hdPath }: {
  * @param address if provided will fetch a determinate IP, else the current one
  * @returns GeoIPLocation with all geo-ip information like city country etc
  */
-export async function fetchLocation(address?: string): Promise<GeoIPLocation> {
-    const response = await axios.get("http://ip-api.com/json/" + (address || ''), { timeout: 10000 })
+export async function fetchLocation(address?: string, timeout: number = 10000): Promise<GeoIPLocation> {
+    const response = await axios.get("http://ip-api.com/json/" + (address || ''), { timeout: timeout })
     return response.data as GeoIPLocation
 }
 
@@ -178,6 +178,7 @@ function encodePubKey(compressedPubKey: Uint8Array): string {
  * @param privateKey - The 32-byte secp256k1 private key of the Cosmos wallet
  *   that owns the session on-chain
  * @param remoteUrl - The node's remote URL as stored on-chain (e.g. `https://1.2.3.4:port`)
+ * @param timeout - request timeout in milliseconds
  * @returns A `NodeHandshakeResult` containing:
  *   - `result.addrs` — list of node endpoints to connect to (e.g. `["1.2.3.4:51820"]`)
  *   - `result.data`  — VPN configuration returned by the node (WireGuard config or v2ray inbound)
@@ -211,6 +212,7 @@ export async function handshake(
     data: any,
     privateKey: Uint8Array,
     remoteUrl: string,
+    timeout: number = 60000
 ): Promise<NodeHandshakeResult> {
 
     const msg = buildMsg(sessionId, data);
@@ -238,7 +240,7 @@ export async function handshake(
             'Content-Type': 'application/json',
         },
         httpsAgent: new https.Agent({ rejectUnauthorized: false }),
-        timeout: 60000,
+        timeout: timeout,
     });
     // .result, supponsing success: True and error doesn't exist
     return response.data.result as NodeHandshakeResult;
