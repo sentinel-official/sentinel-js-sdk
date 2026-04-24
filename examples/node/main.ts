@@ -113,7 +113,7 @@ const main = async () => {
             const v2ray = new V2Ray()
             const result = await handshake(
                 sessionId,
-                { uuid: v2ray.getKey() },
+                { uid: v2ray.getKey() },
                 privkey,
                 p2pNode.node.remoteAddrs[0],
             );
