@@ -25,7 +25,23 @@ import { Node } from "../../protobuf/sentinel/node/v3/node";
 
 export interface NodeExtension {
     readonly node: {
+        /**
+         * Query nodes by status.
+         *
+         * NOTE: Sentinel chain v3 does not return `pagination.next_key` for
+         * this query even when results are truncated. To enumerate all nodes
+         * reliably, do not loop on `next_key` — use a sufficiently large
+         * `limit` in a single call, or paginate by `offset`.
+         *
+         * Reproducible against mainnet: a status=ACTIVE query that has more
+         * than `limit` matching nodes still returns `next_key=null`.
+         */
         nodes: (status: Status, pagination?: PageRequest) => Promise<QueryNodesResponse>,
+        /**
+         * Query nodes joined to a plan by status. Same `next_key` caveat
+         * as `nodes()` — chain v3 does not emit it on truncation. Use
+         * `offset`-based pagination or a sufficiently large `limit`.
+         */
         nodesForPlan: (id: Long, status: Status, pagination?: PageRequest) => Promise<QueryNodesForPlanResponse>,
         node: (address: string) => Promise<Node | undefined>,
         params: () => Promise<Params | undefined>
