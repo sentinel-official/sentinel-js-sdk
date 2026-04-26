@@ -10,6 +10,7 @@ import axios from 'axios';
 import https from 'https'
 
 import { NodeResponse, NodeInfo, GeoIPLocation, NodeHandshakeResult } from "./types";
+import { Status } from "./protobuf/sentinel/types/v1/status";
 
 /**
  * Convert an array of stargate/Attribute in to javascript object
@@ -48,6 +49,21 @@ export function searchEvent(eventUrl: string, events: readonly Event[] | Event[]
  */
 export function uintArrayTob64(value: number[]): string {
     return btoa(String.fromCharCode.apply(null, value))
+}
+
+/**
+ * True if the given status (in any of its on-chain shapes) represents
+ * `STATUS_ACTIVE`. Sentinel chain v3 emits status as the string
+ * `"STATUS_ACTIVE"` in LCD JSON, the numeric `1` in RPC protobuf, and
+ * the typed `Status.STATUS_ACTIVE` enum when decoded by ts-proto. This
+ * helper accepts all three so consumers don't need to remember which
+ * shape they're looking at.
+ *
+ * @param s status value from a chain query (string, number, or Status enum)
+ * @returns true if active
+ */
+export function isActiveStatus(s: string | number | Status): boolean {
+    return s === Status.STATUS_ACTIVE || s === "STATUS_ACTIVE" || s === 1;
 }
 
 
