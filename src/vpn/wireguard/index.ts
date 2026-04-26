@@ -8,6 +8,8 @@ import * as os from 'os';
 
 import qrcode from 'qrcode';
 
+import { preferIPv4 } from "../../utils";
+
 interface WireGuardMetadata {
     port: number;
     public_key: string;
@@ -114,7 +116,7 @@ export class Wireguard {
         const meta = handshakeData.metadata[0];
 
         // Endpoint = public IP of the node (from result.addrs) + port (from metadata)
-        const host = nodeAddrs[0];
+        const host = preferIPv4(nodeAddrs);
         const endpoint = `${host}:${meta.port}`;
 
         this.peer = {

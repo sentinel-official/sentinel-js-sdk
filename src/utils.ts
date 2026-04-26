@@ -50,6 +50,21 @@ export function uintArrayTob64(value: number[]): string {
     return btoa(String.fromCharCode.apply(null, value))
 }
 
+/**
+ * Pick the best node address for an outbound VPN connection. Prefers IPv4
+ * when present; falls back to the first entry (typically IPv6) otherwise.
+ *
+ * Sentinel chain does not guarantee ordering of `result.addrs` returned by
+ * the node handshake, so consumers on v4-only networks need this preference
+ * to avoid silent dial failures on dual-stack nodes.
+ *
+ * @param addrs Address strings from `result.addrs` (no port suffix expected)
+ * @returns The preferred address, or `addrs[0]` if no IPv4 is found
+ */
+export function preferIPv4(addrs: string[]): string {
+    return addrs.find(a => /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(a)) ?? addrs[0];
+}
+
 
 
 /**

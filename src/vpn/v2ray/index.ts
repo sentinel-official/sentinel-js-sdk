@@ -9,6 +9,8 @@ import * as os from 'os';
 import V2RayConf from "./v2ray-conf";
 import { V2RayStreamSettings } from "./v2ray-transport";
 
+import { preferIPv4 } from "../../utils";
+
 /**
  * Proxy protocol types. Maps to ProxyProtocol iota in sentinel-go-sdk/v2ray/server.go
  * 0 = Unspecified, 1 = VLess, 2 = VMess
@@ -169,7 +171,7 @@ export class V2Ray {
         handshakeData: V2RayHandshakeData,
         nodeAddrs: string[],
     ): Promise<void> {
-        const address = nodeAddrs[0];
+        const address = preferIPv4(nodeAddrs);
         const [apiPort] = await findFreePorts(1);
 
         // API inbound
