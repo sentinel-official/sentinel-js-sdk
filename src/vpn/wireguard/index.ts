@@ -180,6 +180,7 @@ export class Wireguard {
         let config = "[Interface]\n";
         config += "Address = " + this.interface.addresses.join(",") + "\n";
         config += "PrivateKey = " + this.interface.privateKey + "\n";
+        config += "ListenPort = " + this.interface.listenPort.toString() + "\n";
         config += "DNS = " + this.interface.dns.join(",") + "\n";
 
         config += "\n[Peer]\n";
