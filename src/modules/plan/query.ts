@@ -22,7 +22,7 @@ import { Plan } from "../../protobuf/sentinel/plan/v3/plan";
 export interface PlanExtension {
     readonly plan: {
         plans: (status: Status, pagination?: PageRequest) => Promise<QueryPlansResponse>,
-        plansForProvide: (address: string, pagination?: PageRequest) => Promise<QueryPlansForProviderResponse>,
+        plansForProvider: (address: string, pagination?: PageRequest) => Promise<QueryPlansForProviderResponse>,
         plan: (id: Long) => Promise<Plan | undefined>
     }
 }
@@ -35,7 +35,7 @@ export function setupPlanExtension(base: QueryClient): PlanExtension {
         plan: {
             plans: async (status: Status, pagination?: PageRequest) =>
                 queryService.QueryPlans(QueryPlansRequest.fromJSON({status, pagination})),
-            plansForProvide: async (address: string, pagination?: PageRequest) =>
+            plansForProvider: async (address: string, pagination?: PageRequest) =>
                 queryService.QueryPlansForProvider(QueryPlansForProviderRequest.fromJSON({address, pagination})),
             plan: async (id: Long) => {
                 const { plan } = await queryService.QueryPlan(QueryPlanRequest.fromJSON({id}));
