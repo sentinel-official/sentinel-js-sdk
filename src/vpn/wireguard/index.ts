@@ -98,7 +98,8 @@ export class Wireguard {
     public async parseConfig(
         handshakeData: WireGuardHandshakeData,
         nodeAddrs: string[],
-        dns: string[] = ["10.8.0.1", "1.0.0.1", "1.1.1.1"]
+        dns: string[] = ["10.8.0.1", "1.0.0.1", "1.1.1.1"],
+        mtu: number = 1280
     ): Promise<void> {
         const [listenPort] = await findFreePorts(1);
 
@@ -108,6 +109,7 @@ export class Wireguard {
             addresses: handshakeData.addrs,
             listenPort,
             dns,
+            mtu,
         };
 
         // Use the first available metadata to build the peer endpoint
@@ -181,6 +183,7 @@ export class Wireguard {
         config += "Address = " + this.interface.addresses.join(",") + "\n";
         config += "PrivateKey = " + this.interface.privateKey + "\n";
         config += "DNS = " + this.interface.dns.join(",") + "\n";
+        if (this.interface.mtu) config += "MTU = " + this.interface.mtu + "\n";
 
         config += "\n[Peer]\n";
         config += "PublicKey = " + this.peer.publicKey + "\n";
