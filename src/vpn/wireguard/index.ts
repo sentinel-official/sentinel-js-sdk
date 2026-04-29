@@ -1,5 +1,6 @@
 import { generateKeyPairSync, randomBytes } from "crypto"
-import { spawn } from "child_process";
+import { spawn, execSync } from "child_process";
+import { platform } from 'os';
 import findFreePorts from "find-free-ports"
 
 import * as path from 'path';
@@ -41,6 +42,44 @@ interface Peer {
     persistentKeepAlive: number
 }
 
+
+/**
+ * Checks if the current process has administrator/root privileges.
+ * WireGuard tunnel management requires elevated permissions on all platforms.
+ */
+export function isAdmin(): boolean {
+    if (platform() === 'win32') {
+        try {
+            execSync('net session', { stdio: 'ignore' });
+            return true;
+        } catch {
+            return false;
+        }
+    }
+    return process.getuid?.() === 0;
+}
+
+/**
+ * Finds the WireGuard executable on Windows.
+ * Checks common installation paths.
+ */
+function findWireGuardExe(): string | null {
+    if (platform() !== 'win32') return null;
+    const paths = [
+        'C:\\Program Files\\WireGuard\\wireguard.exe',
+        'C:\\Program Files (x86)\\WireGuard\\wireguard.exe',
+    ];
+    for (const p of paths) {
+        if (fs.existsSync(p)) return p;
+    }
+    // Check PATH
+    try {
+        const result = execSync('where wireguard.exe', { encoding: 'utf8', stdio: ['pipe', 'pipe', 'ignore'] });
+        const firstLine = result.trim().split('\n')[0];
+        if (firstLine && fs.existsSync(firstLine)) return firstLine;
+    } catch {}
+    return null;
+}
 
 // oh, well... https://www.npmjs.com/package/wireguard-tools
 // Warning, in order to use connect and disconnect method we need sudoers permission
@@ -218,52 +257,115 @@ export class Wireguard {
     }
 
     /**
-     * Brings up the WireGuard tunnel using `wg-quick up`.
-     * Requires sudo/root privileges.
+     * Brings up the WireGuard tunnel.
+     * On Linux/macOS uses `wg-quick up`. On Windows uses the WireGuard tunnel service.
+     * Requires sudo/root/administrator privileges.
      *
      * @param configFile - Optional path to an existing `.conf` file.
      *   If omitted, writes the current config to a temp file first.
+     * @returns Promise that resolves on success or rejects with error details.
      */
-    public connect(configFile?: string) {
+    public async connect(configFile?: string): Promise<void> {
+        if (!isAdmin()) {
+            throw new Error('WireGuard requires administrator/root privileges. Run with sudo or as administrator.');
+        }
+
         if (configFile == undefined) {
-            // const randomFile = "wg_" + randomBytes(8).toString('hex') + ".conf"
-            // pkexec wg-quick up /tmp/sentinel-js-sdkR2Resv/wg_76294e9ab0aac67f.conf
-            // wg-quick: The config file must be a valid interface name, followed by .conf
-
-            /* Recommended INTERFACE names include `wg0' or `wgvpn0' or even `wgmgmtlan0'.  However,  the
-            number  at  the  end  is  in  fact  optional,  and  really  any  free-form  string  [a-zA-
-            Z0-9_=+.-]{1,15} will work. So even interface names corresponding to geographic  locations
-            would suffice, such as `cincinnati', `nyc', or `paris', if that's somehow desirable */
-
             const randomFile = "wgsent0.conf"
             const tempDirectory = fs.mkdtempSync(path.join(os.tmpdir(), 'sentinel-js-sdk'))
             configFile = path.join(tempDirectory, randomFile)
-            // Hope the config are in "memory"
             this.writeConfig(configFile)
         }
-        const child = spawn("wg-quick", ["up", configFile])
-        child.stdout.setEncoding('utf8');
-        child.stdout.on('data', function (data) { console.log('stdout: ' + data.trim()); });
 
-        child.stderr.setEncoding('utf8');
-        child.stderr.on('data', function (data) { console.log('stderr: ' + data.trim()); });
-        child.on('close', (code) => console.log(`wg-quick up exited with code ${code}.`));
+        if (platform() === 'win32') {
+            return this.connectWindows(configFile);
+        }
+        return this.connectUnix(configFile);
+    }
+
+    private connectUnix(configFile: string): Promise<void> {
+        return new Promise((resolve, reject) => {
+            const child = spawn("wg-quick", ["up", configFile]);
+            let stderr = '';
+            child.stderr.setEncoding('utf8');
+            child.stderr.on('data', (data) => { stderr += data; });
+            child.on('error', (err) => reject(new Error(`Failed to start wg-quick: ${err.message}`)));
+            child.on('close', (code) => {
+                if (code === 0) resolve();
+                else reject(new Error(`wg-quick up failed (exit code ${code}): ${stderr.trim()}`));
+            });
+        });
+    }
+
+    private async connectWindows(configFile: string): Promise<void> {
+        const wgExe = findWireGuardExe();
+        if (!wgExe) {
+            throw new Error('WireGuard not found. Install from https://www.wireguard.com/install/');
+        }
+
+        const tunnelName = path.basename(configFile, '.conf');
+
+        // Install tunnel service
+        try {
+            execSync(`"${wgExe}" /installtunnelservice "${configFile}"`, { stdio: 'ignore' });
+        } catch (err: any) {
+            throw new Error(`Failed to install WireGuard tunnel service: ${err.message}`);
+        }
+
+        // Poll for RUNNING state (up to 15 seconds)
+        const serviceName = `WireGuardTunnel$${tunnelName}`;
+        const deadline = Date.now() + 15000;
+        while (Date.now() < deadline) {
+            try {
+                const output = execSync(`sc query "${serviceName}"`, { encoding: 'utf8', stdio: ['pipe', 'pipe', 'ignore'] });
+                if (output.includes('RUNNING')) return;
+            } catch {}
+            await new Promise(r => setTimeout(r, 1000));
+        }
+        throw new Error(`WireGuard tunnel service "${serviceName}" did not reach RUNNING state within 15 seconds`);
     }
 
     /**
-     * Brings down the WireGuard tunnel using `wg-quick down`.
-     * Requires sudo/root privileges.
+     * Brings down the WireGuard tunnel.
+     * On Linux/macOS uses `wg-quick down`. On Windows removes the tunnel service.
+     * Requires sudo/root/administrator privileges.
      *
      * @param configFile - Path to the `.conf` file used when connecting.
+     * @returns Promise that resolves on success or rejects with error details.
      */
-    public disconnect(configFile: string) {
-        const child = spawn("wg-quick", ["down", configFile])
-        child.stdout.setEncoding('utf8');
-        child.stdout.on('data', function (data) { console.log('stdout: ' + data.trim()); });
+    public async disconnect(configFile: string): Promise<void> {
+        if (platform() === 'win32') {
+            return this.disconnectWindows(configFile);
+        }
+        return this.disconnectUnix(configFile);
+    }
 
-        child.stderr.setEncoding('utf8');
-        child.stderr.on('data', function (data) { console.log('stderr: ' + data.trim()); });
-        child.on('close', (code) => console.log(`wg-quick down exited with code ${code}.`));
+    private disconnectUnix(configFile: string): Promise<void> {
+        return new Promise((resolve, reject) => {
+            const child = spawn("wg-quick", ["down", configFile]);
+            let stderr = '';
+            child.stderr.setEncoding('utf8');
+            child.stderr.on('data', (data) => { stderr += data; });
+            child.on('error', (err) => reject(new Error(`Failed to start wg-quick: ${err.message}`)));
+            child.on('close', (code) => {
+                if (code === 0) resolve();
+                else reject(new Error(`wg-quick down failed (exit code ${code}): ${stderr.trim()}`));
+            });
+        });
+    }
+
+    private disconnectWindows(configFile: string): Promise<void> {
+        const wgExe = findWireGuardExe();
+        if (!wgExe) {
+            throw new Error('WireGuard not found');
+        }
+        const tunnelName = path.basename(configFile, '.conf');
+        try {
+            execSync(`"${wgExe}" /uninstalltunnelservice "${tunnelName}"`, { stdio: 'ignore' });
+        } catch (err: any) {
+            throw new Error(`Failed to uninstall WireGuard tunnel: ${err.message}`);
+        }
+        return Promise.resolve();
     }
 
     /**
