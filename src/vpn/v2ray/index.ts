@@ -104,10 +104,12 @@ export class V2Ray {
     config: V2RayConf;
     uuid: string;
     child: null | ChildProcessWithoutNullStreams;
+    socksPort: number;
 
     constructor() {
         this.child = null;
         this.uuid = randomUUID();
+        this.socksPort = 0;
         // https://github.com/sentinel-official/sentinel-go-sdk/blob/development/v2ray/client.json.tmpl
         this.config = {
             api: { services: ["StatsService"], tag: "api" },
@@ -170,7 +172,8 @@ export class V2Ray {
         nodeAddrs: string[],
     ): Promise<void> {
         const address = nodeAddrs[0];
-        const [apiPort] = await findFreePorts(1);
+        const [apiPort, socksPort] = await findFreePorts(2);
+        this.socksPort = socksPort;
 
         // API inbound
         this.config.inbounds.push({
@@ -184,7 +187,7 @@ export class V2Ray {
         // SOCKS proxy inbound
         this.config.inbounds.push({
             listen: "127.0.0.1",
-            port: 1080,
+            port: socksPort,
             protocol: "socks",
             settings: { ip: "127.0.0.1", udp: true },
             sniffing: { destOverride: ["http", "tls"], enabled: true },
