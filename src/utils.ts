@@ -106,7 +106,7 @@ export async function fetchLocation(address?: string, timeout: number = 10000): 
  */
 function uint64ToBigEndian(id: Long): Uint8Array {
     const buf = new Uint8Array(8);
-    let n = BigInt(id.toNumber());
+    let n = BigInt(id.toString());
     for (let i = 7; i >= 0; i--) {
         buf[i] = Number(n & BigInt(0xff));
         n >>= BigInt(8);
@@ -226,7 +226,7 @@ export async function handshake(
 
     const body = {
         data: Buffer.from(JSON.stringify(data)).toString('base64'), // []byte Go → base64
-        id: Number(sessionId),
+        id: sessionId.toString(),
         pub_key: `secp256k1:${pubKeyBase64}`,
         signature: signature,
     };
