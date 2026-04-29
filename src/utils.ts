@@ -121,7 +121,7 @@ function uint64ToBigEndian(id: Long): Uint8Array {
  * followed by the JSON-encoded session data.
  *
  * @param sessionId - The on-chain session identifier
- * @param data - The session data object to include in the message (WireGuard public key or v2ray uid)
+ * @param data - The session data object to include in the message (WireGuard public key or v2ray uuid)
  * @returns A Uint8Array containing `bigEndian(sessionId) || JSON(data)`
  *
  * @example
@@ -158,7 +158,7 @@ function encodePubKey(compressedPubKey: Uint8Array): string {
  *
  * Replicates the `InitHandshake` method of the Sentinel Go SDK client.
  * The process is:
- * 1. JSON-encodes the session `data` (WireGuard pubkey or v2ray uid)
+ * 1. JSON-encodes the session `data` (WireGuard pubkey or v2ray uuid)
  * 2. Builds the message as `bigEndian(sessionId) || JSON(data)`
  * 3. Signs the SHA256 hash of the message with the Cosmos secp256k1 private key
  * 4. POSTs `{ data, id, pub_key, signature }` to the node's root endpoint (`/`)
@@ -174,7 +174,7 @@ function encodePubKey(compressedPubKey: Uint8Array): string {
  *   broadcasting a `MsgStartSessionRequest` transaction
  * @param data - The session data to send to the node:
  *   - For WireGuard: `{ pub_key: "<wg_public_key_base64>" }`
- *   - For v2ray: `{ uid: "<random_16_bytes_base64>" }`
+ *   - For v2ray: `{ uuid: "<random_16_bytes_base64>" }`
  * @param privateKey - The 32-byte secp256k1 private key of the Cosmos wallet
  *   that owns the session on-chain
  * @param remoteUrl - The node's remote URL as stored on-chain (e.g. `https://1.2.3.4:port`)
@@ -199,10 +199,10 @@ function encodePubKey(compressedPubKey: Uint8Array): string {
  *
  * @example
  * // v2ray
- * const uid = Buffer.from(crypto.randomBytes(16)).toString('base64');
+ * const uuid = Buffer.from(crypto.randomBytes(16)).toString('base64');
  * const result = await handshake(
  *     sessionId,
- *     { uid },
+ *     { uuid },
  *     cosmosPrivKeyBytes,
  *     node.remoteUrl,
  * );
