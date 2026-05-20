@@ -18,10 +18,11 @@ import { NodeResponse, NodeInfo, GeoIPLocation, NodeHandshakeResult } from "./ty
  * @returns Object with key: value, where key is in camelCase and value is escaped
  */
 export function parseAttributes(attributes: readonly Attribute[] | Attribute[]): any {
-    return Object.fromEntries(attributes.map((x: Attribute) => [
-        x.key.replace(/_([a-z])/g, (_, p1) => p1.toUpperCase()),
-        JSON.parse(x.value)
-    ]))
+    return Object.fromEntries(attributes.map((x: Attribute) => {
+        const key = x.key.replace(/_([a-z])/g, (_, p1) => p1.toUpperCase());
+        try { return [key, JSON.parse(x.value)]; }
+        catch { return [key, x.value]; }
+    }))
 }
 
 /**
