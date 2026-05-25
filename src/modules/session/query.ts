@@ -22,6 +22,7 @@ import Long from "long";
 
 import { PageRequest } from "../../protobuf/cosmos/base/query/v1beta1/pagination";
 import { Any } from "../../protobuf/google/protobuf/any";
+import { BaseSession } from "../../protobuf/sentinel/session/v3/session";
 
 
 export interface SessionExtension {
@@ -56,5 +57,21 @@ export function setupSessionExtension(base: QueryClient): SessionExtension {
                 return session
             }
         }
+    }
+}
+
+/**
+ * Unpacks a protobuf Any containing a Session into the concrete BaseSession type.
+ * The session query returns Any because sessions can be different versions.
+ *
+ * @param any - The protobuf Any from the session query
+ * @returns The decoded BaseSession object, or null if the typeUrl is unrecognized
+ */
+export function unpackSession(any: Any): BaseSession | null {
+    if (!any || !any.value) return null;
+    try {
+        return BaseSession.decode(any.value);
+    } catch {
+        return null;
     }
 }
