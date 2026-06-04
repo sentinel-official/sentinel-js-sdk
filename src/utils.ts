@@ -8,6 +8,7 @@ import Long from "long";
 import secp256k1 from "secp256k1";
 import axios from 'axios';
 import https from 'https'
+import { isIP } from "net"  // 0: not an IP (domain), 4: IPv4, 6: IPv6
 
 import { NodeResponse, NodeInfo, GeoIPLocation, NodeHandshakeResult } from "./types";
 
@@ -62,7 +63,10 @@ export function uintArrayTob64(value: number[]): string {
  * @returns The preferred address, or `addrs[0]` if no IPv4 is found
  */
 export function preferIPv4(addrs: string[]): string {
-    return addrs.find(a => /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(a)) ?? addrs[0];
+    // Use Node's net.isIP (returns 4 for IPv4) rather than a hand-rolled regex,
+    // matching how src/vpn/v2ray validates addresses. isIP correctly rejects
+    // out-of-range octets (e.g. "999.1.1.1") that a loose \d{1,3} regex accepts.
+    return addrs.find(a => isIP(a) === 4) ?? addrs[0];
 }
 
 
