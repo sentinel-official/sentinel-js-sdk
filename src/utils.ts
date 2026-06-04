@@ -8,6 +8,7 @@ import Long from "long";
 import secp256k1 from "secp256k1";
 import axios from 'axios';
 import https from 'https'
+import { isIP } from "net"  // 0: not an IP (domain), 4: IPv4, 6: IPv6
 
 import { NodeResponse, NodeInfo, GeoIPLocation, NodeHandshakeResult } from "./types";
 
@@ -48,6 +49,24 @@ export function searchEvent(eventUrl: string, events: readonly Event[] | Event[]
  */
 export function uintArrayTob64(value: number[]): string {
     return btoa(String.fromCharCode.apply(null, value))
+}
+
+/**
+ * Pick the best node address for an outbound VPN connection. Prefers IPv4
+ * when present; falls back to the first entry (typically IPv6) otherwise.
+ *
+ * Sentinel chain does not guarantee ordering of `result.addrs` returned by
+ * the node handshake, so consumers on v4-only networks need this preference
+ * to avoid silent dial failures on dual-stack nodes.
+ *
+ * @param addrs Address strings from `result.addrs` (no port suffix expected)
+ * @returns The preferred address, or `addrs[0]` if no IPv4 is found
+ */
+export function preferIPv4(addrs: string[]): string {
+    // Use Node's net.isIP (returns 4 for IPv4) rather than a hand-rolled regex,
+    // matching how src/vpn/v2ray validates addresses. isIP correctly rejects
+    // out-of-range octets (e.g. "999.1.1.1") that a loose \d{1,3} regex accepts.
+    return addrs.find(a => isIP(a) === 4) ?? addrs[0];
 }
 
 
