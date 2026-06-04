@@ -104,10 +104,14 @@ export class V2Ray {
     config: V2RayConf;
     uuid: string;
     child: null | ChildProcessWithoutNullStreams;
+    socksPort: number;
 
-    constructor() {
+    constructor(socksPort?: number) {
         this.child = null;
         this.uuid = randomUUID();
+        // Requested SOCKS port. 0 (default) means "pick a free port at parseConfig time".
+        // Pass an explicit port (e.g. 1080) to force a fixed, predictable SOCKS inbound.
+        this.socksPort = socksPort ?? 0;
         // https://github.com/sentinel-official/sentinel-go-sdk/blob/development/v2ray/client.json.tmpl
         this.config = {
             api: { services: ["StatsService"], tag: "api" },
@@ -170,7 +174,13 @@ export class V2Ray {
         nodeAddrs: string[],
     ): Promise<void> {
         const address = nodeAddrs[0];
-        const [apiPort] = await findFreePorts(1);
+        // apiPort (internal stats inbound) is always auto-allocated.
+        // socksPort honors an explicit port from the constructor; otherwise auto-allocate.
+        const needSocks = this.socksPort === 0;
+        const freePorts = await findFreePorts(needSocks ? 2 : 1);
+        const apiPort = freePorts[0];
+        const socksPort = needSocks ? freePorts[1] : this.socksPort;
+        this.socksPort = socksPort;
 
         // API inbound
         this.config.inbounds.push({
@@ -184,7 +194,7 @@ export class V2Ray {
         // SOCKS proxy inbound
         this.config.inbounds.push({
             listen: "127.0.0.1",
-            port: 1080,
+            port: socksPort,
             protocol: "socks",
             settings: { ip: "127.0.0.1", udp: true },
             sniffing: { destOverride: ["http", "tls"], enabled: true },
