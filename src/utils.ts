@@ -182,8 +182,11 @@ function encodePubKey(compressedPubKey: Uint8Array): string {
  * @returns A `NodeHandshakeResult` containing:
  *   - `result.addrs` — list of node endpoints to connect to (e.g. `["1.2.3.4:51820"]`)
  *   - `result.data`  — VPN configuration returned by the node (WireGuard config or v2ray inbound)
- * @throws Will throw if the HTTP request fails, the session is not active on-chain,
- *   or the signature verification fails on the node side (HTTP 401)
+ * @throws Will throw if the HTTP request fails, OR if the node returns an
+ *   unsuccessful envelope (`success: false` / an `error` payload, which can
+ *   arrive as HTTP 200) — e.g. the session is not active on-chain or signature
+ *   verification failed. The thrown message includes the node's error code and
+ *   text when present. Also throws if a successful response has no `result`.
  *
  * @example
  * // WireGuard
@@ -242,6 +245,23 @@ export async function handshake(
         httpsAgent: new https.Agent({ rejectUnauthorized: false }),
         timeout: timeout,
     });
-    // .result, supponsing success: True and error doesn't exist
-    return response.data.result as NodeHandshakeResult;
+    // The node wraps every response as { success, result?, error? }. A failed
+    // handshake (bad signature, session not active, node-side error) can still
+    // arrive as HTTP 200 with success:false and an error payload, so we must
+    // check the envelope rather than blindly returning .result.
+    const payload = response.data as NodeResponse;
+
+    if (!payload.success || payload.error) {
+        const code = payload.error?.code;
+        const message = payload.error?.message ?? "unknown node error";
+        throw new Error(
+            `Handshake rejected by node${code !== undefined ? ` (code ${code})` : ""}: ${message}`
+        );
+    }
+
+    if (!payload.result) {
+        throw new Error("Handshake response missing result payload");
+    }
+
+    return payload.result as NodeHandshakeResult;
 }
