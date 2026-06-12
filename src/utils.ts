@@ -57,6 +57,10 @@ export function uintArrayTob64(value: number[]): string {
  *
  * @param remoteUrl node endpoint
  * @returns NodeInfo information
+ * @throws Error if the node responds with success:false / an error payload, or
+ *   returns no result. The node wraps every response as { success, result?, error? };
+ *   a failed query can still arrive as HTTP 200 with success:false, so we must check
+ *   the envelope rather than blindly returning .result (which would be undefined).
  */
 export async function nodeInfo(remoteUrl: string, timeout: number = 10000): Promise<NodeInfo> {
     const httpsAgent = new https.Agent({
@@ -67,7 +71,21 @@ export async function nodeInfo(remoteUrl: string, timeout: number = 10000): Prom
     const httpsUrl = inputUrl.startsWith("http") ? inputUrl : `https://${inputUrl}`
 
     const response = await axios.get(httpsUrl, { httpsAgent, timeout: timeout })
-    return (response.data as NodeResponse).result as NodeInfo
+    const payload = response.data as NodeResponse;
+
+    if (!payload.success || payload.error) {
+        const code = payload.error?.code;
+        const message = payload.error?.message ?? "unknown node error";
+        throw new Error(
+            `Node info request rejected by node${code !== undefined ? ` (code ${code})` : ""}: ${message}`
+        );
+    }
+
+    if (!payload.result) {
+        throw new Error("Node info response missing result payload");
+    }
+
+    return payload.result as NodeInfo
 }
 
 /**
