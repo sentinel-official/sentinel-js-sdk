@@ -77,6 +77,8 @@ export function preferIPv4(addrs: string[]): string {
  *
  * @param remoteUrl node endpoint
  * @returns NodeInfo information
+ * @throws Error if the HTTP request fails, the node returns an unsuccessful
+ *   response envelope, or a resolved response has no result.
  */
 export async function nodeInfo(remoteUrl: string, timeout: number = 10000): Promise<NodeInfo> {
     const httpsAgent = new https.Agent({
@@ -86,8 +88,44 @@ export async function nodeInfo(remoteUrl: string, timeout: number = 10000): Prom
     const inputUrl = remoteUrl.replace(/\/$/g, '').trim()
     const httpsUrl = inputUrl.startsWith("http") ? inputUrl : `https://${inputUrl}`
 
-    const response = await axios.get(httpsUrl, { httpsAgent, timeout: timeout })
-    return (response.data as NodeResponse).result as NodeInfo
+    let response;
+    try {
+        response = await axios.get<NodeResponse>(httpsUrl, {
+            httpsAgent,
+            timeout,
+        });
+    } catch (error) {
+        if (axios.isAxiosError(error) && error.response) {
+            const responseError = nodeResponseError(
+                error.response.data,
+                "Node info request",
+            );
+            if (responseError) {
+                throw responseError;
+            }
+        }
+
+        // Preserve network failures, timeouts and non-envelope HTTP errors.
+        throw error;
+    }
+
+    const payload = response.data;
+    const responseError = nodeResponseError(payload, "Node info request");
+    if (responseError) {
+        throw responseError;
+    }
+
+    if (
+        !payload ||
+        typeof payload !== "object" ||
+        payload.success !== true ||
+        payload.result === undefined ||
+        payload.result === null
+    ) {
+        throw new Error("Node info response missing result payload");
+    }
+
+    return payload.result as NodeInfo
 }
 
 /**
@@ -209,7 +247,10 @@ function serializeHandshakeRequest(
  * Converts an unsuccessful dvpnx response envelope into a descriptive error.
  * Returns undefined when the value is not a node-error envelope.
  */
-function handshakeResponseError(payload: unknown): Error | undefined {
+function nodeResponseError(
+    payload: unknown,
+    requestLabel: string,
+): Error | undefined {
     if (!payload || typeof payload !== "object") {
         return undefined;
     }
@@ -224,7 +265,7 @@ function handshakeResponseError(payload: unknown): Error | undefined {
     const codeLabel = code !== undefined ? ` (code ${code})` : "";
 
     return new Error(
-        `Handshake rejected by node${codeLabel}: ${message}`,
+        `${requestLabel} rejected by node${codeLabel}: ${message}`,
     );
 }
 
@@ -324,7 +365,10 @@ export async function handshake(
         });
     } catch (error) {
         if (axios.isAxiosError(error) && error.response) {
-            const nodeError = handshakeResponseError(error.response.data);
+            const nodeError = nodeResponseError(
+                error.response.data,
+                "Handshake",
+            );
             if (nodeError) {
                 throw nodeError;
             }
@@ -335,7 +379,7 @@ export async function handshake(
     }
 
     const payload = response.data;
-    const nodeError = handshakeResponseError(payload);
+    const nodeError = nodeResponseError(payload, "Handshake");
     if (nodeError) {
         throw nodeError;
     }
