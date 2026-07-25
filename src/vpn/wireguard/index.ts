@@ -1,13 +1,14 @@
-import { generateKeyPairSync, randomBytes } from "crypto"
-import { spawn, execSync } from "child_process";
+import { generateKeyPairSync } from "crypto"
+import { execFileSync, spawn } from "child_process";
 import { platform } from 'os';
-import findFreePorts from "find-free-ports"
 
 import * as path from 'path';
 import * as fs from 'fs';
 import * as os from 'os';
 
 import qrcode from 'qrcode';
+
+import { preferIPv4 } from "../../utils";
 
 interface WireGuardMetadata {
     port: number;
@@ -23,7 +24,9 @@ export interface WireGuardHandshakeData {
 interface Interface {
     privateKey: string,
     addresses: string[],
-    listenPort: number,
+    // Optional. When omitted, WireGuard auto-selects a free UDP port at bind
+    // time (kernel-level, no TOCTOU). Set explicitly only to force a fixed port.
+    listenPort?: number,
     dns: string[],
     // dnsSearch: string[],
     // https://gist.github.com/nitred/f16850ca48c48c79bf422e90ee5b9d95
@@ -50,8 +53,18 @@ interface Peer {
 export function isAdmin(): boolean {
     if (platform() === 'win32') {
         try {
-            execSync('net session', { stdio: 'ignore' });
-            return true;
+            const output = execFileSync(
+                "powershell.exe",
+                [
+                    "-NoLogo",
+                    "-NoProfile",
+                    "-NonInteractive",
+                    "-Command",
+                    "(New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)",
+                ],
+                { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"], windowsHide: true },
+            );
+            return output.trim().toLowerCase() === "true";
         } catch {
             return false;
         }
@@ -65,20 +78,57 @@ export function isAdmin(): boolean {
  */
 function findWireGuardExe(): string | null {
     if (platform() !== 'win32') return null;
-    const paths = [
-        'C:\\Program Files\\WireGuard\\wireguard.exe',
-        'C:\\Program Files (x86)\\WireGuard\\wireguard.exe',
+    const installRoots = [
+        process.env.ProgramFiles,
+        process.env["ProgramFiles(x86)"],
+        "C:\\Program Files",
+        "C:\\Program Files (x86)",
     ];
-    for (const p of paths) {
-        if (fs.existsSync(p)) return p;
+    for (const root of installRoots) {
+        if (!root) continue;
+        const executable = path.win32.join(root, "WireGuard", "wireguard.exe");
+        if (fs.existsSync(executable)) return executable;
     }
-    // Check PATH
+
     try {
-        const result = execSync('where wireguard.exe', { encoding: 'utf8', stdio: ['pipe', 'pipe', 'ignore'] });
-        const firstLine = result.trim().split('\n')[0];
-        if (firstLine && fs.existsSync(firstLine)) return firstLine;
+        const result = execFileSync(
+            "where.exe",
+            ["wireguard.exe"],
+            { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"], windowsHide: true },
+        );
+        for (const line of result.split(/\r?\n/)) {
+            const executable = line.trim();
+            if (executable && fs.existsSync(executable)) return executable;
+        }
     } catch {}
     return null;
+}
+
+function windowsTunnelName(configFile: string): string {
+    return path.win32.basename(configFile).replace(/\.conf(?:\.dpapi)?$/i, "");
+}
+
+function commandError(error: unknown): string {
+    return error instanceof Error ? error.message : String(error);
+}
+
+function runWireGuardWindows(executable: string, args: string[]): void {
+    execFileSync(executable, args, {
+        stdio: ["ignore", "ignore", "pipe"],
+        windowsHide: true,
+    });
+}
+
+function queryWindowsService(serviceName: string): string {
+    return execFileSync(
+        "sc.exe",
+        ["query", serviceName],
+        { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"], windowsHide: true },
+    );
+}
+
+function isWindowsServiceRunning(output: string): boolean {
+    return /STATE\s*:\s*4\b|\bRUNNING\b/i.test(output);
 }
 
 // oh, well... https://www.npmjs.com/package/wireguard-tools
@@ -91,10 +141,12 @@ export class Wireguard {
 
     publicKey: string
     privateKey: string
+    configPath: string | null
 
     constructor() {
         this.interface = null;
         this.peer = null;
+        this.configPath = null;
 
         const keys = this.genKeys();
         this.publicKey = keys.pub
@@ -137,9 +189,14 @@ export class Wireguard {
     public async parseConfig(
         handshakeData: WireGuardHandshakeData,
         nodeAddrs: string[],
-        dns: string[] = ["10.8.0.1", "1.0.0.1", "1.1.1.1"]
+        dns: string[] = ["10.8.0.1", "1.0.0.1", "1.1.1.1"],
+        mtu: number = 1280,
+        listenPort?: number
     ): Promise<void> {
-        const [listenPort] = await findFreePorts(1);
+        // Do NOT probe for a free port here: a port found free at config-build
+        // time can be taken before WireGuard actually binds it (TOCTOU). When
+        // listenPort is omitted we leave it unset so WireGuard picks a free UDP
+        // port itself at bind time. Pass listenPort only to force a fixed port.
 
         // IP/CIDR assigned to the client to use as interface addresses
         this.interface = {
@@ -147,13 +204,14 @@ export class Wireguard {
             addresses: handshakeData.addrs,
             listenPort,
             dns,
+            mtu,
         };
 
         // Use the first available metadata to build the peer endpoint
         const meta = handshakeData.metadata[0];
 
         // Endpoint = public IP of the node (from result.addrs) + port (from metadata)
-        const host = nodeAddrs[0];
+        const host = preferIPv4(nodeAddrs);
         const endpoint = `${host}:${meta.port}`;
 
         this.peer = {
@@ -174,37 +232,40 @@ export class Wireguard {
      *   is not yet initialized (call `parseConfig` first).
      */
     public writeConfig(output?: string): string | null {
+        if (!this.interface || !this.peer) return null;
+
+        const isTemporary = output === undefined;
         if (output == undefined) {
             const tempDirectory = fs.mkdtempSync(path.join(os.tmpdir(), 'sentinel-js-sdk'))
             output = path.join(tempDirectory, "wgsent0.conf")
         }
 
-        if (this.interface && this.peer) {
-            // ungly, but betten than nothing :)
-            var config = "[Interface]\n"
-            config += "Address = " + this.interface.addresses.join(",") + "\n"
-            config += "PrivateKey = " + this.interface.privateKey + "\n"
+        // ungly, but betten than nothing :)
+        var config = "[Interface]\n"
+        config += "Address = " + this.interface.addresses.join(",") + "\n"
+        config += "PrivateKey = " + this.interface.privateKey + "\n"
+        if (this.interface.listenPort !== undefined)
             config += "ListenPort = " + this.interface.listenPort.toString() + "\n"
-            config += "DNS = " + this.interface.dns.join(",") + "\n"
+        config += "DNS = " + this.interface.dns.join(",") + "\n"
 
-            if (this.interface.mtu) config += "MTU = " + this.interface.mtu.toString() + "\n"
-            if (this.interface.preUp) config += "PreUp = " + this.interface.preUp + "\n"
-            if (this.interface.postUp) config += "PostUp = " + this.interface.postUp + "\n"
-            if (this.interface.preDown) config += "PreDown = " + this.interface.preDown + "\n"
-            if (this.interface.postDown) config += "PostDown = " + this.interface.postDown + "\n"
+        if (this.interface.mtu) config += "MTU = " + this.interface.mtu.toString() + "\n"
+        if (this.interface.preUp) config += "PreUp = " + this.interface.preUp + "\n"
+        if (this.interface.postUp) config += "PostUp = " + this.interface.postUp + "\n"
+        if (this.interface.preDown) config += "PreDown = " + this.interface.preDown + "\n"
+        if (this.interface.postDown) config += "PostDown = " + this.interface.postDown + "\n"
 
-            config += "\n[Peer]\n"
-            config += "PublicKey = " + this.peer.publicKey + "\n"
-            config += "AllowedIPs = " + this.peer.allowedIPs.join(",") + "\n"
-            config += "Endpoint = " + this.peer.endpoint + "\n"
-            if (this.peer.persistentKeepAlive > 0) config += "PersistentKeepalive = " + this.peer.persistentKeepAlive + "\n"
+        config += "\n[Peer]\n"
+        config += "PublicKey = " + this.peer.publicKey + "\n"
+        config += "AllowedIPs = " + this.peer.allowedIPs.join(",") + "\n"
+        config += "Endpoint = " + this.peer.endpoint + "\n"
+        if (this.peer.persistentKeepAlive > 0) config += "PersistentKeepalive = " + this.peer.persistentKeepAlive + "\n"
 
-            if (this.peer.presharedKey) config += "PresharedKey = " + this.peer.presharedKey + "\n"
+        if (this.peer.presharedKey) config += "PresharedKey = " + this.peer.presharedKey + "\n"
 
-            fs.writeFileSync(output, config);
-            return output
-        }
-        return null
+        fs.writeFileSync(output, config, { mode: 0o600 });
+        try { fs.chmodSync(output, 0o600); } catch {}
+        if (isTemporary) this.configPath = output;
+        return output
     }
 
     /**
@@ -219,7 +280,10 @@ export class Wireguard {
         let config = "[Interface]\n";
         config += "Address = " + this.interface.addresses.join(",") + "\n";
         config += "PrivateKey = " + this.interface.privateKey + "\n";
+        if (this.interface.listenPort !== undefined)
+            config += "ListenPort = " + this.interface.listenPort.toString() + "\n";
         config += "DNS = " + this.interface.dns.join(",") + "\n";
+        if (this.interface.mtu) config += "MTU = " + this.interface.mtu + "\n";
 
         config += "\n[Peer]\n";
         config += "PublicKey = " + this.peer.publicKey + "\n";
@@ -263,15 +327,12 @@ export class Wireguard {
      * @returns Promise that resolves on success or rejects with error details.
      */
     public async connect(configFile?: string): Promise<void> {
-        if (!isAdmin()) {
-            throw new Error('WireGuard requires administrator/root privileges. Run with sudo or as administrator.');
-        }
-
         if (configFile == undefined) {
-            const randomFile = "wgsent0.conf"
-            const tempDirectory = fs.mkdtempSync(path.join(os.tmpdir(), 'sentinel-js-sdk'))
-            configFile = path.join(tempDirectory, randomFile)
-            this.writeConfig(configFile)
+            const temporaryConfig = this.writeConfig();
+            if (temporaryConfig === null) {
+                throw new Error("WireGuard config not initialized. Call parseConfig first.");
+            }
+            configFile = temporaryConfig;
         }
 
         if (platform() === 'win32') {
@@ -284,42 +345,74 @@ export class Wireguard {
         return new Promise((resolve, reject) => {
             const child = spawn("wg-quick", ["up", configFile]);
             let stderr = '';
+
+            child.stdout.setEncoding('utf8');
             child.stderr.setEncoding('utf8');
             child.stderr.on('data', (data) => { stderr += data; });
-            child.on('error', (err) => reject(new Error(`Failed to start wg-quick: ${err.message}`)));
+            child.on('error', (err) => {
+                if (configFile === this.configPath) this.cleanup();
+                reject(new Error(`Failed to start wg-quick: ${err.message}`));
+            });
             child.on('close', (code) => {
                 if (code === 0) resolve();
-                else reject(new Error(`wg-quick up failed (exit code ${code}): ${stderr.trim()}`));
+                else {
+                    if (configFile === this.configPath) this.cleanup();
+                    reject(new Error(`wg-quick up failed (exit code ${code}): ${stderr.trim()}`));
+                }
             });
         });
     }
 
     private async connectWindows(configFile: string): Promise<void> {
+        if (!isAdmin()) {
+            if (configFile === this.configPath) this.cleanup();
+            throw new Error(
+                "WireGuard tunnel installation requires an elevated administrator process."
+            );
+        }
+
         const wgExe = findWireGuardExe();
         if (!wgExe) {
+            if (configFile === this.configPath) this.cleanup();
             throw new Error('WireGuard not found. Install from https://www.wireguard.com/install/');
         }
 
-        const tunnelName = path.basename(configFile, '.conf');
-
-        // Install tunnel service
-        try {
-            execSync(`"${wgExe}" /installtunnelservice "${configFile}"`, { stdio: 'ignore' });
-        } catch (err: any) {
-            throw new Error(`Failed to install WireGuard tunnel service: ${err.message}`);
-        }
-
-        // Poll for RUNNING state (up to 15 seconds)
+        const tunnelName = windowsTunnelName(configFile);
         const serviceName = `WireGuardTunnel$${tunnelName}`;
-        const deadline = Date.now() + 15000;
-        while (Date.now() < deadline) {
+
+        try {
+            // Arguments are passed directly without a command shell.
+            runWireGuardWindows(wgExe, ["/installtunnelservice", configFile]);
+
+            const deadline = Date.now() + 15000;
+            while (Date.now() < deadline) {
+                try {
+                    if (isWindowsServiceRunning(queryWindowsService(serviceName))) return;
+                } catch {}
+                await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+            throw new Error(
+                `WireGuard tunnel service "${serviceName}" did not reach RUNNING state within 15 seconds`
+            );
+        } catch (error) {
+            let rollbackError: unknown = null;
             try {
-                const output = execSync(`sc query "${serviceName}"`, { encoding: 'utf8', stdio: ['pipe', 'pipe', 'ignore'] });
-                if (output.includes('RUNNING')) return;
-            } catch {}
-            await new Promise(r => setTimeout(r, 1000));
+                runWireGuardWindows(wgExe, ["/uninstalltunnelservice", tunnelName]);
+            } catch (rollback) {
+                rollbackError = rollback;
+            }
+
+            if (rollbackError === null && configFile === this.configPath) {
+                this.cleanup();
+            }
+
+            const rollbackMessage = rollbackError === null
+                ? ""
+                : ` Rollback also failed: ${commandError(rollbackError)}`;
+            throw new Error(
+                `Failed to start WireGuard tunnel "${tunnelName}": ${commandError(error)}.${rollbackMessage}`
+            );
         }
-        throw new Error(`WireGuard tunnel service "${serviceName}" did not reach RUNNING state within 15 seconds`);
     }
 
     /**
@@ -341,28 +434,67 @@ export class Wireguard {
         return new Promise((resolve, reject) => {
             const child = spawn("wg-quick", ["down", configFile]);
             let stderr = '';
+
+            child.stdout.setEncoding('utf8');
             child.stderr.setEncoding('utf8');
             child.stderr.on('data', (data) => { stderr += data; });
             child.on('error', (err) => reject(new Error(`Failed to start wg-quick: ${err.message}`)));
             child.on('close', (code) => {
-                if (code === 0) resolve();
-                else reject(new Error(`wg-quick down failed (exit code ${code}): ${stderr.trim()}`));
+                if (code === 0) {
+                    if (configFile === this.configPath) this.cleanup();
+                    resolve();
+                } else {
+                    reject(new Error(`wg-quick down failed (exit code ${code}): ${stderr.trim()}`));
+                }
             });
         });
     }
 
-    private disconnectWindows(configFile: string): Promise<void> {
+    private async disconnectWindows(configFile: string): Promise<void> {
+        if (!isAdmin()) {
+            throw new Error(
+                "WireGuard tunnel removal requires an elevated administrator process."
+            );
+        }
+
         const wgExe = findWireGuardExe();
         if (!wgExe) {
             throw new Error('WireGuard not found');
         }
-        const tunnelName = path.basename(configFile, '.conf');
+        const tunnelName = windowsTunnelName(configFile);
         try {
-            execSync(`"${wgExe}" /uninstalltunnelservice "${tunnelName}"`, { stdio: 'ignore' });
-        } catch (err: any) {
-            throw new Error(`Failed to uninstall WireGuard tunnel: ${err.message}`);
+            runWireGuardWindows(wgExe, ["/uninstalltunnelservice", tunnelName]);
+        } catch (error) {
+            throw new Error(
+                `Failed to uninstall WireGuard tunnel "${tunnelName}": ${commandError(error)}`
+            );
         }
-        return Promise.resolve();
+        if (configFile === this.configPath) this.cleanup();
+    }
+
+    /**
+     * Removes the temporary config created by this instance. Caller-provided
+     * paths are never tracked or deleted automatically.
+     */
+    public cleanup(): void {
+        const target = this.configPath;
+        if (!target) return;
+        const directory = path.dirname(target);
+        try {
+            const size = fs.statSync(target).size;
+            fs.writeFileSync(target, Buffer.alloc(size, 0));
+            fs.unlinkSync(target);
+        } catch {
+            // Best-effort cleanup
+        }
+        if (!fs.existsSync(target)) {
+            this.configPath = null;
+            try {
+                fs.rmdirSync(directory);
+            } catch {
+                // The directory may not be empty or may already be gone.
+            }
+        }
     }
 
     /**
