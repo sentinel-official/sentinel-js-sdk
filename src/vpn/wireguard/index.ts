@@ -179,6 +179,8 @@ export class Wireguard {
      *
      * @param handshakeData - Parsed `result.data` from the handshake response
      * @param nodeAddrs     - `result.addrs` from the handshake response (public IPs of the node)
+     * @param dns           - DNS servers for wg-quick. Pass an empty array to
+     *   omit the DNS directive when resolvconf integration is unavailable.
      *
      * @example
      * const data: WireGuardHandshakeData = JSON.parse(
@@ -246,7 +248,8 @@ export class Wireguard {
         config += "PrivateKey = " + this.interface.privateKey + "\n"
         if (this.interface.listenPort !== undefined)
             config += "ListenPort = " + this.interface.listenPort.toString() + "\n"
-        config += "DNS = " + this.interface.dns.join(",") + "\n"
+        if (this.interface.dns.length > 0)
+            config += "DNS = " + this.interface.dns.join(",") + "\n"
 
         if (this.interface.mtu) config += "MTU = " + this.interface.mtu.toString() + "\n"
         if (this.interface.preUp) config += "PreUp = " + this.interface.preUp + "\n"
@@ -282,7 +285,8 @@ export class Wireguard {
         config += "PrivateKey = " + this.interface.privateKey + "\n";
         if (this.interface.listenPort !== undefined)
             config += "ListenPort = " + this.interface.listenPort.toString() + "\n";
-        config += "DNS = " + this.interface.dns.join(",") + "\n";
+        if (this.interface.dns.length > 0)
+            config += "DNS = " + this.interface.dns.join(",") + "\n";
         if (this.interface.mtu) config += "MTU = " + this.interface.mtu + "\n";
 
         config += "\n[Peer]\n";

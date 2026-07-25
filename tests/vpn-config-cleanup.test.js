@@ -25,12 +25,12 @@ function fileMode(filename) {
     return fs.statSync(filename).mode & 0o777;
 }
 
-function initializeWireguard() {
+function initializeWireguard(dns = ["1.1.1.1"]) {
     const wireguard = new Wireguard();
     wireguard.interface = {
         privateKey: wireguard.privateKey,
         addresses: ["10.0.0.2/32"],
-        dns: ["1.1.1.1"],
+        dns,
         mtu: 1280,
     };
     wireguard.peer = {
@@ -41,6 +41,27 @@ function initializeWireguard() {
     };
     return wireguard;
 }
+
+test("WireGuard omits DNS from generated configs when the DNS list is empty", () => {
+    const wireguard = initializeWireguard([]);
+    const config = wireguard.buildConfigString();
+    const configPath = wireguard.writeConfig();
+
+    assert.notEqual(config, null);
+    assert.notEqual(configPath, null);
+    assert.doesNotMatch(config, /^DNS\s*=/m);
+    assert.doesNotMatch(fs.readFileSync(configPath, "utf8"), /^DNS\s*=/m);
+
+    wireguard.cleanup();
+});
+
+test("WireGuard preserves DNS in generated configs by default", () => {
+    const wireguard = initializeWireguard();
+    const config = wireguard.buildConfigString();
+
+    assert.notEqual(config, null);
+    assert.match(config, /^DNS = 1\.1\.1\.1$/m);
+});
 
 test("VPN config writers protect secrets and never track caller paths", () => {
     const directory = fs.mkdtempSync(path.join(os.tmpdir(), "sentinel-sdk-test-"));
