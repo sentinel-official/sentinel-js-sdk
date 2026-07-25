@@ -1,5 +1,6 @@
-import { generateKeyPairSync, randomBytes } from "crypto"
-import { spawn } from "child_process";
+import { generateKeyPairSync } from "crypto"
+import { execFileSync, spawn } from "child_process";
+import { platform } from 'os';
 
 import * as path from 'path';
 import * as fs from 'fs';
@@ -44,6 +45,91 @@ interface Peer {
     persistentKeepAlive: number
 }
 
+
+/**
+ * Checks if the current process has administrator/root privileges.
+ * WireGuard tunnel management requires elevated permissions on all platforms.
+ */
+export function isAdmin(): boolean {
+    if (platform() === 'win32') {
+        try {
+            const output = execFileSync(
+                "powershell.exe",
+                [
+                    "-NoLogo",
+                    "-NoProfile",
+                    "-NonInteractive",
+                    "-Command",
+                    "(New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)",
+                ],
+                { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"], windowsHide: true },
+            );
+            return output.trim().toLowerCase() === "true";
+        } catch {
+            return false;
+        }
+    }
+    return process.getuid?.() === 0;
+}
+
+/**
+ * Finds the WireGuard executable on Windows.
+ * Checks common installation paths.
+ */
+function findWireGuardExe(): string | null {
+    if (platform() !== 'win32') return null;
+    const installRoots = [
+        process.env.ProgramFiles,
+        process.env["ProgramFiles(x86)"],
+        "C:\\Program Files",
+        "C:\\Program Files (x86)",
+    ];
+    for (const root of installRoots) {
+        if (!root) continue;
+        const executable = path.win32.join(root, "WireGuard", "wireguard.exe");
+        if (fs.existsSync(executable)) return executable;
+    }
+
+    try {
+        const result = execFileSync(
+            "where.exe",
+            ["wireguard.exe"],
+            { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"], windowsHide: true },
+        );
+        for (const line of result.split(/\r?\n/)) {
+            const executable = line.trim();
+            if (executable && fs.existsSync(executable)) return executable;
+        }
+    } catch {}
+    return null;
+}
+
+function windowsTunnelName(configFile: string): string {
+    return path.win32.basename(configFile).replace(/\.conf(?:\.dpapi)?$/i, "");
+}
+
+function commandError(error: unknown): string {
+    return error instanceof Error ? error.message : String(error);
+}
+
+function runWireGuardWindows(executable: string, args: string[]): void {
+    execFileSync(executable, args, {
+        stdio: ["ignore", "ignore", "pipe"],
+        windowsHide: true,
+    });
+}
+
+function queryWindowsService(serviceName: string): string {
+    return execFileSync(
+        "sc.exe",
+        ["query", serviceName],
+        { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"], windowsHide: true },
+    );
+}
+
+function isWindowsServiceRunning(output: string): boolean {
+    return /STATE\s*:\s*4\b|\bRUNNING\b/i.test(output);
+}
 
 // oh, well... https://www.npmjs.com/package/wireguard-tools
 // Warning, in order to use connect and disconnect method we need sudoers permission
@@ -232,25 +318,32 @@ export class Wireguard {
     }
 
     /**
-     * Brings up the WireGuard tunnel using `wg-quick up`.
-     * Requires sudo/root privileges.
+     * Brings up the WireGuard tunnel.
+     * On Linux/macOS uses `wg-quick up`. On Windows uses the WireGuard tunnel service.
+     * Requires sudo/root/administrator privileges.
      *
      * @param configFile - Optional path to an existing `.conf` file.
      *   If omitted, writes the current config to a temp file first.
      * @returns Promise that resolves on success or rejects with error details.
      */
-    public connect(configFile?: string): Promise<void> {
+    public async connect(configFile?: string): Promise<void> {
         if (configFile == undefined) {
             const temporaryConfig = this.writeConfig();
             if (temporaryConfig === null) {
-                return Promise.reject(
-                    new Error("WireGuard config not initialized. Call parseConfig first.")
-                );
+                throw new Error("WireGuard config not initialized. Call parseConfig first.");
             }
             configFile = temporaryConfig;
         }
+
+        if (platform() === 'win32') {
+            return this.connectWindows(configFile);
+        }
+        return this.connectUnix(configFile);
+    }
+
+    private connectUnix(configFile: string): Promise<void> {
         return new Promise((resolve, reject) => {
-            const child = spawn("wg-quick", ["up", configFile!]);
+            const child = spawn("wg-quick", ["up", configFile]);
             let stderr = '';
 
             child.stdout.setEncoding('utf8');
@@ -270,14 +363,74 @@ export class Wireguard {
         });
     }
 
+    private async connectWindows(configFile: string): Promise<void> {
+        if (!isAdmin()) {
+            if (configFile === this.configPath) this.cleanup();
+            throw new Error(
+                "WireGuard tunnel installation requires an elevated administrator process."
+            );
+        }
+
+        const wgExe = findWireGuardExe();
+        if (!wgExe) {
+            if (configFile === this.configPath) this.cleanup();
+            throw new Error('WireGuard not found. Install from https://www.wireguard.com/install/');
+        }
+
+        const tunnelName = windowsTunnelName(configFile);
+        const serviceName = `WireGuardTunnel$${tunnelName}`;
+
+        try {
+            // Arguments are passed directly without a command shell.
+            runWireGuardWindows(wgExe, ["/installtunnelservice", configFile]);
+
+            const deadline = Date.now() + 15000;
+            while (Date.now() < deadline) {
+                try {
+                    if (isWindowsServiceRunning(queryWindowsService(serviceName))) return;
+                } catch {}
+                await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+            throw new Error(
+                `WireGuard tunnel service "${serviceName}" did not reach RUNNING state within 15 seconds`
+            );
+        } catch (error) {
+            let rollbackError: unknown = null;
+            try {
+                runWireGuardWindows(wgExe, ["/uninstalltunnelservice", tunnelName]);
+            } catch (rollback) {
+                rollbackError = rollback;
+            }
+
+            if (rollbackError === null && configFile === this.configPath) {
+                this.cleanup();
+            }
+
+            const rollbackMessage = rollbackError === null
+                ? ""
+                : ` Rollback also failed: ${commandError(rollbackError)}`;
+            throw new Error(
+                `Failed to start WireGuard tunnel "${tunnelName}": ${commandError(error)}.${rollbackMessage}`
+            );
+        }
+    }
+
     /**
-     * Brings down the WireGuard tunnel using `wg-quick down`.
-     * Requires sudo/root privileges.
+     * Brings down the WireGuard tunnel.
+     * On Linux/macOS uses `wg-quick down`. On Windows removes the tunnel service.
+     * Requires sudo/root/administrator privileges.
      *
      * @param configFile - Path to the `.conf` file used when connecting.
      * @returns Promise that resolves on success or rejects with error details.
      */
-    public disconnect(configFile: string): Promise<void> {
+    public async disconnect(configFile: string): Promise<void> {
+        if (platform() === 'win32') {
+            return this.disconnectWindows(configFile);
+        }
+        return this.disconnectUnix(configFile);
+    }
+
+    private disconnectUnix(configFile: string): Promise<void> {
         return new Promise((resolve, reject) => {
             const child = spawn("wg-quick", ["down", configFile]);
             let stderr = '';
@@ -295,6 +448,28 @@ export class Wireguard {
                 }
             });
         });
+    }
+
+    private async disconnectWindows(configFile: string): Promise<void> {
+        if (!isAdmin()) {
+            throw new Error(
+                "WireGuard tunnel removal requires an elevated administrator process."
+            );
+        }
+
+        const wgExe = findWireGuardExe();
+        if (!wgExe) {
+            throw new Error('WireGuard not found');
+        }
+        const tunnelName = windowsTunnelName(configFile);
+        try {
+            runWireGuardWindows(wgExe, ["/uninstalltunnelservice", tunnelName]);
+        } catch (error) {
+            throw new Error(
+                `Failed to uninstall WireGuard tunnel "${tunnelName}": ${commandError(error)}`
+            );
+        }
+        if (configFile === this.configPath) this.cleanup();
     }
 
     /**
