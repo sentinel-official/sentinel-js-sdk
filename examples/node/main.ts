@@ -122,19 +122,7 @@ const main = async () => {
                 Buffer.from(result.data, 'base64').toString('utf8')
             );
             await v2ray.parseConfig(handshakeData, result.addrs)
-            const v2Pid = v2ray.connect()
-
-            const rl2 = readline.createInterface({ input: process.stdin, output: process.stdout });
-            console.log(`V2Ray client was started. Pid: ${v2Pid}.`)
-            console.log("You can test the following protocols: ")
-            v2ray.config.inbounds.forEach((inbound: any) => {
-                console.log(`- ${inbound.protocol} on ${inbound.listen}:${inbound.port}`)
-            })
-
-            await rl2.question('Once you have finished press enter, the session will be ended');
-            rl2.close();
-
-            v2ray.disconnect()
+            v2ray.printShareQRCodes()
         }
 
 

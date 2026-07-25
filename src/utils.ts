@@ -8,6 +8,7 @@ import Long from "long";
 import secp256k1 from "secp256k1";
 import axios from 'axios';
 import https from 'https'
+import { isIP } from "net"  // 0: not an IP (domain), 4: IPv4, 6: IPv6
 
 import { NodeResponse, NodeInfo, GeoIPLocation, NodeHandshakeResult } from "./types";
 
@@ -18,10 +19,11 @@ import { NodeResponse, NodeInfo, GeoIPLocation, NodeHandshakeResult } from "./ty
  * @returns Object with key: value, where key is in camelCase and value is escaped
  */
 export function parseAttributes(attributes: readonly Attribute[] | Attribute[]): any {
-    return Object.fromEntries(attributes.map((x: Attribute) => [
-        x.key.replace(/_([a-z])/g, (_, p1) => p1.toUpperCase()),
-        JSON.parse(x.value)
-    ]))
+    return Object.fromEntries(attributes.map((x: Attribute) => {
+        const key = x.key.replace(/_([a-z])/g, (_, p1) => p1.toUpperCase());
+        try { return [key, JSON.parse(x.value)]; }
+        catch { return [key, x.value]; }
+    }))
 }
 
 /**
@@ -50,6 +52,24 @@ export function uintArrayTob64(value: number[]): string {
     return btoa(String.fromCharCode.apply(null, value))
 }
 
+/**
+ * Pick the best node address for an outbound VPN connection. Prefers IPv4
+ * when present; falls back to the first entry (typically IPv6) otherwise.
+ *
+ * Sentinel chain does not guarantee ordering of `result.addrs` returned by
+ * the node handshake, so consumers on v4-only networks need this preference
+ * to avoid silent dial failures on dual-stack nodes.
+ *
+ * @param addrs Address strings from `result.addrs` (no port suffix expected)
+ * @returns The preferred address, or `addrs[0]` if no IPv4 is found
+ */
+export function preferIPv4(addrs: string[]): string {
+    // Use Node's net.isIP (returns 4 for IPv4) rather than a hand-rolled regex,
+    // matching how src/vpn/v2ray validates addresses. isIP correctly rejects
+    // out-of-range octets (e.g. "999.1.1.1") that a loose \d{1,3} regex accepts.
+    return addrs.find(a => isIP(a) === 4) ?? addrs[0];
+}
+
 
 
 /**
@@ -58,7 +78,7 @@ export function uintArrayTob64(value: number[]): string {
  * @param remoteUrl node endpoint
  * @returns NodeInfo information
  */
-export async function nodeInfo(remoteUrl: string): Promise<NodeInfo> {
+export async function nodeInfo(remoteUrl: string, timeout: number = 10000): Promise<NodeInfo> {
     const httpsAgent = new https.Agent({
         rejectUnauthorized: false
     });
@@ -66,7 +86,7 @@ export async function nodeInfo(remoteUrl: string): Promise<NodeInfo> {
     const inputUrl = remoteUrl.replace(/\/$/g, '').trim()
     const httpsUrl = inputUrl.startsWith("http") ? inputUrl : `https://${inputUrl}`
 
-    const response = await axios.get(httpsUrl, { httpsAgent })
+    const response = await axios.get(httpsUrl, { httpsAgent, timeout: timeout })
     return (response.data as NodeResponse).result as NodeInfo
 }
 
@@ -88,8 +108,8 @@ export async function privKeyFromMnemonic({ mnemonic, bip39Password, hdPath }: {
  * @param address if provided will fetch a determinate IP, else the current one
  * @returns GeoIPLocation with all geo-ip information like city country etc
  */
-export async function fetchLocation(address?: string): Promise<GeoIPLocation> {
-    const response = await axios.get("http://ip-api.com/json/" + (address || ''))
+export async function fetchLocation(address?: string, timeout: number = 10000): Promise<GeoIPLocation> {
+    const response = await axios.get("http://ip-api.com/json/" + (address || ''), { timeout: timeout })
     return response.data as GeoIPLocation
 }
 
@@ -106,7 +126,7 @@ export async function fetchLocation(address?: string): Promise<GeoIPLocation> {
  */
 function uint64ToBigEndian(id: Long): Uint8Array {
     const buf = new Uint8Array(8);
-    let n = BigInt(id.toNumber());
+    let n = BigInt(id.toString());
     for (let i = 7; i >= 0; i--) {
         buf[i] = Number(n & BigInt(0xff));
         n >>= BigInt(8);
@@ -121,7 +141,7 @@ function uint64ToBigEndian(id: Long): Uint8Array {
  * followed by the JSON-encoded session data.
  *
  * @param sessionId - The on-chain session identifier
- * @param data - The session data object to include in the message (WireGuard public key or v2ray uid)
+ * @param data - The session data object to include in the message (WireGuard public key or v2ray uuid)
  * @returns A Uint8Array containing `bigEndian(sessionId) || JSON(data)`
  *
  * @example
@@ -154,11 +174,66 @@ function encodePubKey(compressedPubKey: Uint8Array): string {
 }
 
 /**
+ * Serializes the dvpnx handshake request without converting the uint64
+ * session ID through JavaScript's number type.
+ *
+ * dvpnx expects `id` to be a JSON number (Go `uint64`), not a quoted string.
+ * Building this small payload explicitly preserves the exact decimal value
+ * while JSON.stringify safely escapes every string field.
+ */
+function serializeHandshakeRequest(
+    sessionId: Long,
+    data: any,
+    pubKey: string,
+    signature: string,
+): string {
+    if (sessionId.isNegative() || sessionId.isZero()) {
+        throw new RangeError("Session ID must be a positive uint64");
+    }
+
+    const encodedData = Buffer
+        .from(JSON.stringify(data))
+        .toString('base64');
+
+    return [
+        "{",
+        `"data":${JSON.stringify(encodedData)},`,
+        `"id":${sessionId.toString()},`,
+        `"pub_key":${JSON.stringify(pubKey)},`,
+        `"signature":${JSON.stringify(signature)}`,
+        "}",
+    ].join("");
+}
+
+/**
+ * Converts an unsuccessful dvpnx response envelope into a descriptive error.
+ * Returns undefined when the value is not a node-error envelope.
+ */
+function handshakeResponseError(payload: unknown): Error | undefined {
+    if (!payload || typeof payload !== "object") {
+        return undefined;
+    }
+
+    const response = payload as Partial<NodeResponse>;
+    if (response.success !== false && !response.error) {
+        return undefined;
+    }
+
+    const code = response.error?.code;
+    const message = response.error?.message ?? "unknown node error";
+    const codeLabel = code !== undefined ? ` (code ${code})` : "";
+
+    return new Error(
+        `Handshake rejected by node${codeLabel}: ${message}`,
+    );
+}
+
+/**
  * Performs the handshake with a Sentinel dVPN node to initiate a VPN session.
  *
  * Replicates the `InitHandshake` method of the Sentinel Go SDK client.
  * The process is:
- * 1. JSON-encodes the session `data` (WireGuard pubkey or v2ray uid)
+ * 1. JSON-encodes the session `data` (WireGuard pubkey or v2ray uuid)
  * 2. Builds the message as `bigEndian(sessionId) || JSON(data)`
  * 3. Signs the SHA256 hash of the message with the Cosmos secp256k1 private key
  * 4. POSTs `{ data, id, pub_key, signature }` to the node's root endpoint (`/`)
@@ -174,18 +249,19 @@ function encodePubKey(compressedPubKey: Uint8Array): string {
  *   broadcasting a `MsgStartSessionRequest` transaction
  * @param data - The session data to send to the node:
  *   - For WireGuard: `{ pub_key: "<wg_public_key_base64>" }`
- *   - For v2ray: `{ uid: "<random_16_bytes_base64>" }`
+ *   - For v2ray: `{ uuid: number[] }` with exactly 16 bytes; use `v2ray.getKey()`
  * @param privateKey - The 32-byte secp256k1 private key of the Cosmos wallet
  *   that owns the session on-chain
  * @param remoteUrl - The node's remote URL as stored on-chain (e.g. `https://1.2.3.4:port`)
+ * @param timeout - request timeout in milliseconds
  * @returns A `NodeHandshakeResult` containing:
  *   - `result.addrs` — list of node endpoints to connect to (e.g. `["1.2.3.4:51820"]`)
  *   - `result.data`  — VPN configuration returned by the node (WireGuard config or v2ray inbound)
- * @throws Will throw if the HTTP request fails, OR if the node returns an
- *   unsuccessful envelope (`success: false` / an `error` payload, which can
- *   arrive as HTTP 200) — e.g. the session is not active on-chain or signature
- *   verification failed. The thrown message includes the node's error code and
- *   text when present. Also throws if a successful response has no `result`.
+ * @throws Will throw if the HTTP request fails, or if the node returns an
+ *   unsuccessful envelope (`success: false` / an `error` payload) — e.g. the
+ *   session is not active on-chain or signature verification failed. The
+ *   thrown message includes the node's error code and text when present. Also
+ *   throws if a resolved response is unsuccessful or has no `result`.
  *
  * @example
  * // WireGuard
@@ -201,10 +277,10 @@ function encodePubKey(compressedPubKey: Uint8Array): string {
  *
  * @example
  * // v2ray
- * const uid = Buffer.from(crypto.randomBytes(16)).toString('base64');
+ * const v2ray = new V2Ray();
  * const result = await handshake(
  *     sessionId,
- *     { uid },
+ *     { uuid: v2ray.getKey() },
  *     cosmosPrivKeyBytes,
  *     node.remoteUrl,
  * );
@@ -214,6 +290,7 @@ export async function handshake(
     data: any,
     privateKey: Uint8Array,
     remoteUrl: string,
+    timeout: number = 60000
 ): Promise<NodeHandshakeResult> {
 
     const msg = buildMsg(sessionId, data);
@@ -225,38 +302,51 @@ export async function handshake(
     const pubKeyBytes = secp256k1.publicKeyCreate(privateKey, true); // compressed=true
     const pubKeyBase64 = encodePubKey(pubKeyBytes);
 
-    const body = {
-        data: Buffer.from(JSON.stringify(data)).toString('base64'), // []byte Go → base64
-        id: Number(sessionId),
-        pub_key: `secp256k1:${pubKeyBase64}`,
-        signature: signature,
-    };
+    const body = serializeHandshakeRequest(
+        sessionId,
+        data,
+        `secp256k1:${pubKeyBase64}`,
+        signature,
+    );
 
     const inputUrl = remoteUrl.replace(/\/$/g, '').trim()
     const httpsUrl = inputUrl.startsWith("http") ? inputUrl : `https://${inputUrl}`
 
-    const response = await axios.post(httpsUrl, body, {
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-        },
-        httpsAgent: new https.Agent({ rejectUnauthorized: false }),
-    });
-    // The node wraps every response as { success, result?, error? }. A failed
-    // handshake (bad signature, session not active, node-side error) can still
-    // arrive as HTTP 200 with success:false and an error payload, so we must
-    // check the envelope rather than blindly returning .result.
-    const payload = response.data as NodeResponse;
+    let response;
+    try {
+        response = await axios.post<NodeResponse>(httpsUrl, body, {
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+            httpsAgent: new https.Agent({ rejectUnauthorized: false }),
+            timeout: timeout,
+        });
+    } catch (error) {
+        if (axios.isAxiosError(error) && error.response) {
+            const nodeError = handshakeResponseError(error.response.data);
+            if (nodeError) {
+                throw nodeError;
+            }
+        }
 
-    if (!payload.success || payload.error) {
-        const code = payload.error?.code;
-        const message = payload.error?.message ?? "unknown node error";
-        throw new Error(
-            `Handshake rejected by node${code !== undefined ? ` (code ${code})` : ""}: ${message}`
-        );
+        // Preserve network failures, timeouts and non-envelope HTTP errors.
+        throw error;
     }
 
-    if (!payload.result) {
+    const payload = response.data;
+    const nodeError = handshakeResponseError(payload);
+    if (nodeError) {
+        throw nodeError;
+    }
+
+    if (
+        !payload ||
+        typeof payload !== "object" ||
+        payload.success !== true ||
+        payload.result === undefined ||
+        payload.result === null
+    ) {
         throw new Error("Handshake response missing result payload");
     }
 

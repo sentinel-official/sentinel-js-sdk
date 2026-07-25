@@ -1,12 +1,13 @@
 {
   "name": "@sentinel-official/sentinel-js-sdk",
-  "version": "2.0.0",
+  "version": "2.0.4",
   "description": "sentinel javascript sdk",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "rm -rf dist/* && touch dist/.gitkeep && tsc",
-    "docs": "rm -rf docs/* && typedoc"
+    "docs": "rm -rf docs/* && typedoc",
+    "test": "npm run build && node --test tests/*.test.js"
   },
   "files": [
     "dist"
