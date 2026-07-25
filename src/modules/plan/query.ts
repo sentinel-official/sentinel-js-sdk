@@ -22,6 +22,8 @@ import { Plan } from "../../protobuf/sentinel/plan/v3/plan";
 export interface PlanExtension {
     readonly plan: {
         plans: (status: Status, pagination?: PageRequest) => Promise<QueryPlansResponse>,
+        plansForProvider: (address: string, pagination?: PageRequest) => Promise<QueryPlansForProviderResponse>,
+        /** @deprecated Use plansForProvider instead. */
         plansForProvide: (address: string, pagination?: PageRequest) => Promise<QueryPlansForProviderResponse>,
         plan: (id: Long) => Promise<Plan | undefined>
     }
@@ -30,13 +32,15 @@ export interface PlanExtension {
 export function setupPlanExtension(base: QueryClient): PlanExtension {
     const rpc = createProtobufRpcClient(base);
     const queryService = new QueryServiceClientImpl(rpc);
+    const plansForProvider = (address: string, pagination?: PageRequest) =>
+        queryService.QueryPlansForProvider(QueryPlansForProviderRequest.fromJSON({address, pagination}));
 
     return {
         plan: {
             plans: async (status: Status, pagination?: PageRequest) =>
                 queryService.QueryPlans(QueryPlansRequest.fromJSON({status, pagination})),
-            plansForProvide: async (address: string, pagination?: PageRequest) =>
-                queryService.QueryPlansForProvider(QueryPlansForProviderRequest.fromJSON({address, pagination})),
+            plansForProvider,
+            plansForProvide: plansForProvider,
             plan: async (id: Long) => {
                 const { plan } = await queryService.QueryPlan(QueryPlanRequest.fromJSON({id}));
                 return plan
