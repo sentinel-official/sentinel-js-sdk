@@ -23,6 +23,8 @@ import Long from "long";
 import { PageRequest } from "../../protobuf/cosmos/base/query/v1beta1/pagination";
 import { Any } from "../../protobuf/google/protobuf/any";
 import { BaseSession } from "../../protobuf/sentinel/session/v3/session";
+import { Session as NodeSession } from "../../protobuf/sentinel/node/v3/session";
+import { Session as SubscriptionSession } from "../../protobuf/sentinel/subscription/v3/session";
 
 
 export interface SessionExtension {
@@ -61,16 +63,31 @@ export function setupSessionExtension(base: QueryClient): SessionExtension {
 }
 
 /**
- * Unpacks a protobuf Any containing a Session into the concrete BaseSession type.
- * The session query returns Any because sessions can be different versions.
+ * Unpacks a protobuf Any containing a v3 session into its BaseSession.
+ * Node and subscription sessions use different wrapper messages, so decoding
+ * must be selected from Any.typeUrl before extracting their baseSession.
  *
  * @param any - The protobuf Any from the session query
- * @returns The decoded BaseSession object, or null if the typeUrl is unrecognized
+ * @returns The decoded BaseSession, or null for unknown types and invalid data
  */
 export function unpackSession(any: Any): BaseSession | null {
-    if (!any || !any.value) return null;
+    if (!any?.value?.length) return null;
+
+    const typeName = any.typeUrl.split("/").pop();
     try {
-        return BaseSession.decode(any.value);
+        switch (typeName) {
+            case "sentinel.node.v3.Session":
+                return NodeSession.decode(any.value).baseSession ?? null;
+
+            case "sentinel.subscription.v3.Session":
+                return SubscriptionSession.decode(any.value).baseSession ?? null;
+
+            case "sentinel.session.v3.BaseSession":
+                return BaseSession.decode(any.value);
+
+            default:
+                return null;
+        }
     } catch {
         return null;
     }
