@@ -55,10 +55,12 @@ export class Wireguard {
 
     publicKey: string
     privateKey: string
+    configPath: string | null
 
     constructor() {
         this.interface = null;
         this.peer = null;
+        this.configPath = null;
 
         const keys = this.genKeys();
         this.publicKey = keys.pub
@@ -144,38 +146,40 @@ export class Wireguard {
      *   is not yet initialized (call `parseConfig` first).
      */
     public writeConfig(output?: string): string | null {
+        if (!this.interface || !this.peer) return null;
+
+        const isTemporary = output === undefined;
         if (output == undefined) {
             const tempDirectory = fs.mkdtempSync(path.join(os.tmpdir(), 'sentinel-js-sdk'))
             output = path.join(tempDirectory, "wgsent0.conf")
         }
 
-        if (this.interface && this.peer) {
-            // ungly, but betten than nothing :)
-            var config = "[Interface]\n"
-            config += "Address = " + this.interface.addresses.join(",") + "\n"
-            config += "PrivateKey = " + this.interface.privateKey + "\n"
-            if (this.interface.listenPort !== undefined)
-                config += "ListenPort = " + this.interface.listenPort.toString() + "\n"
-            config += "DNS = " + this.interface.dns.join(",") + "\n"
+        // ungly, but betten than nothing :)
+        var config = "[Interface]\n"
+        config += "Address = " + this.interface.addresses.join(",") + "\n"
+        config += "PrivateKey = " + this.interface.privateKey + "\n"
+        if (this.interface.listenPort !== undefined)
+            config += "ListenPort = " + this.interface.listenPort.toString() + "\n"
+        config += "DNS = " + this.interface.dns.join(",") + "\n"
 
-            if (this.interface.mtu) config += "MTU = " + this.interface.mtu.toString() + "\n"
-            if (this.interface.preUp) config += "PreUp = " + this.interface.preUp + "\n"
-            if (this.interface.postUp) config += "PostUp = " + this.interface.postUp + "\n"
-            if (this.interface.preDown) config += "PreDown = " + this.interface.preDown + "\n"
-            if (this.interface.postDown) config += "PostDown = " + this.interface.postDown + "\n"
+        if (this.interface.mtu) config += "MTU = " + this.interface.mtu.toString() + "\n"
+        if (this.interface.preUp) config += "PreUp = " + this.interface.preUp + "\n"
+        if (this.interface.postUp) config += "PostUp = " + this.interface.postUp + "\n"
+        if (this.interface.preDown) config += "PreDown = " + this.interface.preDown + "\n"
+        if (this.interface.postDown) config += "PostDown = " + this.interface.postDown + "\n"
 
-            config += "\n[Peer]\n"
-            config += "PublicKey = " + this.peer.publicKey + "\n"
-            config += "AllowedIPs = " + this.peer.allowedIPs.join(",") + "\n"
-            config += "Endpoint = " + this.peer.endpoint + "\n"
-            if (this.peer.persistentKeepAlive > 0) config += "PersistentKeepalive = " + this.peer.persistentKeepAlive + "\n"
+        config += "\n[Peer]\n"
+        config += "PublicKey = " + this.peer.publicKey + "\n"
+        config += "AllowedIPs = " + this.peer.allowedIPs.join(",") + "\n"
+        config += "Endpoint = " + this.peer.endpoint + "\n"
+        if (this.peer.persistentKeepAlive > 0) config += "PersistentKeepalive = " + this.peer.persistentKeepAlive + "\n"
 
-            if (this.peer.presharedKey) config += "PresharedKey = " + this.peer.presharedKey + "\n"
+        if (this.peer.presharedKey) config += "PresharedKey = " + this.peer.presharedKey + "\n"
 
-            fs.writeFileSync(output, config);
-            return output
-        }
-        return null
+        fs.writeFileSync(output, config, { mode: 0o600 });
+        try { fs.chmodSync(output, 0o600); } catch {}
+        if (isTemporary) this.configPath = output;
+        return output
     }
 
     /**
@@ -237,10 +241,13 @@ export class Wireguard {
      */
     public connect(configFile?: string): Promise<void> {
         if (configFile == undefined) {
-            const randomFile = "wgsent0.conf"
-            const tempDirectory = fs.mkdtempSync(path.join(os.tmpdir(), 'sentinel-js-sdk'))
-            configFile = path.join(tempDirectory, randomFile)
-            this.writeConfig(configFile)
+            const temporaryConfig = this.writeConfig();
+            if (temporaryConfig === null) {
+                return Promise.reject(
+                    new Error("WireGuard config not initialized. Call parseConfig first.")
+                );
+            }
+            configFile = temporaryConfig;
         }
         return new Promise((resolve, reject) => {
             const child = spawn("wg-quick", ["up", configFile!]);
@@ -249,10 +256,16 @@ export class Wireguard {
             child.stdout.setEncoding('utf8');
             child.stderr.setEncoding('utf8');
             child.stderr.on('data', (data) => { stderr += data; });
-            child.on('error', (err) => reject(new Error(`Failed to start wg-quick: ${err.message}`)));
+            child.on('error', (err) => {
+                if (configFile === this.configPath) this.cleanup();
+                reject(new Error(`Failed to start wg-quick: ${err.message}`));
+            });
             child.on('close', (code) => {
                 if (code === 0) resolve();
-                else reject(new Error(`wg-quick up failed (exit code ${code}): ${stderr.trim()}`));
+                else {
+                    if (configFile === this.configPath) this.cleanup();
+                    reject(new Error(`wg-quick up failed (exit code ${code}): ${stderr.trim()}`));
+                }
             });
         });
     }
@@ -274,10 +287,39 @@ export class Wireguard {
             child.stderr.on('data', (data) => { stderr += data; });
             child.on('error', (err) => reject(new Error(`Failed to start wg-quick: ${err.message}`)));
             child.on('close', (code) => {
-                if (code === 0) resolve();
-                else reject(new Error(`wg-quick down failed (exit code ${code}): ${stderr.trim()}`));
+                if (code === 0) {
+                    if (configFile === this.configPath) this.cleanup();
+                    resolve();
+                } else {
+                    reject(new Error(`wg-quick down failed (exit code ${code}): ${stderr.trim()}`));
+                }
             });
         });
+    }
+
+    /**
+     * Removes the temporary config created by this instance. Caller-provided
+     * paths are never tracked or deleted automatically.
+     */
+    public cleanup(): void {
+        const target = this.configPath;
+        if (!target) return;
+        const directory = path.dirname(target);
+        try {
+            const size = fs.statSync(target).size;
+            fs.writeFileSync(target, Buffer.alloc(size, 0));
+            fs.unlinkSync(target);
+        } catch {
+            // Best-effort cleanup
+        }
+        if (!fs.existsSync(target)) {
+            this.configPath = null;
+            try {
+                fs.rmdirSync(directory);
+            } catch {
+                // The directory may not be empty or may already be gone.
+            }
+        }
     }
 
     /**

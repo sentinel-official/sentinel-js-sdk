@@ -106,10 +106,12 @@ export class V2Ray {
     config: V2RayConf;
     uuid: string;
     child: null | ChildProcessWithoutNullStreams;
+    configPath: string | null;
     socksPort: number;
 
     constructor(socksPort?: number) {
         this.child = null;
+        this.configPath = null;
         this.uuid = randomUUID();
         // Requested SOCKS port. 0 (default) means "pick a free port at parseConfig time".
         // Pass an explicit port (e.g. 1080) to force a fixed, predictable SOCKS inbound.
@@ -262,13 +264,16 @@ export class V2Ray {
      * @returns The path of the written config file.
      */
     public writeConfig(output?: string): string {
+        const isTemporary = output === undefined;
         if (output === undefined) {
             const tempDirectory = fs.mkdtempSync(
                 path.join(os.tmpdir(), 'sentinel-js-sdk')
             );
             output = path.join(tempDirectory, "v2ray_" + randomBytes(8).toString('hex') + ".json");
         }
-        fs.writeFileSync(output, JSON.stringify(this.config, null, 4));
+        fs.writeFileSync(output, JSON.stringify(this.config, null, 4), { mode: 0o600 });
+        try { fs.chmodSync(output, 0o600); } catch {}
+        if (isTemporary) this.configPath = output;
         return output;
     }
 
@@ -282,17 +287,18 @@ export class V2Ray {
      */
     public connect(configFile?: string): number | undefined {
         if (configFile === undefined) {
-            const tempDirectory = fs.mkdtempSync(
-                path.join(os.tmpdir(), 'sentinel-js-sdk')
-            );
-            configFile = path.join(
-                tempDirectory,
-                "v2ray_" + randomBytes(8).toString('hex') + ".json"
-            );
-            this.writeConfig(configFile);
+            configFile = this.writeConfig();
         }
         this.child = spawn("v2ray", ["run", "--config", configFile]);
-        return this.child.pid;
+        const child = this.child;
+        const temporaryConfig = configFile === this.configPath ? configFile : null;
+        child.once("close", () => {
+            if (this.child === child) this.child = null;
+            if (temporaryConfig !== null && this.configPath === temporaryConfig) {
+                this.cleanup();
+            }
+        });
+        return child.pid;
     }
 
     /**
@@ -301,8 +307,32 @@ export class V2Ray {
      * @returns `true` if the signal was sent successfully, `false` if no process is running.
      */
     public disconnect(): boolean {
-        if (this.child) return this.child.kill('SIGINT');
-        return false;
+        return this.child ? this.child.kill('SIGINT') : false;
+    }
+
+    /**
+     * Removes config files from disk.
+     *
+     * Only a temporary config created by this instance is removed. Paths
+     * supplied by callers are never tracked or deleted automatically.
+     */
+    public cleanup(): void {
+        const target = this.configPath;
+        if (!target) return;
+        const directory = path.dirname(target);
+        try {
+            fs.unlinkSync(target);
+        } catch {
+            // Best-effort cleanup
+        }
+        if (!fs.existsSync(target)) {
+            this.configPath = null;
+            try {
+                fs.rmdirSync(directory);
+            } catch {
+                // The directory may not be empty or may already be gone.
+            }
+        }
     }
 
     /**
