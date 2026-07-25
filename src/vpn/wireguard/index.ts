@@ -1,6 +1,5 @@
 import { generateKeyPairSync, randomBytes } from "crypto"
 import { spawn } from "child_process";
-import findFreePorts from "find-free-ports"
 
 import * as path from 'path';
 import * as fs from 'fs';
@@ -24,7 +23,9 @@ export interface WireGuardHandshakeData {
 interface Interface {
     privateKey: string,
     addresses: string[],
-    listenPort: number,
+    // Optional. When omitted, WireGuard auto-selects a free UDP port at bind
+    // time (kernel-level, no TOCTOU). Set explicitly only to force a fixed port.
+    listenPort?: number,
     dns: string[],
     // dnsSearch: string[],
     // https://gist.github.com/nitred/f16850ca48c48c79bf422e90ee5b9d95
@@ -101,9 +102,13 @@ export class Wireguard {
         handshakeData: WireGuardHandshakeData,
         nodeAddrs: string[],
         dns: string[] = ["10.8.0.1", "1.0.0.1", "1.1.1.1"],
-        mtu: number = 1280
+        mtu: number = 1280,
+        listenPort?: number
     ): Promise<void> {
-        const [listenPort] = await findFreePorts(1);
+        // Do NOT probe for a free port here: a port found free at config-build
+        // time can be taken before WireGuard actually binds it (TOCTOU). When
+        // listenPort is omitted we leave it unset so WireGuard picks a free UDP
+        // port itself at bind time. Pass listenPort only to force a fixed port.
 
         // IP/CIDR assigned to the client to use as interface addresses
         this.interface = {
@@ -149,7 +154,8 @@ export class Wireguard {
             var config = "[Interface]\n"
             config += "Address = " + this.interface.addresses.join(",") + "\n"
             config += "PrivateKey = " + this.interface.privateKey + "\n"
-            config += "ListenPort = " + this.interface.listenPort.toString() + "\n"
+            if (this.interface.listenPort !== undefined)
+                config += "ListenPort = " + this.interface.listenPort.toString() + "\n"
             config += "DNS = " + this.interface.dns.join(",") + "\n"
 
             if (this.interface.mtu) config += "MTU = " + this.interface.mtu.toString() + "\n"
@@ -184,6 +190,8 @@ export class Wireguard {
         let config = "[Interface]\n";
         config += "Address = " + this.interface.addresses.join(",") + "\n";
         config += "PrivateKey = " + this.interface.privateKey + "\n";
+        if (this.interface.listenPort !== undefined)
+            config += "ListenPort = " + this.interface.listenPort.toString() + "\n";
         config += "DNS = " + this.interface.dns.join(",") + "\n";
         if (this.interface.mtu) config += "MTU = " + this.interface.mtu + "\n";
 
