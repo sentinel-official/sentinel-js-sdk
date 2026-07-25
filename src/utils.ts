@@ -206,6 +206,29 @@ function serializeHandshakeRequest(
 }
 
 /**
+ * Converts an unsuccessful dvpnx response envelope into a descriptive error.
+ * Returns undefined when the value is not a node-error envelope.
+ */
+function handshakeResponseError(payload: unknown): Error | undefined {
+    if (!payload || typeof payload !== "object") {
+        return undefined;
+    }
+
+    const response = payload as Partial<NodeResponse>;
+    if (response.success !== false && !response.error) {
+        return undefined;
+    }
+
+    const code = response.error?.code;
+    const message = response.error?.message ?? "unknown node error";
+    const codeLabel = code !== undefined ? ` (code ${code})` : "";
+
+    return new Error(
+        `Handshake rejected by node${codeLabel}: ${message}`,
+    );
+}
+
+/**
  * Performs the handshake with a Sentinel dVPN node to initiate a VPN session.
  *
  * Replicates the `InitHandshake` method of the Sentinel Go SDK client.
@@ -234,8 +257,11 @@ function serializeHandshakeRequest(
  * @returns A `NodeHandshakeResult` containing:
  *   - `result.addrs` — list of node endpoints to connect to (e.g. `["1.2.3.4:51820"]`)
  *   - `result.data`  — VPN configuration returned by the node (WireGuard config or v2ray inbound)
- * @throws Will throw if the HTTP request fails, the session is not active on-chain,
- *   or the signature verification fails on the node side (HTTP 401)
+ * @throws Will throw if the HTTP request fails, or if the node returns an
+ *   unsuccessful envelope (`success: false` / an `error` payload) — e.g. the
+ *   session is not active on-chain or signature verification failed. The
+ *   thrown message includes the node's error code and text when present. Also
+ *   throws if a resolved response is unsuccessful or has no `result`.
  *
  * @example
  * // WireGuard
@@ -286,14 +312,43 @@ export async function handshake(
     const inputUrl = remoteUrl.replace(/\/$/g, '').trim()
     const httpsUrl = inputUrl.startsWith("http") ? inputUrl : `https://${inputUrl}`
 
-    const response = await axios.post(httpsUrl, body, {
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-        },
-        httpsAgent: new https.Agent({ rejectUnauthorized: false }),
-        timeout: timeout,
-    });
-    // .result, supponsing success: True and error doesn't exist
-    return response.data.result as NodeHandshakeResult;
+    let response;
+    try {
+        response = await axios.post<NodeResponse>(httpsUrl, body, {
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+            httpsAgent: new https.Agent({ rejectUnauthorized: false }),
+            timeout: timeout,
+        });
+    } catch (error) {
+        if (axios.isAxiosError(error) && error.response) {
+            const nodeError = handshakeResponseError(error.response.data);
+            if (nodeError) {
+                throw nodeError;
+            }
+        }
+
+        // Preserve network failures, timeouts and non-envelope HTTP errors.
+        throw error;
+    }
+
+    const payload = response.data;
+    const nodeError = handshakeResponseError(payload);
+    if (nodeError) {
+        throw nodeError;
+    }
+
+    if (
+        !payload ||
+        typeof payload !== "object" ||
+        payload.success !== true ||
+        payload.result === undefined ||
+        payload.result === null
+    ) {
+        throw new Error("Handshake response missing result payload");
+    }
+
+    return payload.result as NodeHandshakeResult;
 }

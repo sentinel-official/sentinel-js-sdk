@@ -101,3 +101,104 @@ test("handshake rejects zero and negative session IDs before sending", async () 
     );
     assert.equal(requests, 0);
 });
+
+test("handshake parses dvpnx envelopes from non-2xx Axios responses", async () => {
+    const privateKey = new Uint8Array(32);
+    privateKey[31] = 1;
+
+    for (const status of [400, 401, 409, 500]) {
+        axios.post = async () => {
+            throw new axios.AxiosError(
+                `Request failed with status code ${status}`,
+                axios.AxiosError.ERR_BAD_RESPONSE,
+                undefined,
+                undefined,
+                {
+                    data: {
+                        success: false,
+                        error: {
+                            code: 5,
+                            message: "invalid session status",
+                        },
+                    },
+                    status,
+                    statusText: "Error",
+                    headers: {},
+                    config: {},
+                },
+            );
+        };
+
+        await assert.rejects(
+            handshake(
+                Long.UONE,
+                { pub_key: "key" },
+                privateKey,
+                "https://node.example",
+            ),
+            /Handshake rejected by node \(code 5\): invalid session status/,
+        );
+    }
+});
+
+test("handshake preserves network errors without a node response", async () => {
+    const privateKey = new Uint8Array(32);
+    privateKey[31] = 1;
+    const networkError = new axios.AxiosError(
+        "socket hang up",
+        "ECONNRESET",
+    );
+
+    axios.post = async () => {
+        throw networkError;
+    };
+
+    await handshake(
+        Long.UONE,
+        { pub_key: "key" },
+        privateKey,
+        "https://node.example",
+    ).then(
+        () => assert.fail("Expected handshake to reject"),
+        error => assert.equal(error, networkError),
+    );
+});
+
+test("handshake validates resolved response envelopes", async () => {
+    const privateKey = new Uint8Array(32);
+    privateKey[31] = 1;
+
+    axios.post = async () => ({
+        data: {
+            success: false,
+            error: {
+                code: 7,
+                message: "adding peer failed",
+            },
+        },
+    });
+
+    await assert.rejects(
+        handshake(
+            Long.UONE,
+            { pub_key: "key" },
+            privateKey,
+            "https://node.example",
+        ),
+        /Handshake rejected by node \(code 7\): adding peer failed/,
+    );
+
+    axios.post = async () => ({
+        data: { success: true },
+    });
+
+    await assert.rejects(
+        handshake(
+            Long.UONE,
+            { pub_key: "key" },
+            privateKey,
+            "https://node.example",
+        ),
+        /Handshake response missing result payload/,
+    );
+});
