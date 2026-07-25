@@ -174,6 +174,38 @@ function encodePubKey(compressedPubKey: Uint8Array): string {
 }
 
 /**
+ * Serializes the dvpnx handshake request without converting the uint64
+ * session ID through JavaScript's number type.
+ *
+ * dvpnx expects `id` to be a JSON number (Go `uint64`), not a quoted string.
+ * Building this small payload explicitly preserves the exact decimal value
+ * while JSON.stringify safely escapes every string field.
+ */
+function serializeHandshakeRequest(
+    sessionId: Long,
+    data: any,
+    pubKey: string,
+    signature: string,
+): string {
+    if (sessionId.isNegative() || sessionId.isZero()) {
+        throw new RangeError("Session ID must be a positive uint64");
+    }
+
+    const encodedData = Buffer
+        .from(JSON.stringify(data))
+        .toString('base64');
+
+    return [
+        "{",
+        `"data":${JSON.stringify(encodedData)},`,
+        `"id":${sessionId.toString()},`,
+        `"pub_key":${JSON.stringify(pubKey)},`,
+        `"signature":${JSON.stringify(signature)}`,
+        "}",
+    ].join("");
+}
+
+/**
  * Performs the handshake with a Sentinel dVPN node to initiate a VPN session.
  *
  * Replicates the `InitHandshake` method of the Sentinel Go SDK client.
@@ -194,7 +226,7 @@ function encodePubKey(compressedPubKey: Uint8Array): string {
  *   broadcasting a `MsgStartSessionRequest` transaction
  * @param data - The session data to send to the node:
  *   - For WireGuard: `{ pub_key: "<wg_public_key_base64>" }`
- *   - For v2ray: `{ uuid: "<random_16_bytes_base64>" }`
+ *   - For v2ray: `{ uuid: number[] }` with exactly 16 bytes; use `v2ray.getKey()`
  * @param privateKey - The 32-byte secp256k1 private key of the Cosmos wallet
  *   that owns the session on-chain
  * @param remoteUrl - The node's remote URL as stored on-chain (e.g. `https://1.2.3.4:port`)
@@ -219,10 +251,10 @@ function encodePubKey(compressedPubKey: Uint8Array): string {
  *
  * @example
  * // v2ray
- * const uuid = Buffer.from(crypto.randomBytes(16)).toString('base64');
+ * const v2ray = new V2Ray();
  * const result = await handshake(
  *     sessionId,
- *     { uuid },
+ *     { uuid: v2ray.getKey() },
  *     cosmosPrivKeyBytes,
  *     node.remoteUrl,
  * );
@@ -244,12 +276,12 @@ export async function handshake(
     const pubKeyBytes = secp256k1.publicKeyCreate(privateKey, true); // compressed=true
     const pubKeyBase64 = encodePubKey(pubKeyBytes);
 
-    const body = {
-        data: Buffer.from(JSON.stringify(data)).toString('base64'), // []byte Go → base64
-        id: sessionId.toString(),
-        pub_key: `secp256k1:${pubKeyBase64}`,
-        signature: signature,
-    };
+    const body = serializeHandshakeRequest(
+        sessionId,
+        data,
+        `secp256k1:${pubKeyBase64}`,
+        signature,
+    );
 
     const inputUrl = remoteUrl.replace(/\/$/g, '').trim()
     const httpsUrl = inputUrl.startsWith("http") ? inputUrl : `https://${inputUrl}`

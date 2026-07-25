@@ -140,9 +140,9 @@ export class V2Ray {
 
     /**
      * Returns the v2ray-encoded key for this client's UUID.
-     * Format: base64( [0x01] + uuid_bytes )
+     * Format: the 16 UUID bytes as a number array.
      *
-     * @returns base64 string used as handshake `data.uid`
+     * @returns 16-byte array used as handshake `data.uuid`
      */
     public getKey(): number[] {
         const uuidBuffer = Buffer.from(this.uuid.replace(/-/g, ''), 'hex');
