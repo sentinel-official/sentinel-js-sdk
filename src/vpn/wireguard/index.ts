@@ -1,12 +1,13 @@
 import { generateKeyPairSync, randomBytes } from "crypto"
 import { spawn } from "child_process";
-import findFreePorts from "find-free-ports"
 
 import * as path from 'path';
 import * as fs from 'fs';
 import * as os from 'os';
 
 import qrcode from 'qrcode';
+
+import { preferIPv4 } from "../../utils";
 
 interface WireGuardMetadata {
     port: number;
@@ -22,7 +23,9 @@ export interface WireGuardHandshakeData {
 interface Interface {
     privateKey: string,
     addresses: string[],
-    listenPort: number,
+    // Optional. When omitted, WireGuard auto-selects a free UDP port at bind
+    // time (kernel-level, no TOCTOU). Set explicitly only to force a fixed port.
+    listenPort?: number,
     dns: string[],
     // dnsSearch: string[],
     // https://gist.github.com/nitred/f16850ca48c48c79bf422e90ee5b9d95
@@ -100,9 +103,14 @@ export class Wireguard {
     public async parseConfig(
         handshakeData: WireGuardHandshakeData,
         nodeAddrs: string[],
-        dns: string[] = ["10.8.0.1", "1.0.0.1", "1.1.1.1"]
+        dns: string[] = ["10.8.0.1", "1.0.0.1", "1.1.1.1"],
+        mtu: number = 1280,
+        listenPort?: number
     ): Promise<void> {
-        const [listenPort] = await findFreePorts(1);
+        // Do NOT probe for a free port here: a port found free at config-build
+        // time can be taken before WireGuard actually binds it (TOCTOU). When
+        // listenPort is omitted we leave it unset so WireGuard picks a free UDP
+        // port itself at bind time. Pass listenPort only to force a fixed port.
 
         // IP/CIDR assigned to the client to use as interface addresses
         this.interface = {
@@ -110,13 +118,14 @@ export class Wireguard {
             addresses: handshakeData.addrs,
             listenPort,
             dns,
+            mtu,
         };
 
         // Use the first available metadata to build the peer endpoint
         const meta = handshakeData.metadata[0];
 
         // Endpoint = public IP of the node (from result.addrs) + port (from metadata)
-        const host = nodeAddrs[0];
+        const host = preferIPv4(nodeAddrs);
         const endpoint = `${host}:${meta.port}`;
 
         this.peer = {
@@ -137,39 +146,40 @@ export class Wireguard {
      *   is not yet initialized (call `parseConfig` first).
      */
     public writeConfig(output?: string): string | null {
+        if (!this.interface || !this.peer) return null;
+
+        const isTemporary = output === undefined;
         if (output == undefined) {
             const tempDirectory = fs.mkdtempSync(path.join(os.tmpdir(), 'sentinel-js-sdk'))
             output = path.join(tempDirectory, "wgsent0.conf")
         }
 
-        if (this.interface && this.peer) {
-            // ungly, but betten than nothing :)
-            var config = "[Interface]\n"
-            config += "Address = " + this.interface.addresses.join(",") + "\n"
-            config += "PrivateKey = " + this.interface.privateKey + "\n"
+        // ungly, but betten than nothing :)
+        var config = "[Interface]\n"
+        config += "Address = " + this.interface.addresses.join(",") + "\n"
+        config += "PrivateKey = " + this.interface.privateKey + "\n"
+        if (this.interface.listenPort !== undefined)
             config += "ListenPort = " + this.interface.listenPort.toString() + "\n"
-            config += "DNS = " + this.interface.dns.join(",") + "\n"
+        config += "DNS = " + this.interface.dns.join(",") + "\n"
 
-            if (this.interface.mtu) config += "MTU = " + this.interface.mtu.toString() + "\n"
-            if (this.interface.preUp) config += "PreUp = " + this.interface.preUp + "\n"
-            if (this.interface.postUp) config += "PostUp = " + this.interface.postUp + "\n"
-            if (this.interface.preDown) config += "PreDown = " + this.interface.preDown + "\n"
-            if (this.interface.postDown) config += "PostDown = " + this.interface.postDown + "\n"
+        if (this.interface.mtu) config += "MTU = " + this.interface.mtu.toString() + "\n"
+        if (this.interface.preUp) config += "PreUp = " + this.interface.preUp + "\n"
+        if (this.interface.postUp) config += "PostUp = " + this.interface.postUp + "\n"
+        if (this.interface.preDown) config += "PreDown = " + this.interface.preDown + "\n"
+        if (this.interface.postDown) config += "PostDown = " + this.interface.postDown + "\n"
 
-            config += "\n[Peer]\n"
-            config += "PublicKey = " + this.peer.publicKey + "\n"
-            config += "AllowedIPs = " + this.peer.allowedIPs.join(",") + "\n"
-            config += "Endpoint = " + this.peer.endpoint + "\n"
-            if (this.peer.persistentKeepAlive > 0) config += "PersistentKeepalive = " + this.peer.persistentKeepAlive + "\n"
+        config += "\n[Peer]\n"
+        config += "PublicKey = " + this.peer.publicKey + "\n"
+        config += "AllowedIPs = " + this.peer.allowedIPs.join(",") + "\n"
+        config += "Endpoint = " + this.peer.endpoint + "\n"
+        if (this.peer.persistentKeepAlive > 0) config += "PersistentKeepalive = " + this.peer.persistentKeepAlive + "\n"
 
-            if (this.peer.presharedKey) config += "PresharedKey = " + this.peer.presharedKey + "\n"
+        if (this.peer.presharedKey) config += "PresharedKey = " + this.peer.presharedKey + "\n"
 
-            fs.writeFileSync(output, config);
-            this.configPath = output;
-            try { fs.chmodSync(output, 0o600); } catch {}
-            return output
-        }
-        return null
+        fs.writeFileSync(output, config, { mode: 0o600 });
+        try { fs.chmodSync(output, 0o600); } catch {}
+        if (isTemporary) this.configPath = output;
+        return output
     }
 
     /**
@@ -184,7 +194,10 @@ export class Wireguard {
         let config = "[Interface]\n";
         config += "Address = " + this.interface.addresses.join(",") + "\n";
         config += "PrivateKey = " + this.interface.privateKey + "\n";
+        if (this.interface.listenPort !== undefined)
+            config += "ListenPort = " + this.interface.listenPort.toString() + "\n";
         config += "DNS = " + this.interface.dns.join(",") + "\n";
+        if (this.interface.mtu) config += "MTU = " + this.interface.mtu + "\n";
 
         config += "\n[Peer]\n";
         config += "PublicKey = " + this.peer.publicKey + "\n";
@@ -224,31 +237,37 @@ export class Wireguard {
      *
      * @param configFile - Optional path to an existing `.conf` file.
      *   If omitted, writes the current config to a temp file first.
+     * @returns Promise that resolves on success or rejects with error details.
      */
-    public connect(configFile?: string) {
+    public connect(configFile?: string): Promise<void> {
         if (configFile == undefined) {
-            // const randomFile = "wg_" + randomBytes(8).toString('hex') + ".conf"
-            // pkexec wg-quick up /tmp/sentinel-js-sdkR2Resv/wg_76294e9ab0aac67f.conf
-            // wg-quick: The config file must be a valid interface name, followed by .conf
-
-            /* Recommended INTERFACE names include `wg0' or `wgvpn0' or even `wgmgmtlan0'.  However,  the
-            number  at  the  end  is  in  fact  optional,  and  really  any  free-form  string  [a-zA-
-            Z0-9_=+.-]{1,15} will work. So even interface names corresponding to geographic  locations
-            would suffice, such as `cincinnati', `nyc', or `paris', if that's somehow desirable */
-
-            const randomFile = "wgsent0.conf"
-            const tempDirectory = fs.mkdtempSync(path.join(os.tmpdir(), 'sentinel-js-sdk'))
-            configFile = path.join(tempDirectory, randomFile)
-            // Hope the config are in "memory"
-            this.writeConfig(configFile)
+            const temporaryConfig = this.writeConfig();
+            if (temporaryConfig === null) {
+                return Promise.reject(
+                    new Error("WireGuard config not initialized. Call parseConfig first.")
+                );
+            }
+            configFile = temporaryConfig;
         }
-        const child = spawn("wg-quick", ["up", configFile])
-        child.stdout.setEncoding('utf8');
-        child.stdout.on('data', function (data) { console.log('stdout: ' + data.trim()); });
+        return new Promise((resolve, reject) => {
+            const child = spawn("wg-quick", ["up", configFile!]);
+            let stderr = '';
 
-        child.stderr.setEncoding('utf8');
-        child.stderr.on('data', function (data) { console.log('stderr: ' + data.trim()); });
-        child.on('close', (code) => console.log(`wg-quick up exited with code ${code}.`));
+            child.stdout.setEncoding('utf8');
+            child.stderr.setEncoding('utf8');
+            child.stderr.on('data', (data) => { stderr += data; });
+            child.on('error', (err) => {
+                if (configFile === this.configPath) this.cleanup();
+                reject(new Error(`Failed to start wg-quick: ${err.message}`));
+            });
+            child.on('close', (code) => {
+                if (code === 0) resolve();
+                else {
+                    if (configFile === this.configPath) this.cleanup();
+                    reject(new Error(`wg-quick up failed (exit code ${code}): ${stderr.trim()}`));
+                }
+            });
+        });
     }
 
     /**
@@ -256,6 +275,7 @@ export class Wireguard {
      * Requires sudo/root privileges.
      *
      * @param configFile - Path to the `.conf` file used when connecting.
+     * @returns Promise that resolves on success or rejects with error details.
      */
     public disconnect(configFile: string): Promise<void> {
         return new Promise((resolve, reject) => {
@@ -267,37 +287,39 @@ export class Wireguard {
             child.stderr.on('data', (data) => { stderr += data; });
             child.on('error', (err) => reject(new Error(`Failed to start wg-quick: ${err.message}`)));
             child.on('close', (code) => {
-                // Clean up config file (contains private key in plaintext)
-                this.cleanup(configFile);
-                if (code === 0) resolve();
-                else reject(new Error(`wg-quick down failed (exit code ${code}): ${stderr.trim()}`));
+                if (code === 0) {
+                    if (configFile === this.configPath) this.cleanup();
+                    resolve();
+                } else {
+                    reject(new Error(`wg-quick down failed (exit code ${code}): ${stderr.trim()}`));
+                }
             });
         });
     }
 
     /**
-     * Removes config files from disk. Overwrites with zeros before deletion
-     * to scrub the private key from the filesystem.
-     *
-     * @param configFile - Path to the config file to clean up.
+     * Removes the temporary config created by this instance. Caller-provided
+     * paths are never tracked or deleted automatically.
      */
-    public cleanup(configFile?: string): void {
-        const target = configFile || this.configPath;
+    public cleanup(): void {
+        const target = this.configPath;
         if (!target) return;
+        const directory = path.dirname(target);
         try {
-            // Overwrite with zeros to scrub private key before unlinking
             const size = fs.statSync(target).size;
             fs.writeFileSync(target, Buffer.alloc(size, 0));
             fs.unlinkSync(target);
-            // Try to remove parent temp directory if empty
-            const dir = path.dirname(target);
-            if (dir.includes('sentinel-js-sdk')) {
-                fs.rmdirSync(dir);
-            }
         } catch {
             // Best-effort cleanup
         }
-        if (target === this.configPath) this.configPath = null;
+        if (!fs.existsSync(target)) {
+            this.configPath = null;
+            try {
+                fs.rmdirSync(directory);
+            } catch {
+                // The directory may not be empty or may already be gone.
+            }
+        }
     }
 
     /**
