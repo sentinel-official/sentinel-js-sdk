@@ -9,6 +9,8 @@ import * as os from 'os';
 import V2RayConf from "./v2ray-conf";
 import { V2RayStreamSettings } from "./v2ray-transport";
 
+import { preferIPv4 } from "../../utils";
+
 /**
  * Proxy protocol types. Maps to ProxyProtocol iota in sentinel-go-sdk/v2ray/server.go
  * 0 = Unspecified, 1 = VLess, 2 = VMess
@@ -104,10 +106,14 @@ export class V2Ray {
     config: V2RayConf;
     uuid: string;
     child: null | ChildProcessWithoutNullStreams;
+    socksPort: number;
 
-    constructor() {
+    constructor(socksPort?: number) {
         this.child = null;
         this.uuid = randomUUID();
+        // Requested SOCKS port. 0 (default) means "pick a free port at parseConfig time".
+        // Pass an explicit port (e.g. 1080) to force a fixed, predictable SOCKS inbound.
+        this.socksPort = socksPort ?? 0;
         // https://github.com/sentinel-official/sentinel-go-sdk/blob/development/v2ray/client.json.tmpl
         this.config = {
             api: { services: ["StatsService"], tag: "api" },
@@ -138,9 +144,9 @@ export class V2Ray {
 
     /**
      * Returns the v2ray-encoded key for this client's UUID.
-     * Format: base64( [0x01] + uuid_bytes )
+     * Format: the 16 UUID bytes as a number array.
      *
-     * @returns base64 string used as handshake `data.uid`
+     * @returns 16-byte array used as handshake `data.uuid`
      */
     public getKey(): number[] {
         const uuidBuffer = Buffer.from(this.uuid.replace(/-/g, ''), 'hex');
@@ -169,8 +175,19 @@ export class V2Ray {
         handshakeData: V2RayHandshakeData,
         nodeAddrs: string[],
     ): Promise<void> {
-        const address = nodeAddrs[0];
-        const [apiPort] = await findFreePorts(1);
+        const address = preferIPv4(nodeAddrs);
+        // apiPort (internal stats inbound) is always auto-allocated.
+        // socksPort honors an explicit port from the constructor; otherwise auto-allocate.
+        const needSocks = this.socksPort === 0;
+        // Always request two distinct free ports. If the explicit SOCKS port is
+        // among them, use the other one for the API inbound.
+        const freePorts = await findFreePorts(2);
+        const socksPort = needSocks ? freePorts[1] : this.socksPort;
+        const apiPort = freePorts.find(port => port !== socksPort);
+        if (apiPort === undefined) {
+            throw new Error("Could not allocate a V2Ray API port distinct from the SOCKS port");
+        }
+        this.socksPort = socksPort;
 
         // API inbound
         this.config.inbounds.push({
@@ -184,7 +201,7 @@ export class V2Ray {
         // SOCKS proxy inbound
         this.config.inbounds.push({
             listen: "127.0.0.1",
-            port: 1080,
+            port: socksPort,
             protocol: "socks",
             settings: { ip: "127.0.0.1", udp: true },
             sniffing: { destOverride: ["http", "tls"], enabled: true },

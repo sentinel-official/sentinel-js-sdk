@@ -6,7 +6,8 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "rm -rf dist/* && touch dist/.gitkeep && tsc",
-    "docs": "rm -rf docs/* && typedoc"
+    "docs": "rm -rf docs/* && typedoc",
+    "test": "npm run build && node --test tests/*.test.js"
   },
   "files": [
     "dist"

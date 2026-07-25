@@ -30,8 +30,9 @@ export interface NodeExtension {
          *
          * NOTE: Sentinel chain v3 does not return `pagination.next_key` for
          * this query even when results are truncated. To enumerate all nodes
-         * reliably, do not loop on `next_key` — use a sufficiently large
-         * `limit` in a single call, or paginate by `offset`.
+         * reliably, do not loop on `next_key` or rely on `offset`: current
+         * mainnet queries can return no results for a non-zero offset. Use a
+         * sufficiently large `limit` in a single call instead.
          *
          * Reproducible against mainnet: a status=ACTIVE query that has more
          * than `limit` matching nodes still returns `next_key=null`.
@@ -39,8 +40,9 @@ export interface NodeExtension {
         nodes: (status: Status, pagination?: PageRequest) => Promise<QueryNodesResponse>,
         /**
          * Query nodes joined to a plan by status. Same `next_key` caveat
-         * as `nodes()` — chain v3 does not emit it on truncation. Use
-         * `offset`-based pagination or a sufficiently large `limit`.
+         * as `nodes()` — chain v3 does not emit it on truncation and non-zero
+         * offsets are not reliable. Use a sufficiently large `limit` in one
+         * call.
          */
         nodesForPlan: (id: Long, status: Status, pagination?: PageRequest) => Promise<QueryNodesForPlanResponse>,
         node: (address: string) => Promise<Node | undefined>,
