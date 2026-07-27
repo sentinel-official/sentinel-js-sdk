@@ -171,6 +171,13 @@ export class Wireguard {
     }
 
     /**
+     * Returns the peer payload expected by dvpnx for a WireGuard handshake.
+     */
+    public getPeerRequest(): { public_key: string } {
+        return { public_key: this.publicKey };
+    }
+
+    /**
      * Parses the JSON response from the node handshake and builds the
      * WireGuard interface + peer configuration.
      *

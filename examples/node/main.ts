@@ -31,6 +31,10 @@ type VPNClient = {
     writeConfig(): string | null;
 };
 
+type PeerRequestClient = VPNClient & {
+    getPeerRequest(): unknown;
+};
+
 function createVPNClient(serviceType: NodeVPNType): VPNClient {
     switch (serviceType) {
         case NodeVPNType.WIREGUARD: return new Wireguard();
@@ -44,13 +48,10 @@ function createVPNClient(serviceType: NodeVPNType): VPNClient {
 }
 
 function peerRequest(serviceType: NodeVPNType, client: VPNClient): unknown {
-    if (serviceType === NodeVPNType.WIREGUARD) {
-        return { pub_key: (client as Wireguard).publicKey };
-    }
     if (serviceType === NodeVPNType.V2RAY) {
         return { uuid: (client as V2Ray).getKey() };
     }
-    return (client as OpenVPN | Xray | AmneziaWG | Hysteria2).getPeerRequest();
+    return (client as PeerRequestClient).getPeerRequest();
 }
 
 async function main() {

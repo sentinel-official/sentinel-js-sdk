@@ -66,11 +66,9 @@ const clients = {
 
 const serviceType = nodeStatus.service_type;
 const vpn = clients[serviceType]();
-const peerRequest = serviceType === NodeVPNType.WIREGUARD
-    ? { pub_key: vpn.publicKey }
-    : serviceType === NodeVPNType.V2RAY
-        ? { uuid: vpn.getKey() }
-        : vpn.getPeerRequest();
+const peerRequest = serviceType === NodeVPNType.V2RAY
+    ? { uuid: vpn.getKey() }
+    : vpn.getPeerRequest();
 
 const result = await handshake(
     sessionId,

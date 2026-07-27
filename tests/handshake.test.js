@@ -18,7 +18,7 @@ afterEach(() => {
 
 test("handshake emits an exact unquoted uint64 ID and signs the same value", async () => {
     const sessionId = Long.fromString("18446744073709551615", true);
-    const data = { pub_key: "wireguard-public-key" };
+    const data = { public_key: "wireguard-public-key" };
     const privateKey = new Uint8Array(32);
     privateKey[31] = 1;
 

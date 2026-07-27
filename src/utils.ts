@@ -215,7 +215,7 @@ function uint64ToBigEndian(id: Long): Uint8Array {
  * @returns A Uint8Array containing `bigEndian(sessionId) || JSON(data)`
  *
  * @example
- * const msg = buildMsg(42n, { pub_key: "abc123==" });
+ * const msg = buildMsg(42n, { public_key: "abc123==" });
  * // Uint8Array [ 0,0,0,0,0,0,0,42, ...jsonBytes ]
  */
 function buildMsg(sessionId: Long, data: any): Uint8Array {
@@ -320,9 +320,9 @@ function nodeResponseError(
  *
  * @param sessionId - The on-chain session identifier (uint64), obtained after
  *   broadcasting a `MsgStartSessionRequest` transaction
- * @param data - The protocol-specific peer request. Use `{ pub_key }` for
- *   WireGuard, `{ uuid: v2ray.getKey() }` for V2Ray, or `getPeerRequest()`
- *   on OpenVPN, Xray, AmneziaWG and Hysteria2 clients.
+ * @param data - The protocol-specific peer request. Use
+ *   `{ uuid: v2ray.getKey() }` for V2Ray or `getPeerRequest()` on the other
+ *   VPN clients.
  * @param privateKey - The 32-byte secp256k1 private key of the Cosmos wallet
  *   that owns the session on-chain
  * @param remoteUrl - The node's remote URL as stored on-chain (e.g. `https://1.2.3.4:port`)
@@ -341,7 +341,7 @@ function nodeResponseError(
  * const wgKeys = generateKeypair();
  * const result = await handshake(
  *     sessionId,
- *     { pub_key: wgKeys.publicKey },
+ *     wireguard.getPeerRequest(),
  *     cosmosPrivKeyBytes,
  *     node.remoteUrl,
  * );
