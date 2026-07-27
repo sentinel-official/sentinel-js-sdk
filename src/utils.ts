@@ -320,9 +320,8 @@ function nodeResponseError(
  *
  * @param sessionId - The on-chain session identifier (uint64), obtained after
  *   broadcasting a `MsgStartSessionRequest` transaction
- * @param data - The protocol-specific peer request. Use
- *   `{ uuid: v2ray.getKey() }` for V2Ray or `getPeerRequest()` on the other
- *   VPN clients.
+ * @param data - The protocol-specific peer request returned by the selected
+ *   VPN client's `getPeerRequest()` method.
  * @param privateKey - The 32-byte secp256k1 private key of the Cosmos wallet
  *   that owns the session on-chain
  * @param remoteUrl - The node's remote URL as stored on-chain (e.g. `https://1.2.3.4:port`)
@@ -353,7 +352,7 @@ function nodeResponseError(
  * const v2ray = new V2Ray();
  * const result = await handshake(
  *     sessionId,
- *     { uuid: v2ray.getKey() },
+ *     v2ray.getPeerRequest(),
  *     cosmosPrivKeyBytes,
  *     node.remoteUrl,
  * );

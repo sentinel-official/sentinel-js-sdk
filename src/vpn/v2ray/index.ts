@@ -159,6 +159,15 @@ export class V2Ray {
     }
 
     /**
+     * Returns the peer payload expected by dvpnx for a V2Ray handshake.
+     *
+     * `getKey()` remains available for backwards compatibility.
+     */
+    public getPeerRequest(): { uuid: number[] } {
+        return { uuid: this.getKey() };
+    }
+
+    /**
      * Parses the JSON response from the node handshake and builds the
      * v2ray configuration. Replaces the old 7-byte binary buffer parsing.
      *

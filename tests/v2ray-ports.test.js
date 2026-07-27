@@ -31,6 +31,13 @@ function inboundPort(v2ray, tag) {
     return v2ray.config.inbounds.find(inbound => inbound.tag === tag)?.port;
 }
 
+test("V2Ray exposes a uniform peer request without changing getKey", () => {
+    const v2ray = new V2Ray();
+
+    assert.deepEqual(v2ray.getPeerRequest(), { uuid: v2ray.getKey() });
+    assert.equal(v2ray.getPeerRequest().uuid.length, 16);
+});
+
 test("V2Ray allocates distinct automatic API and SOCKS ports", async () => {
     const v2ray = new V2Ray();
 

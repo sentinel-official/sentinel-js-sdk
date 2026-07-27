@@ -27,12 +27,9 @@ import * as process from "node:process";
 import * as readline from "node:readline/promises";
 
 type VPNClient = {
+    getPeerRequest(): unknown;
     parseConfig(data: any, addrs: string[]): void | Promise<void>;
     writeConfig(): string | null;
-};
-
-type PeerRequestClient = VPNClient & {
-    getPeerRequest(): unknown;
 };
 
 function createVPNClient(serviceType: NodeVPNType): VPNClient {
@@ -45,13 +42,6 @@ function createVPNClient(serviceType: NodeVPNType): VPNClient {
         case NodeVPNType.HYSTERIA2: return new Hysteria2();
         default: throw new Error(`Unsupported service type: ${serviceType}`);
     }
-}
-
-function peerRequest(serviceType: NodeVPNType, client: VPNClient): unknown {
-    if (serviceType === NodeVPNType.V2RAY) {
-        return { uuid: (client as V2Ray).getKey() };
-    }
-    return (client as PeerRequestClient).getPeerRequest();
 }
 
 async function main() {
@@ -118,7 +108,7 @@ async function prepareSession(
     const vpn = createVPNClient(status.service_type);
     const result = await handshake(
         sessionId,
-        peerRequest(status.service_type, vpn),
+        vpn.getPeerRequest(),
         privateKey,
         node.remoteAddrs[0],
     );

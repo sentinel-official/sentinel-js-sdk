@@ -119,12 +119,6 @@ function createService(protocol) {
     }
 }
 
-function peerRequest(protocol, service) {
-    return protocol === NodeVPNType.V2RAY
-        ? { uuid: service.getKey() }
-        : service.getPeerRequest();
-}
-
 function decodeHandshakeData(value) {
     if (typeof value === "object" && value !== null) return value;
     if (typeof value !== "string" || value.length === 0) {
@@ -451,7 +445,7 @@ async function main() {
         service = createService(protocol);
         const response = await handshake(
             sessionId,
-            peerRequest(protocol, service),
+            service.getPeerRequest(),
             privateKey,
             remoteAddr,
         );
