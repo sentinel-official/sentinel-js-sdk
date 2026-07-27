@@ -15,6 +15,78 @@ The SDK exstends the followings:
 
 Full documentation: https://sentinel-official.github.io/sentinel-js-sdk/
 
+## VPN protocols
+
+The SDK supports every service type advertised by `sentinel-dvpnx` v9:
+
+| Protocol | SDK class | Client mode | Runtime executable |
+| --- | --- | --- | --- |
+| WireGuard | `Wireguard` | Full tunnel | `wg-quick` |
+| V2Ray | `V2Ray` | Local SOCKS5 proxy | `v2ray` |
+| OpenVPN | `OpenVPN` | Full tunnel | `openvpn` |
+| Xray | `Xray` | Local SOCKS5 proxy | `xray` |
+| AmneziaWG | `AmneziaWG` | Full tunnel | `awg-quick` |
+| Hysteria2 | `Hysteria2` | Full tunnel | `hysteria2` |
+
+The SDK creates protocol credentials, parses the authenticated node handshake,
+writes private configuration files (`0600` on Unix), and starts/stops the
+corresponding client. Native executables are not bundled in the npm package.
+Full-tunnel clients require root/administrator network privileges.
+
+The connection flow is the same for all protocols:
+
+1. Query an active node and inspect `nodeInfo(remoteAddr).service_type`.
+2. Start an on-chain session and obtain its session ID from
+   `NodeEventCreateSession`.
+3. Create the matching client class and send its peer request through
+   `handshake`.
+4. Base64-decode and parse `result.data`, then call `parseConfig`.
+5. Call `connect`; later call `disconnect` and `cleanup`.
+
+```javascript
+import {
+    AmneziaWG,
+    Hysteria2,
+    NodeVPNType,
+    OpenVPN,
+    V2Ray,
+    Wireguard,
+    Xray,
+    handshake,
+} from "@sentinel-official/sentinel-js-sdk";
+
+const clients = {
+    [NodeVPNType.WIREGUARD]: () => new Wireguard(),
+    [NodeVPNType.V2RAY]: () => new V2Ray(),
+    [NodeVPNType.OPENVPN]: () => new OpenVPN(),
+    [NodeVPNType.XRAY]: () => new Xray(),
+    [NodeVPNType.AMNEZIAWG]: () => new AmneziaWG(),
+    [NodeVPNType.HYSTERIA2]: () => new Hysteria2(),
+};
+
+const serviceType = nodeStatus.service_type;
+const vpn = clients[serviceType]();
+const peerRequest = serviceType === NodeVPNType.WIREGUARD
+    ? { pub_key: vpn.publicKey }
+    : serviceType === NodeVPNType.V2RAY
+        ? { uuid: vpn.getKey() }
+        : vpn.getPeerRequest();
+
+const result = await handshake(
+    sessionId,
+    peerRequest,
+    cosmosPrivateKey,
+    node.remoteAddrs[0],
+);
+const data = JSON.parse(Buffer.from(result.data, "base64").toString("utf8"));
+await vpn.parseConfig(data, result.addrs);
+await vpn.connect();
+```
+
+`V2Ray` and `Xray` expose the selected local proxy port as `vpn.socksPort`.
+Their traffic must be routed through `socks5://127.0.0.1:<socksPort>`; they do
+not alter the system default route.
+
 ## clients
 ```javascript
 import { SentinelClient } from "@sentinel-official/sentinel-js-sdk";
@@ -173,4 +245,3 @@ cd examples/node
 npm i
 ts-node main.ts
 ```
-

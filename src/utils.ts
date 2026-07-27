@@ -306,7 +306,7 @@ function nodeResponseError(
  *
  * Replicates the `InitHandshake` method of the Sentinel Go SDK client.
  * The process is:
- * 1. JSON-encodes the session `data` (WireGuard pubkey or v2ray uuid)
+ * 1. JSON-encodes the protocol-specific peer request
  * 2. Builds the message as `bigEndian(sessionId) || JSON(data)`
  * 3. Signs the SHA256 hash of the message with the Cosmos secp256k1 private key
  * 4. POSTs `{ data, id, pub_key, signature }` to the node's root endpoint (`/`)
@@ -320,16 +320,16 @@ function nodeResponseError(
  *
  * @param sessionId - The on-chain session identifier (uint64), obtained after
  *   broadcasting a `MsgStartSessionRequest` transaction
- * @param data - The session data to send to the node:
- *   - For WireGuard: `{ pub_key: "<wg_public_key_base64>" }`
- *   - For v2ray: `{ uuid: number[] }` with exactly 16 bytes; use `v2ray.getKey()`
+ * @param data - The protocol-specific peer request. Use `{ pub_key }` for
+ *   WireGuard, `{ uuid: v2ray.getKey() }` for V2Ray, or `getPeerRequest()`
+ *   on OpenVPN, Xray, AmneziaWG and Hysteria2 clients.
  * @param privateKey - The 32-byte secp256k1 private key of the Cosmos wallet
  *   that owns the session on-chain
  * @param remoteUrl - The node's remote URL as stored on-chain (e.g. `https://1.2.3.4:port`)
  * @param timeout - request timeout in milliseconds
  * @returns A `NodeHandshakeResult` containing:
  *   - `result.addrs` — list of node endpoints to connect to (e.g. `["1.2.3.4:51820"]`)
- *   - `result.data`  — VPN configuration returned by the node (WireGuard config or v2ray inbound)
+ *   - `result.data`  — base64-encoded protocol handshake response
  * @throws Will throw if the HTTP request fails, or if the node returns an
  *   unsuccessful envelope (`success: false` / an `error` payload) — e.g. the
  *   session is not active on-chain or signature verification failed. The
@@ -345,8 +345,8 @@ function nodeResponseError(
  *     cosmosPrivKeyBytes,
  *     node.remoteUrl,
  * );
- * // result.result.addrs → ["1.2.3.4:51820"]
- * // result.result.data  → WireGuard peer config
+ * // result.addrs → ["1.2.3.4"]
+ * // result.data  → base64-encoded WireGuard peer config
  *
  * @example
  * // v2ray
