@@ -7,7 +7,10 @@
   "scripts": {
     "build": "rm -rf dist/* && touch dist/.gitkeep && tsc",
     "docs": "rm -rf docs/* && typedoc",
-    "test": "npm run build && node --test tests/*.test.js"
+    "test": "npm run build && node --test tests/*.test.js",
+    "smoke:discover": "npm run build && node examples/vpn-smoke-test/discover-nodes.js",
+    "smoke:vpn": "node examples/vpn-smoke-test/live-protocol-smoke.js",
+    "smoke:cancel": "node examples/vpn-smoke-test/cancel-session.js"
   },
   "files": [
     "dist"

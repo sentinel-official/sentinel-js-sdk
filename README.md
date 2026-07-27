@@ -222,6 +222,11 @@ Just remember to replace `StargateClient` with `SentinelClient` and `SigningStar
 
 The repository provide currently a `nodejs script` example and a `keplr` one (based on: https://tutorials.cosmos.network/tutorials/7-cosmjs/4-with-keplr.html).
 
+The opt-in [mainnet VPN smoke test](examples/vpn-smoke-test/README.md)
+discovers nodes dynamically and verifies session creation, handshake,
+configuration, connectivity, cleanup, and cancellation. It is not run in CI:
+it spends wallet funds and some protocols require root network privileges.
+
 If you want to use a local version of sdk (for testing purpose) you have to compile the src folder into dist and then link the package with npm.
 ```bash
 npm run build
