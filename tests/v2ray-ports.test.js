@@ -68,3 +68,29 @@ test("V2Ray API allocation never reuses an explicit SOCKS port", async () => {
         explicitSocksPort,
     );
 });
+
+test("V2Ray expands released port ranges and applies TLS pins", async () => {
+    const v2ray = new V2Ray(1080);
+    await v2ray.parseConfig(
+        {
+            metadata: [{
+                port: "443-444:8443-8444",
+                proxy_protocol: ProxyProtocol.VLess,
+                transport_protocol: TransportProtocol.TCP,
+                transport_security: TransportSecurity.TLS,
+                tls_pin: "0123456789abcdef",
+            }],
+        },
+        ["203.0.113.1"],
+    );
+
+    assert.deepEqual(
+        v2ray.config.outbounds.map(outbound => outbound.settings.vnext[0].port),
+        [8443, 8444],
+    );
+    assert.deepEqual(
+        v2ray.config.outbounds[0].streamSettings.tlsSettings
+            .pinnedPeerCertificateChainSha256,
+        ["0123456789abcdef"],
+    );
+});

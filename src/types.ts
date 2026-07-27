@@ -17,7 +17,10 @@ export { Node, Session } from "./modules/node";
 export enum NodeVPNType {
     WIREGUARD = "wireguard",
     V2RAY = "v2ray",
-    OPENVPN = "openvpn"
+    OPENVPN = "openvpn",
+    XRAY = "xray",
+    AMNEZIAWG = "amneziawg",
+    HYSTERIA2 = "hysteria2",
 }
 
 export { Plan } from "./modules/plan";
@@ -58,6 +61,12 @@ export interface NodeInfo {
     moniker: string,
     peers: number,
     service_type: NodeVPNType,
+    /**
+     * Filtered, protocol-specific metadata advertised by dvpnx v9+.
+     * Connection secrets and ports are only returned by the authenticated
+     * handshake, so consumers must not use this field as client config.
+     */
+    service_metadata?: unknown,
     uplink: string,
     version: {
         commit: string,

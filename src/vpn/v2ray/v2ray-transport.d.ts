@@ -110,6 +110,8 @@ declare namespace StreamSettings {
     interface TLS {
         serverName?: string;
         allowInsecure?: boolean;
+        fingerprint?: string;
+        pinnedPeerCertificateChainSha256?: string[];
         /* allowInsecureCiphers?: boolean;
         alpn?: string[];
         certificates: [];

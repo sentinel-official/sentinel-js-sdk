@@ -54,6 +54,22 @@ export function uintArrayTob64(value: number[]): string {
 }
 
 /**
+ * Converts a canonical UUID string to the 16-byte JSON array emitted by
+ * sentinel-go-sdk/v2/libs/uuid.UUID.MarshalJSON.
+ *
+ * OpenVPN, V2Ray and Xray use this representation in peer requests.
+ * Hysteria2 deliberately uses the canonical UUID string instead.
+ */
+export function uuidToByteArray(uuid: string): number[] {
+    const canonical = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!canonical.test(uuid)) {
+        throw new TypeError("UUID must use canonical 8-4-4-4-12 hexadecimal format");
+    }
+
+    return Array.from(Buffer.from(uuid.replace(/-/g, ""), "hex"));
+}
+
+/**
  * True if the given status (in any of its on-chain shapes) represents
  * `STATUS_ACTIVE`. Sentinel chain v3 emits status as the string
  * `"STATUS_ACTIVE"` in LCD JSON, the numeric `1` in RPC protobuf, and

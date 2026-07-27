@@ -10,6 +10,7 @@ import V2RayConf from "./v2ray-conf";
 import { V2RayStreamSettings } from "./v2ray-transport";
 
 import { preferIPv4 } from "../../utils";
+import { parseVPNPortRange } from "../port";
 
 /**
  * Proxy protocol types. Maps to ProxyProtocol iota in sentinel-go-sdk/v2ray/server.go
@@ -52,6 +53,7 @@ export interface V2RayMetadata {
     proxy_protocol: ProxyProtocol;
     transport_protocol: TransportProtocol;
     transport_security: TransportSecurity;
+    tls_pin?: string;
 }
 
 // Parsed content of `result.data` from the v2ray handshake response
@@ -214,32 +216,41 @@ export class V2Ray {
 
         // create outbound for each metadata entry
         for (const meta of handshakeData.metadata) {
-            const port = parseInt(meta.port, 10);
             const network = toV2RayNetwork(meta.transport_protocol);
             const security = toV2RaySecurity(meta.transport_security);
             const protocol = toV2RayProtocol(meta.proxy_protocol);
+            const ports = parseVPNPortRange(meta.port);
 
-            // tag format: {address}_{port}_{protocol}_{transport}_{security}
-            const tag = `${address}_${port}_${protocol}_${network}_${security}`;
-            outboundTags.push(tag);
+            for (let port = ports.outFrom; port <= ports.outTo; port++) {
+                // tag format: {address}_{port}_{protocol}_{transport}_{security}
+                const tag = `${address}_${port}_${protocol}_${network}_${security}`;
+                outboundTags.push(tag);
 
-            const userEntry = protocol === "vmess"
-                ? { id: this.uuid, alterId: 0 }
-                : { id: this.uuid, encryption: "none" };
+                const userEntry = protocol === "vmess"
+                    ? { id: this.uuid, alterId: 0 }
+                    : { id: this.uuid, encryption: "none" };
 
-            const streamSettings: V2RayStreamSettings = { network, security };
-            if (security === "tls") {
-                streamSettings.tlsSettings = { allowInsecure: true };
+                const streamSettings: V2RayStreamSettings = { network, security };
+                if (security === "tls") {
+                    streamSettings.tlsSettings = {
+                        // Preserve compatibility with pre-v9 self-signed nodes.
+                        allowInsecure: true,
+                        fingerprint: "chrome",
+                    };
+                    if (meta.tls_pin) {
+                        streamSettings.tlsSettings.pinnedPeerCertificateChainSha256 = [meta.tls_pin];
+                    }
+                }
+
+                this.config.outbounds.push({
+                    protocol,
+                    settings: {
+                        vnext: [{ address, port, users: [userEntry] }],
+                    },
+                    streamSettings,
+                    tag,
+                });
             }
-
-            this.config.outbounds.push({
-                protocol,
-                settings: {
-                    vnext: [{ address, port, users: [userEntry] }],
-                },
-                streamSettings,
-                tag,
-            });
         }
 
         // balancer con leastping su tutti gli outbound
