@@ -133,6 +133,9 @@ async function prepareService(protocol, service, result) {
         // Preserve the host resolver: wg-quick can otherwise fail when
         // /etc/resolv.conf is not managed by resolvconf.
         await service.parseConfig(data, result.addrs, []);
+    } else if (protocol === NodeVPNType.AMNEZIAWG) {
+        // Preserve the host resolver for the AmneziaWG full-tunnel client too.
+        await service.parseConfig(data, result.addrs, { dns: [] });
     } else {
         await service.parseConfig(data, result.addrs);
     }
