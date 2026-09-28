@@ -1,6 +1,6 @@
 {
   "name": "@sentinel-official/sentinel-js-sdk",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "sentinel javascript sdk",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -20,7 +20,7 @@
     "url": "git+https://github.com/sentinel-official/sentinel-js-sdk.git"
   },
   "author": "Tkd-Alex <alex.tkd.alex@gmail.com>",
-  "license": "ISC",
+  "license": "Apache-2.0",
   "bugs": {
     "url": "https://github.com/sentinel-official/sentinel-js-sdk/issues"
   },
